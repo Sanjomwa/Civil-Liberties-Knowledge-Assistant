@@ -1,0 +1,64 @@
+# Documents selected from Access Now for the corpus.
+#
+# Selection follows docs/corpus-inclusion-rubric.md. Access Now's #KeepItOn
+# reports are continent-wide annual shutdown reports (not single-country),
+# but explicitly cover all five target countries within them each year —
+# per the rubric's own "primarily concerns... in at least one target
+# country" test, a report whose core subject is documenting shutdowns
+# including in-scope countries counts, even covering other countries too.
+#
+# default_acquisition: auto (2026-07-13) — reconnaissance probe (single
+# GET, browser-like headers, no retry loop) returned clean HTTP 200 + real
+# PDF content for both documents below. See corpus/acquisition-log.md and
+# decisionlog.md, 2026-07-13, for the full multi-org probe results.
+
+default_acquisition: auto
+
+documents:
+  - doc_id: accessnow-africa-2023-keepiton-shutdowns
+    title: "Shrinking Democracy, Growing Violence: Internet Shutdowns in 2023"
+    organization: Access Now
+    countries: ["KE", "UG", "TZ", "ET", "RW"]
+    publication_date: "2024-05-01"
+    url: "https://www.accessnow.org/wp-content/uploads/2024/05/2023-KIO-Report.pdf"
+    doc_type: annual_report
+    source_format: pdf
+    topics: ["internet_shutdown", "censorship", "network_interference"]
+    language: en
+    selection_rationale: >
+      Access Now's #KeepItOn annual shutdown report for 2023 (283 shutdowns
+      documented across 39 countries, the highest count since tracking
+      began in 2016). Includes all five target countries within its
+      country-by-country findings. Coverage-contribution value: documents
+      the same 2023-2024 period as this corpus's OONI and Freedom House
+      entries but from Access Now's own cross-country shutdown-tracking
+      methodology — a genuinely different organizational account of an
+      overlapping period, not a duplicate. Publication date approximate
+      (month/year confirmed via the file's own URL path, exact day not
+      independently confirmed from the document's title page).
+    corpus_version: v1.0
+    sha256: "53b6b7efcb8e9334bbe38adf64c3c1af3463f78c542f4b7910fb1f11443a1333"
+
+  - doc_id: accessnow-africa-2024-keepiton-shutdowns
+    title: "Emboldened Offenders, Endangered Communities: Internet Shutdowns in 2024"
+    organization: Access Now
+    countries: ["KE", "UG", "TZ", "ET", "RW"]
+    publication_date: "2025-02-01"
+    url: "https://www.accessnow.org/wp-content/uploads/2025/02/KeepItOn-2024-Internet-Shutdowns-Annual-Report.pdf"
+    doc_type: annual_report
+    source_format: pdf
+    topics: ["internet_shutdown", "censorship", "network_interference"]
+    language: en
+    selection_rationale: >
+      Access Now's #KeepItOn annual shutdown report for 2024 (21 shutdowns
+      across 15 African countries, the highest ever recorded for the
+      region in a single year). Explicitly documents Kenya's mid-2024
+      protest-related disruption and its knock-on connectivity effects in
+      Rwanda, plus continued Ethiopia (Tigray/Amhara) and Uganda
+      (Facebook-blocking) restrictions — direct overlap with this corpus's
+      other 2024-period entries (CIPESA's 2024 report, this org's own 2023
+      report), a real coverage-contribution/cross-org-comparison case
+      rather than a constructed one. Publication date approximate (per URL
+      path), exact day not independently confirmed.
+    corpus_version: v1.0
+    sha256: "19602c14804306c565e00d54356df254e60be66a0ab954f18aab868e14257d81"

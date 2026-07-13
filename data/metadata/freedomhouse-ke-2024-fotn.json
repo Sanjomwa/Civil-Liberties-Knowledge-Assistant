@@ -1,0 +1,49 @@
+{
+  "doc_id": "freedomhouse-ke-2024-fotn",
+  "schema_version": "1.1",
+  "declared": {
+    "title": "Kenya: Freedom on the Net 2024 Country Report",
+    "organization": "Freedom House",
+    "countries": [
+      "KE"
+    ],
+    "publication_date": "2024-10-01",
+    "url": "https://freedomhouse.org/country/kenya/freedom-net/2024",
+    "doc_type": "country_report",
+    "source_format": "html",
+    "topics": [
+      "digital_rights",
+      "censorship",
+      "internet_freedom"
+    ],
+    "language": "en",
+    "selection_rationale": "Freedom House's 2024 Kenya chapter (coverage period roughly June 2023-May 2024). Covers online speech arrests/detentions, a politically-motivated killing/abduction of online commentators, and Kenya's broader internet-freedom trajectory. Publication month approximate (FOTN series' typical October release), not independently confirmed from the page itself.",
+    "corpus_version": "v1.0"
+  },
+  "derived": {
+    "sha256": "62439f4b82730d16b833a7d886895756b9f2928d05388f312e0a629dc8f6baa2",
+    "file_size_bytes": 394705,
+    "extracted_word_count": 14084,
+    "extraction_method": "trafilatura",
+    "extraction_date": "2026-07-13",
+    "detected_language": "en",
+    "detected_language_confidence": 1.0,
+    "validation_status": "valid",
+    "validation_warnings": []
+  },
+  "lifecycle": {
+    "status": "active",
+    "superseded_by": null,
+    "supersedes": null,
+    "reason": null,
+    "effective_date": null
+  },
+  "chunking": {
+    "strategy": "fixed_overlap",
+    "chunk_size": 1500,
+    "chunk_step": 750,
+    "total_chunks": 146,
+    "chunking_date": "2026-07-13",
+    "corpus_version": "v1.0"
+  }
+}

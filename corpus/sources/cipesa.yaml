@@ -1,0 +1,77 @@
+# Documents selected from CIPESA for the corpus.
+#
+# Selection follows docs/corpus-inclusion-rubric.md. CIPESA's "State of
+# Internet Freedom in Africa" is an annual continent-wide report, not
+# single-country, but each edition includes explicit country-level
+# findings for the five target countries — same "primarily concerns"
+# reasoning as accessnow.yaml.
+#
+# Note on the 2023 edition ("A Decade of Internet Freedom in Africa"):
+# deliberately NOT included here. CIPESA's report PDFs don't reliably keep
+# a year in their own filename/URL (confirmed 2026-07-13: the URL a search
+# engine associated with the "2023" edition currently serves the 2025
+# edition instead — CIPESA appears to reuse the same file slug across
+# years). Rather than risk a doc_id/checksum pointing at the wrong year's
+# content, used the two editions that were independently verified by
+# fetching and reading each PDF's own title page (2024, 2025) instead of
+# trusting a search-engine-reported year.
+#
+# default_acquisition: auto (2026-07-13) — reconnaissance probe (single
+# GET, browser-like headers, no retry loop) returned clean HTTP 200 + real
+# PDF content for both documents below.
+
+default_acquisition: auto
+
+documents:
+  - doc_id: cipesa-africa-2024-sifa-elections
+    title: "State of Internet Freedom in Africa 2024: Technology and Elections"
+    organization: CIPESA
+    countries: ["KE", "UG", "TZ", "ET", "RW"]  # not independently verified per-country -- see rationale below
+    publication_date: "2024-10-01"
+    url: "https://cipesa.org/wp-content/files/reports/State_of_Internet_Freedom_in_Africa_Report_2024.pdf"
+    doc_type: annual_report
+    source_format: pdf
+    topics: ["censorship", "digital_rights", "elections", "network_interference"]
+    language: en
+    selection_rationale: >
+      CIPESA's 11th annual State of Internet Freedom in Africa report,
+      examining technology's role (both enabling and repressive) in
+      Africa's 2024 elections. Covers all five target countries within its
+      country findings. Coverage-contribution value: same 2024 period as
+      this corpus's Access Now 2024 entry and OONI/Freedom House
+      2023-2024-period entries, from CIPESA's own research methodology — a
+      genuine cross-organizational account of an overlapping period.
+      Publication date approximate (month inferred from the report's
+      October 2024 public release/FIFAfrica coverage; exact day not
+      independently confirmed from the PDF's own title page).
+    corpus_version: v1.0
+    sha256: "17734c34da5c317c699a774c23062fa5476e0a570613d1973c3c2d126c445f8b"
+
+  - doc_id: cipesa-africa-2025-sifa-ai
+    title: "State of Internet Freedom in Africa 2025: Navigating the Implications of AI on Digital Democracy in Africa"
+    organization: CIPESA
+    countries: ["KE", "UG", "ET", "RW"]  # TZ deliberately excluded -- see rationale below
+    publication_date: "2025-09-01"
+    url: "https://cipesa.org/wp-content/files/reports/State_of_Internet_Freedom_in_Africa_Report_.pdf"
+    doc_type: annual_report
+    source_format: pdf
+    topics: ["censorship", "digital_rights", "artificial_intelligence", "disinformation"]
+    language: en
+    selection_rationale: >
+      CIPESA's 2025 edition, on AI's implications for digital democracy in
+      Africa (surveillance, content moderation, disinformation risks) —
+      still squarely within this corpus's censorship/digital-rights scope,
+      not a topic drift, since AI-driven content moderation and
+      surveillance are explicitly framed by CIPESA as censorship-adjacent
+      risks. Country researchers for this edition explicitly include
+      Ethiopia, Kenya, Rwanda, and Uganda among others (per the report's
+      own acknowledgements section — confirmed by directly fetching and
+      reading the PDF, not inferred). Tanzania is NOT among this edition's
+      listed country researchers -- deliberately excluded from `countries`
+      above rather than assumed, since declared.countries should reflect
+      what this specific document actually covers. Publication date
+      confirmed exactly from the PDF's own title page ("Published
+      September 2025"), unlike most other entries in this corpus where
+      publication month/day is only approximate.
+    corpus_version: v1.0
+    sha256: "5a6e1aa0ef024eacd7805f86fdc036d90dc8d04f291cbe6bf82ab771415bd498"

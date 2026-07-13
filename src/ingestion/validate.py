@@ -41,6 +41,18 @@ from pathlib import Path
 from langdetect import LangDetectException, detect
 from simhash import Simhash
 
+# The simhash package's default `large_weight_cutoff` (50) routes any token
+# appearing more than 50 times through a code path
+# (`Simhash._bitarray_from_bytes(h) * w`) that multiplies a uint8 numpy
+# array by the raw weight -- fine under old numpy (silently wrapped), but
+# modern numpy (>=~1.24) raises OverflowError instead, since w easily
+# exceeds 255 for a common word in a real multi-thousand-word report. Real
+# bug hit 2026-07-13 on the first real multi-document validate.py run (10
+# documents, some 25-30k words) -- never surfaced on the single
+# walking-skeleton document. Raising the cutoff avoids that code path
+# entirely; no real document will repeat a single token a billion times.
+Simhash.large_weight_cutoff = 10**9
+
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 MANIFEST_PATH = PROJECT_ROOT / "corpus" / "manifest.csv"
 PROCESSED_DIR = PROJECT_ROOT / "data" / "processed"

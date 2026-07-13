@@ -1,0 +1,53 @@
+{
+  "doc_id": "cipesa-africa-2025-sifa-ai",
+  "schema_version": "1.1",
+  "declared": {
+    "title": "State of Internet Freedom in Africa 2025: Navigating the Implications of AI on Digital Democracy in Africa",
+    "organization": "CIPESA",
+    "countries": [
+      "KE",
+      "UG",
+      "ET",
+      "RW"
+    ],
+    "publication_date": "2025-09-01",
+    "url": "https://cipesa.org/wp-content/files/reports/State_of_Internet_Freedom_in_Africa_Report_.pdf",
+    "doc_type": "annual_report",
+    "source_format": "pdf",
+    "topics": [
+      "censorship",
+      "digital_rights",
+      "artificial_intelligence",
+      "disinformation"
+    ],
+    "language": "en",
+    "selection_rationale": "CIPESA's 2025 edition, on AI's implications for digital democracy in Africa (surveillance, content moderation, disinformation risks) — still squarely within this corpus's censorship/digital-rights scope, not a topic drift, since AI-driven content moderation and surveillance are explicitly framed by CIPESA as censorship-adjacent risks. Country researchers for this edition explicitly include Ethiopia, Kenya, Rwanda, and Uganda among others (per the report's own acknowledgements section — confirmed by directly fetching and reading the PDF, not inferred). Tanzania is NOT among this edition's listed country researchers -- deliberately excluded from `countries` above rather than assumed, since declared.countries should reflect what this specific document actually covers. Publication date confirmed exactly from the PDF's own title page (\"Published September 2025\"), unlike most other entries in this corpus where publication month/day is only approximate.",
+    "corpus_version": "v1.0"
+  },
+  "derived": {
+    "sha256": "5a6e1aa0ef024eacd7805f86fdc036d90dc8d04f291cbe6bf82ab771415bd498",
+    "file_size_bytes": 4054102,
+    "extracted_word_count": 29857,
+    "extraction_method": "pdfplumber",
+    "extraction_date": "2026-07-13",
+    "detected_language": "en",
+    "detected_language_confidence": 1.0,
+    "validation_status": "valid",
+    "validation_warnings": []
+  },
+  "lifecycle": {
+    "status": "active",
+    "superseded_by": null,
+    "supersedes": null,
+    "reason": null,
+    "effective_date": null
+  },
+  "chunking": {
+    "strategy": "fixed_overlap",
+    "chunk_size": 1500,
+    "chunk_step": 750,
+    "total_chunks": 321,
+    "chunking_date": "2026-07-13",
+    "corpus_version": "v1.0"
+  }
+}

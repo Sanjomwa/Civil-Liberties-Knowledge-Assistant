@@ -1,0 +1,49 @@
+{
+  "doc_id": "ooni-ke-2025-telegram-kcse-blocking",
+  "schema_version": "1.1",
+  "declared": {
+    "title": "OONI Analysis of Telegram Blocking in Kenya During the 2023 and 2024 KCSE Exams",
+    "organization": "OONI",
+    "countries": [
+      "KE"
+    ],
+    "publication_date": "2025-05-01",
+    "url": "https://ooni.org/post/2025-kenya-blocked-telegram-kcse-exams/",
+    "doc_type": "country_report",
+    "source_format": "html",
+    "topics": [
+      "censorship",
+      "network_interference",
+      "exam_related_blocking"
+    ],
+    "language": "en",
+    "selection_rationale": "Second OONI document, added for the 10-document/4-org milestone (2026-07-13) specifically to diversify beyond the walking-skeleton's single Tanzania document and re-test OONI's acquisition behavior on a different URL. Reconnaissance probe (2026-07-13, single GET, no retry) returned HTTP 429 on this URL too -- second independent confirmation that ooni.org's blocking is server-wide, not specific to the original document's URL. Topically distinct from the Tanzania document (exam-integrity-motivated blocking of a messaging app, rather than a platform block during civil unrest) -- genuine coverage contribution, not a near-duplicate. Publication month approximate (based on the post's URL date prefix), exact day not yet confirmed.",
+    "corpus_version": "v1.0"
+  },
+  "derived": {
+    "sha256": "7769f47ad56b383c25986d2310058d158beca830c4829d8dae6a25708c7c320e",
+    "file_size_bytes": 155349,
+    "extracted_word_count": 8568,
+    "extraction_method": "trafilatura",
+    "extraction_date": "2026-07-13",
+    "detected_language": "en",
+    "detected_language_confidence": 1.0,
+    "validation_status": "valid",
+    "validation_warnings": []
+  },
+  "lifecycle": {
+    "status": "active",
+    "superseded_by": null,
+    "supersedes": null,
+    "reason": null,
+    "effective_date": null
+  },
+  "chunking": {
+    "strategy": "fixed_overlap",
+    "chunk_size": 1500,
+    "chunk_step": 750,
+    "total_chunks": 73,
+    "chunking_date": "2026-07-13",
+    "corpus_version": "v1.0"
+  }
+}

@@ -1,0 +1,111 @@
+# Documents selected from Freedom House for the corpus.
+#
+# Selection follows docs/corpus-inclusion-rubric.md. One "Freedom on the
+# Net" (FOTN) country chapter per target country, per the architecture's
+# own Acquisition Rules for Freedom House.
+#
+# Real finding (2026-07-13): Tanzania has NO Freedom on the Net chapter.
+# Freedom House's FOTN survey covers a fixed country list and Tanzania
+# isn't on it (confirmed via search -- only their separate "Freedom in the
+# World" product, a different survey with a different methodology/scope,
+# covers Tanzania). The architecture's assumption of "one FOTN chapter per
+# target country, all five" doesn't hold for this org. Resolved by using
+# FOTN chapters for the four target countries that actually have them
+# (Kenya, Uganda, Ethiopia, Rwanda) rather than substituting a
+# differently-scoped Freedom House product for Tanzania -- that would mix
+# two different survey methodologies under one doc_type/topic set. Sam
+# confirmed proceeding on this basis, 2026-07-13.
+#
+# Rights/licensing note (rubric Section 3): Freedom House content is
+# permission-gated per docs/licensing.md, not Creative Commons. Permission
+# request sent 2026-07-13 (see docs/PROJECT_CONTINUITY.md Section 7),
+# awaiting response. Current course-project internal use is low-risk per
+# licensing.md's own analysis; these four documents are for that internal
+# use only, not any CLIO-facing redistribution, until permission is
+# confirmed.
+#
+# default_acquisition: auto (2026-07-13) — reconnaissance probe (single
+# GET, browser-like headers, no retry loop) returned clean HTTP 200 + real
+# HTML content (no bot-challenge phrases matched) for all four documents.
+
+default_acquisition: auto
+
+documents:
+  - doc_id: freedomhouse-ke-2024-fotn
+    title: "Kenya: Freedom on the Net 2024 Country Report"
+    organization: Freedom House
+    countries: ["KE"]
+    publication_date: "2024-10-01"
+    url: "https://freedomhouse.org/country/kenya/freedom-net/2024"
+    doc_type: country_report
+    source_format: html
+    topics: ["digital_rights", "censorship", "internet_freedom"]
+    language: en
+    selection_rationale: >
+      Freedom House's 2024 Kenya chapter (coverage period roughly June
+      2023-May 2024). Covers online speech arrests/detentions, a
+      politically-motivated killing/abduction of online commentators, and
+      Kenya's broader internet-freedom trajectory. Publication month
+      approximate (FOTN series' typical October release), not independently
+      confirmed from the page itself.
+    corpus_version: v1.0
+    sha256: "62439f4b82730d16b833a7d886895756b9f2928d05388f312e0a629dc8f6baa2"
+
+  - doc_id: freedomhouse-ug-2024-fotn
+    title: "Uganda: Freedom on the Net 2024 Country Report"
+    organization: Freedom House
+    countries: ["UG"]
+    publication_date: "2024-10-01"
+    url: "https://freedomhouse.org/country/uganda/freedom-net/2024"
+    doc_type: country_report
+    source_format: html
+    topics: ["digital_rights", "censorship", "internet_freedom"]
+    language: en
+    selection_rationale: >
+      Freedom House's 2024 Uganda chapter. Coverage-contribution value
+      against this corpus's Access Now entries: FH reports no new
+      connectivity restrictions in this specific coverage window, which is
+      itself informative alongside Access Now's own note of Uganda's
+      continuing Facebook block -- a case where two orgs' accounts of the
+      same period usefully diverge rather than duplicate, per the rubric's
+      own reasoning on cross-org value. Publication month approximate.
+    corpus_version: v1.0
+    sha256: "3a2c15f45a3cd5abb0ceb00570593334d4c43a7d3faf1af4867b44ede288e656"
+
+  - doc_id: freedomhouse-et-2024-fotn
+    title: "Ethiopia: Freedom on the Net 2024 Country Report"
+    organization: Freedom House
+    countries: ["ET"]
+    publication_date: "2024-10-01"
+    url: "https://freedomhouse.org/country/ethiopia/freedom-net/2024"
+    doc_type: country_report
+    source_format: html
+    topics: ["digital_rights", "censorship", "internet_freedom", "network_interference"]
+    language: en
+    selection_rationale: >
+      Freedom House's 2024 Ethiopia chapter -- lowest-scored ("Not Free")
+      country in the region per this edition, with conflict-related
+      connectivity disruption and content-removal law in scope. Direct
+      topical overlap with this corpus's OONI and Access Now entries on
+      network interference during periods of unrest. Publication month
+      approximate.
+    corpus_version: v1.0
+    sha256: "d77bcf20e23859f4d386b827c0263e092fd2f0c67bc7e3d3b676191f01ebf1ac"
+
+  - doc_id: freedomhouse-rw-2024-fotn
+    title: "Rwanda: Freedom on the Net 2024 Country Report"
+    organization: Freedom House
+    countries: ["RW"]
+    publication_date: "2024-10-01"
+    url: "https://freedomhouse.org/country/rwanda/freedom-net/2024"
+    doc_type: country_report
+    source_format: html
+    topics: ["digital_rights", "censorship", "internet_freedom"]
+    language: en
+    selection_rationale: >
+      Freedom House's 2024 Rwanda chapter -- documents declining internet
+      freedom, progovernment online harassment campaigns, and
+      self-censorship ahead of Rwanda's July 2024 general election.
+      Publication month approximate.
+    corpus_version: v1.0
+    sha256: "0a2546ee89489cccfbe8f0079bdda58f5d9a519601479c957dd9b93dd79d3016"

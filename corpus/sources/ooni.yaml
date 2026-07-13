@@ -8,6 +8,17 @@
 # This file only records what has already been decided — one entry per
 # document actually included, not a crawl target list. acquire.py reads
 # this file; it does not decide what belongs here.
+#
+# default_acquisition: manual (2026-07-13) — ooni.org sustained a 429
+# against repeated scripted requests even with a proper User-Agent and no
+# retry-loop abuse, and separately, two different URLs on the site each
+# turned out to sit behind different bot-challenge pages under automated
+# access. This is a server-wide behavior, not specific to one document, so
+# it's set here as the org default rather than repeated per document. See
+# corpus/acquisition-log.md and decisionlog.md (2026-07-13) for the full
+# incident history (two false starts, Opus and Fable consults).
+
+default_acquisition: manual
 
 documents:
   - doc_id: ooni-tz-2025-x-platform-blocking
@@ -18,14 +29,6 @@ documents:
     url: "https://ooni.org/post/2025-tanzania-blocked-twitter/"
     doc_type: country_report
     source_format: html
-    acquisition: manual  # ooni.org turned out to challenge scripted requests broadly (not just
-                         # the /documents/ PDF path) once enough automated traffic had hit it —
-                         # confirmed 2026-07-13 when this same /post/ URL, fetched again via curl,
-                         # returned a *different* challenge page ("verifying your browser") than
-                         # the first attempt. Real content obtained via an actual browser (which
-                         # passes the challenge), saved as a complete HTML page, verified by
-                         # content (word count + absence of known challenge phrases) before trusting
-                         # it this time, not just by file type.
     topics: ["censorship", "network_interference", "social_media_blocking"]
     language: en
     selection_rationale: >
@@ -44,3 +47,29 @@ documents:
       this HTML write-up covers the same finding and is openly accessible.
     corpus_version: v1.0
     sha256: "17109f2a365e5959c4d218c412cf6e851e3d51e49cc070e2ff26bda72a90a44f"
+
+  - doc_id: ooni-ke-2025-telegram-kcse-blocking
+    title: "OONI Analysis of Telegram Blocking in Kenya During the 2023 and 2024 KCSE Exams"
+    organization: OONI
+    countries: ["KE"]
+    publication_date: "2025-05-01"
+    url: "https://ooni.org/post/2025-kenya-blocked-telegram-kcse-exams/"
+    doc_type: country_report
+    source_format: html
+    topics: ["censorship", "network_interference", "exam_related_blocking"]
+    language: en
+    selection_rationale: >
+      Second OONI document, added for the 10-document/4-org milestone
+      (2026-07-13) specifically to diversify beyond the walking-skeleton's
+      single Tanzania document and re-test OONI's acquisition behavior on a
+      different URL. Reconnaissance probe (2026-07-13, single GET, no
+      retry) returned HTTP 429 on this URL too -- second independent
+      confirmation that ooni.org's blocking is server-wide, not specific to
+      the original document's URL. Topically distinct from the Tanzania
+      document (exam-integrity-motivated blocking of a messaging app,
+      rather than a platform block during civil unrest) -- genuine
+      coverage contribution, not a near-duplicate. Publication month
+      approximate (based on the post's URL date prefix), exact day not yet
+      confirmed.
+    corpus_version: v1.0
+    sha256: "7769f47ad56b383c25986d2310058d158beca830c4829d8dae6a25708c7c320e"

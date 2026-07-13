@@ -9,8 +9,14 @@ in the corpus, it only acquires and verifies what's already been declared.
 Idempotent: rerunning skips any document already present in data/raw/ with
 a matching checksum — safe to run again and again.
 
-Two acquisition modes per document (the `acquisition` field in the source
-YAML, default "auto"):
+Acquisition mode, resolved per document as: the document's own
+`acquisition` field if present, else the YAML's top-level
+`default_acquisition`, else "auto". Added the org-level default
+(2026-07-13, Opus-consulted, ahead of the 10-document/4-org milestone)
+because the OONI walking-skeleton document showed this is fundamentally a
+*server* property, not a per-document one — every OONI document is going
+to need the same answer, so forcing it onto every single document entry
+was the wrong level of repetition.
 
   auto   — acquire.py downloads it directly. One attempt, no retry loop.
            A tight retry loop against a 429 tends to make things worse, not
@@ -27,10 +33,15 @@ YAML, default "auto"):
            repeated Python requests for the exact same URL that a single
            manual curl had just fetched successfully seconds earlier.
 
-Fails loudly (raises, non-zero exit) only for genuine integrity problems —
-a present file whose checksum doesn't match what's declared. Missing
-"auto" downloads or not-yet-placed "manual" files are reported clearly but
-don't crash the run; other documents still get processed.
+A single document's failure (checksum mismatch, bad format, not yet
+placed) is logged and does NOT stop the rest of the run — this changed
+2026-07-13, ahead of the 10-document/4-org milestone: with a single
+document, "stop on first failure" and "stop the whole corpus run" were the
+same thing, but at multi-org scale one bad document from one org
+shouldn't block every other org's documents from being processed in the
+same run. Failures are still loud (printed to stderr, and logged to
+corpus/acquisition-log.md with the specific reason) and the script's exit
+code reflects whether anything failed — just not via crashing mid-loop.
 
 Usage:
     uv run python src/ingestion/acquire.py
@@ -39,6 +50,7 @@ Usage:
 import csv
 import hashlib
 import sys
+from datetime import date
 from pathlib import Path
 
 import requests
@@ -61,9 +73,22 @@ SOURCES_DIR = PROJECT_ROOT / "corpus" / "sources"
 RAW_DIR = PROJECT_ROOT / "data" / "raw"
 MANIFEST_PATH = PROJECT_ROOT / "corpus" / "manifest.csv"
 CHECKSUMS_PATH = PROJECT_ROOT / "corpus" / "checksums.sha256"
+ACQUISITION_LOG_PATH = PROJECT_ROOT / "corpus" / "acquisition-log.md"
 
 MANIFEST_FIELDS = [
     "doc_id", "org", "title", "countries", "publication_date", "sha256", "local_path",
+]
+
+# Known bot-challenge phrases, checked against HTML content. Not
+# exhaustive — this list grows every time a new challenge mechanism is
+# actually hit (two distinct ones on ooni.org alone: a Vercel-style
+# checkpoint, and a separate "verifying your browser" JS challenge).
+CHALLENGE_PHRASES = [
+    "verifying your browser",
+    "enable javascript to continue",
+    "checking your browser",
+    "security checkpoint",
+    "just a moment",
 ]
 
 
@@ -76,7 +101,7 @@ def sha256_of(path: Path) -> str:
     return digest.hexdigest()
 
 
-def looks_like_declared_format(path: Path, source_format: str) -> bool:
+def looks_like_declared_format(path: Path, source_format: str):
     """
     Cheap sanity check independent of the checksum: does the file's magic
     number actually match what it claims to be? A checksum only proves
@@ -85,64 +110,98 @@ def looks_like_declared_format(path: Path, source_format: str) -> bool:
     real incident (2026-07-13): a bot-challenge HTML page (Vercel Security
     Checkpoint) got saved as a .pdf by curl, with a 200 status and no error,
     and its checksum then matched itself consistently across every later
-    check — this is the check that would have caught it immediately
-    instead of two stages later, in extract.py.
+    check.
+
+    Returns (ok: bool, reason: str | None) — the reason is None when ok is
+    True, and a specific human-readable explanation when it's False. Returning
+    the reason (not just a bool) matters once there's more than one document:
+    it's what makes corpus/acquisition-log.md a useful empirical record of
+    *why* a given org's content failed this check, rather than a silent gate.
     """
     if source_format == "pdf":
         with open(path, "rb") as f:
             header = f.read(5)
-        return header == b"%PDF-"
+        if header == b"%PDF-":
+            return True, None
+        return False, f"bad PDF magic number (got {header!r}, expected b'%PDF-')"
 
     if source_format == "html":
         # There's no magic-number equivalent for HTML — a bot-challenge page
         # and a real article are both structurally valid HTML. The only
         # signal available is content: check for known challenge phrases.
-        # Not exhaustive (challenge pages vary and this list will need
-        # updating as new ones are hit), but it catches the two distinct
-        # challenge mechanisms this project has already run into on ooni.org
-        # alone (a "Vercel Security Checkpoint" page and a separate
-        # "verifying your browser" / "enable JavaScript to continue" page).
-        challenge_phrases = [
-            "verifying your browser",
-            "enable javascript to continue",
-            "checking your browser",
-            "security checkpoint",
-            "just a moment",
-        ]
         text = path.read_text(encoding="utf-8", errors="replace").lower()
-        return not any(phrase in text for phrase in challenge_phrases)
+        for phrase in CHALLENGE_PHRASES:
+            if phrase in text:
+                return False, f"matched known bot-challenge phrase: '{phrase}'"
+        return True, None
 
-    return True
+    return True, None
+
+
+def resolve_acquisition_mode(org_default: str, doc: dict) -> str:
+    return doc.get("acquisition", org_default)
 
 
 def load_sources():
-    """Yield (org, document_dict) for every document declared across corpus/sources/*.yaml."""
+    """Yield (org, document_dict) for every document declared across
+    corpus/sources/*.yaml, with each document's effective acquisition mode
+    already resolved (document field, else the YAML's own
+    `default_acquisition`, else "auto") and stored under `_acquisition`."""
     for yaml_path in sorted(SOURCES_DIR.glob("*.yaml")):
         org = yaml_path.stem
         with open(yaml_path) as f:
             data = yaml.safe_load(f) or {}
+        org_default = data.get("default_acquisition", "auto")
         for doc in data.get("documents", []):
+            doc = dict(doc)
+            doc["_acquisition"] = resolve_acquisition_mode(org_default, doc)
             yield org, doc
+
+
+def append_acquisition_log_failure(doc_id: str, reason: str) -> None:
+    ACQUISITION_LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
+    is_new = not ACQUISITION_LOG_PATH.exists()
+    with open(ACQUISITION_LOG_PATH, "a", encoding="utf-8") as f:
+        if is_new:
+            f.write("# Acquisition Log\n\n")
+            f.write(
+                "Every document encountered during corpus construction, "
+                "included or not, with the reason. Tier 1 exclusions below "
+                "are written automatically by validate.py — they're facts, "
+                "not judgments. Inclusion/exclusion after a Tier 2 flag or "
+                "the semantic review is a human call, added by hand per "
+                "docs/corpus-inclusion-rubric.md.\n\n"
+            )
+        f.write(
+            f"- **{doc_id}** — acquire.py failure ({date.today().isoformat()}): "
+            f"{reason}\n"
+        )
+
+
+class AcquisitionFailure(Exception):
+    """A single document's acquisition failed. Caught per-document in
+    main() so one bad document doesn't stop the rest of the run."""
 
 
 def acquire_document(org: str, doc: dict):
     """
     Handle one document. Returns a manifest row (dict) on success, or None
     if it's not ready yet (auto download failed this run, or a manual file
-    hasn't been placed yet) — neither of those crashes the whole run.
-    Raises only on a genuine checksum mismatch against a present file.
+    hasn't been placed yet) — neither of those is an AcquisitionFailure.
+    Raises AcquisitionFailure only for a genuine integrity problem: a
+    present file whose checksum or format doesn't match what's declared.
     """
     doc_id = doc["doc_id"]
     expected_sha256 = doc["sha256"]
     url = doc["url"]
     ext = "pdf" if doc["source_format"] == "pdf" else "html"
-    mode = doc.get("acquisition", "auto")
+    mode = doc["_acquisition"]
 
     if expected_sha256.startswith("REPLACE_ME"):
-        raise ValueError(
-            f"{doc_id}: corpus/sources/{org}.yaml still has a placeholder "
-            f"sha256. Get the real file once by hand, compute its checksum, "
-            f"and put that in the YAML before running this script."
+        raise AcquisitionFailure(
+            f"corpus/sources/{org}.yaml still has a placeholder sha256. "
+            f"Get the real file once by hand, compute its checksum, and "
+            f"put that in the YAML before running this script."
         )
 
     org_dir = RAW_DIR / org
@@ -152,23 +211,24 @@ def acquire_document(org: str, doc: dict):
     if dest.exists():
         actual = sha256_of(dest)
         if actual == expected_sha256:
-            if not looks_like_declared_format(dest, doc["source_format"]):
-                raise ValueError(
-                    f"{doc_id}: checksum matches, but the file doesn't look "
-                    f"like a real {doc['source_format']} (bad magic number). "
-                    f"Likely a blocked-request or challenge page saved by "
-                    f"mistake, with a checksum that's now just consistently "
-                    f"re-verifying the wrong file — replace it with the real "
-                    f"one and update sha256 in corpus/sources/{org}.yaml."
+            ok, reason = looks_like_declared_format(dest, doc["source_format"])
+            if not ok:
+                raise AcquisitionFailure(
+                    f"checksum matches, but the file doesn't look like a "
+                    f"real {doc['source_format']} ({reason}). Likely a "
+                    f"blocked-request or challenge page saved by mistake, "
+                    f"with a checksum that's now just consistently "
+                    f"re-verifying the wrong file — replace it with the "
+                    f"real one and update sha256 in corpus/sources/{org}.yaml."
                 )
             print(f"[skip] {doc_id} — already present, checksum matches")
             return {**doc, "org": org, "local_path": str(dest.relative_to(PROJECT_ROOT))}
         if mode == "manual":
-            raise ValueError(
-                f"Checksum mismatch for {doc_id} (manual acquisition): "
-                f"expected {expected_sha256}, got {actual}. The file at "
-                f"{dest} doesn't match what was declared — check it's the "
-                f"right file before re-running."
+            raise AcquisitionFailure(
+                f"checksum mismatch (manual acquisition): expected "
+                f"{expected_sha256}, got {actual}. The file at {dest} "
+                f"doesn't match what was declared — check it's the right "
+                f"file before re-running."
             )
         print(f"[redownload] {doc_id} — present but checksum mismatch, refetching")
 
@@ -188,8 +248,8 @@ def acquire_document(org: str, doc: dict):
         print(
             f"[fail] {doc_id} — {e}. Not retrying in a loop (that tends to "
             f"make rate-limiting worse, not better) — re-run the whole "
-            f"script later, or mark this document `acquisition: manual` in "
-            f"corpus/sources/{org}.yaml and place the file by hand.",
+            f"script later, or mark this document (or its whole org, via "
+            f"`default_acquisition`) as `manual` and place the file by hand.",
             file=sys.stderr,
         )
         return None
@@ -200,19 +260,20 @@ def acquire_document(org: str, doc: dict):
     actual_sha256 = sha256_of(tmp_path)
     if actual_sha256 != expected_sha256:
         tmp_path.unlink()
-        raise ValueError(
-            f"Checksum mismatch for {doc_id}: expected {expected_sha256}, "
-            f"got {actual_sha256}. The source file may have changed since "
-            f"it was selected, or the download was corrupted. Not writing "
-            f"to data/raw/ — investigate before re-running."
+        raise AcquisitionFailure(
+            f"checksum mismatch: expected {expected_sha256}, got "
+            f"{actual_sha256}. The source file may have changed since it "
+            f"was selected, or the download was corrupted. Not writing to "
+            f"data/raw/ — investigate before re-running."
         )
-    if not looks_like_declared_format(tmp_path, doc["source_format"]):
+    ok, reason = looks_like_declared_format(tmp_path, doc["source_format"])
+    if not ok:
         tmp_path.unlink()
-        raise ValueError(
-            f"{doc_id}: downloaded content doesn't look like a real "
-            f"{doc['source_format']} (bad magic number) — likely a "
-            f"blocked-request or bot-challenge page served with a 200 "
-            f"status instead of the real file. Not writing to data/raw/."
+        raise AcquisitionFailure(
+            f"downloaded content doesn't look like a real "
+            f"{doc['source_format']} ({reason}) — likely a blocked-request "
+            f"or bot-challenge page served with a 200 status instead of "
+            f"the real file. Not writing to data/raw/."
         )
 
     tmp_path.rename(dest)
@@ -252,18 +313,23 @@ def write_checksums(rows: list[dict]) -> None:
 def main() -> None:
     rows = []
     pending = 0
+    failures = 0
+
     for org, doc in load_sources():
+        doc_id = doc.get("doc_id", "?")
         try:
             row = acquire_document(org, doc)
-        except Exception as e:
-            print(f"[FAIL] {doc.get('doc_id', '?')}: {e}", file=sys.stderr)
-            sys.exit(1)
+        except AcquisitionFailure as e:
+            print(f"[FAIL] {doc_id}: {e}", file=sys.stderr)
+            append_acquisition_log_failure(doc_id, str(e))
+            failures += 1
+            continue
         if row is None:
             pending += 1
         else:
             rows.append(row)
 
-    if not rows and not pending:
+    if not rows and not pending and not failures:
         print("No documents declared in corpus/sources/*.yaml — nothing to do.")
         return
 
@@ -278,8 +344,11 @@ def main() -> None:
     print(
         f"\nDone — {len(rows)} document(s) verified and in the manifest, "
         f"{pending} still pending (not yet downloaded or not yet placed "
-        f"for manual acquisition)."
+        f"for manual acquisition), {failures} failed (see stderr above and "
+        f"corpus/acquisition-log.md)."
     )
+    if failures:
+        sys.exit(1)
 
 
 if __name__ == "__main__":

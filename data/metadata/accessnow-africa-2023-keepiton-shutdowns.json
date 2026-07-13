@@ -1,0 +1,53 @@
+{
+  "doc_id": "accessnow-africa-2023-keepiton-shutdowns",
+  "schema_version": "1.1",
+  "declared": {
+    "title": "Shrinking Democracy, Growing Violence: Internet Shutdowns in 2023",
+    "organization": "Access Now",
+    "countries": [
+      "KE",
+      "UG",
+      "TZ",
+      "ET",
+      "RW"
+    ],
+    "publication_date": "2024-05-01",
+    "url": "https://www.accessnow.org/wp-content/uploads/2024/05/2023-KIO-Report.pdf",
+    "doc_type": "annual_report",
+    "source_format": "pdf",
+    "topics": [
+      "internet_shutdown",
+      "censorship",
+      "network_interference"
+    ],
+    "language": "en",
+    "selection_rationale": "Access Now's #KeepItOn annual shutdown report for 2023 (283 shutdowns documented across 39 countries, the highest count since tracking began in 2016). Includes all five target countries within its country-by-country findings. Coverage-contribution value: documents the same 2023-2024 period as this corpus's OONI and Freedom House entries but from Access Now's own cross-country shutdown-tracking methodology — a genuinely different organizational account of an overlapping period, not a duplicate. Publication date approximate (month/year confirmed via the file's own URL path, exact day not independently confirmed from the document's title page).",
+    "corpus_version": "v1.0"
+  },
+  "derived": {
+    "sha256": "53b6b7efcb8e9334bbe38adf64c3c1af3463f78c542f4b7910fb1f11443a1333",
+    "file_size_bytes": 4016815,
+    "extracted_word_count": 25491,
+    "extraction_method": "pdfplumber",
+    "extraction_date": "2026-07-13",
+    "detected_language": "en",
+    "detected_language_confidence": 1.0,
+    "validation_status": "valid",
+    "validation_warnings": []
+  },
+  "lifecycle": {
+    "status": "active",
+    "superseded_by": null,
+    "supersedes": null,
+    "reason": null,
+    "effective_date": null
+  },
+  "chunking": {
+    "strategy": "fixed_overlap",
+    "chunk_size": 1500,
+    "chunk_step": 750,
+    "total_chunks": 267,
+    "chunking_date": "2026-07-13",
+    "corpus_version": "v1.0"
+  }
+}

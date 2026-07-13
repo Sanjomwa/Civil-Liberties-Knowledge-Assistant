@@ -1,0 +1,53 @@
+{
+  "doc_id": "accessnow-africa-2024-keepiton-shutdowns",
+  "schema_version": "1.1",
+  "declared": {
+    "title": "Emboldened Offenders, Endangered Communities: Internet Shutdowns in 2024",
+    "organization": "Access Now",
+    "countries": [
+      "KE",
+      "UG",
+      "TZ",
+      "ET",
+      "RW"
+    ],
+    "publication_date": "2025-02-01",
+    "url": "https://www.accessnow.org/wp-content/uploads/2025/02/KeepItOn-2024-Internet-Shutdowns-Annual-Report.pdf",
+    "doc_type": "annual_report",
+    "source_format": "pdf",
+    "topics": [
+      "internet_shutdown",
+      "censorship",
+      "network_interference"
+    ],
+    "language": "en",
+    "selection_rationale": "Access Now's #KeepItOn annual shutdown report for 2024 (21 shutdowns across 15 African countries, the highest ever recorded for the region in a single year). Explicitly documents Kenya's mid-2024 protest-related disruption and its knock-on connectivity effects in Rwanda, plus continued Ethiopia (Tigray/Amhara) and Uganda (Facebook-blocking) restrictions — direct overlap with this corpus's other 2024-period entries (CIPESA's 2024 report, this org's own 2023 report), a real coverage-contribution/cross-org-comparison case rather than a constructed one. Publication date approximate (per URL path), exact day not independently confirmed.",
+    "corpus_version": "v1.0"
+  },
+  "derived": {
+    "sha256": "19602c14804306c565e00d54356df254e60be66a0ab954f18aab868e14257d81",
+    "file_size_bytes": 7782590,
+    "extracted_word_count": 9286,
+    "extraction_method": "pdfplumber",
+    "extraction_date": "2026-07-13",
+    "detected_language": "en",
+    "detected_language_confidence": 1.0,
+    "validation_status": "valid",
+    "validation_warnings": []
+  },
+  "lifecycle": {
+    "status": "active",
+    "superseded_by": null,
+    "supersedes": null,
+    "reason": null,
+    "effective_date": null
+  },
+  "chunking": {
+    "strategy": "fixed_overlap",
+    "chunk_size": 1500,
+    "chunk_step": 750,
+    "total_chunks": 93,
+    "chunking_date": "2026-07-13",
+    "corpus_version": "v1.0"
+  }
+}

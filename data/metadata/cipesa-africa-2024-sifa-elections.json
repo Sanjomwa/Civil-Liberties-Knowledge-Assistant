@@ -1,0 +1,54 @@
+{
+  "doc_id": "cipesa-africa-2024-sifa-elections",
+  "schema_version": "1.1",
+  "declared": {
+    "title": "State of Internet Freedom in Africa 2024: Technology and Elections",
+    "organization": "CIPESA",
+    "countries": [
+      "KE",
+      "UG",
+      "TZ",
+      "ET",
+      "RW"
+    ],
+    "publication_date": "2024-10-01",
+    "url": "https://cipesa.org/wp-content/files/reports/State_of_Internet_Freedom_in_Africa_Report_2024.pdf",
+    "doc_type": "annual_report",
+    "source_format": "pdf",
+    "topics": [
+      "censorship",
+      "digital_rights",
+      "elections",
+      "network_interference"
+    ],
+    "language": "en",
+    "selection_rationale": "CIPESA's 11th annual State of Internet Freedom in Africa report, examining technology's role (both enabling and repressive) in Africa's 2024 elections. Covers all five target countries within its country findings. Coverage-contribution value: same 2024 period as this corpus's Access Now 2024 entry and OONI/Freedom House 2023-2024-period entries, from CIPESA's own research methodology — a genuine cross-organizational account of an overlapping period. Publication date approximate (month inferred from the report's October 2024 public release/FIFAfrica coverage; exact day not independently confirmed from the PDF's own title page).",
+    "corpus_version": "v1.0"
+  },
+  "derived": {
+    "sha256": "17734c34da5c317c699a774c23062fa5476e0a570613d1973c3c2d126c445f8b",
+    "file_size_bytes": 4670076,
+    "extracted_word_count": 30247,
+    "extraction_method": "pdfplumber",
+    "extraction_date": "2026-07-13",
+    "detected_language": "en",
+    "detected_language_confidence": 1.0,
+    "validation_status": "valid",
+    "validation_warnings": []
+  },
+  "lifecycle": {
+    "status": "active",
+    "superseded_by": null,
+    "supersedes": null,
+    "reason": null,
+    "effective_date": null
+  },
+  "chunking": {
+    "strategy": "fixed_overlap",
+    "chunk_size": 1500,
+    "chunk_step": 750,
+    "total_chunks": 327,
+    "chunking_date": "2026-07-13",
+    "corpus_version": "v1.0"
+  }
+}
