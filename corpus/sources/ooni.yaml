@@ -1,0 +1,46 @@
+# Documents selected from OONI for the corpus.
+#
+# Selection follows docs/corpus-inclusion-rubric.md and the architecture's
+# own Acquisition Rules for OONI: country reports from ooni.org/reports
+# filtered to target countries and 2022-2025, plus methodology pages.
+# Excludes raw Explorer measurements and short data notes under 500 words.
+#
+# This file only records what has already been decided — one entry per
+# document actually included, not a crawl target list. acquire.py reads
+# this file; it does not decide what belongs here.
+
+documents:
+  - doc_id: ooni-tz-2025-x-platform-blocking
+    title: "OONI Analysis on the Blocking of the X Social Media Platform in Tanzania"
+    organization: OONI
+    countries: ["TZ"]
+    publication_date: "2025-08-07"
+    url: "https://ooni.org/post/2025-tanzania-blocked-twitter/"
+    doc_type: country_report
+    source_format: html
+    acquisition: manual  # ooni.org turned out to challenge scripted requests broadly (not just
+                         # the /documents/ PDF path) once enough automated traffic had hit it —
+                         # confirmed 2026-07-13 when this same /post/ URL, fetched again via curl,
+                         # returned a *different* challenge page ("verifying your browser") than
+                         # the first attempt. Real content obtained via an actual browser (which
+                         # passes the challenge), saved as a complete HTML page, verified by
+                         # content (word count + absence of known challenge phrases) before trusting
+                         # it this time, not just by file type.
+    topics: ["censorship", "network_interference", "social_media_blocking"]
+    language: en
+    selection_rationale: >
+      First document processed by the ingestion pipeline (walking-skeleton
+      milestone — see docs/PROJECT_CONTINUITY.md Section 6a). Also a genuine fit
+      for the corpus on its own merits, independent of that: OONI is an
+      approved v1 source, Tanzania is a target country, mid-2025 is inside
+      the 2022-2025 window, and it documents a specific dated censorship
+      event (blocking of X) with technical network-measurement evidence —
+      exactly the kind of source-cited claim the assistant is meant to
+      answer questions about. Originally pointed at the PDF version of
+      this report under ooni.org/documents/; switched to this HTML
+      companion post after the PDF path turned out to sit behind a
+      JS-based bot challenge (Fable-consulted design question — see
+      decisionlog.md, 2026-07-13) that a scripted client can't pass, while
+      this HTML write-up covers the same finding and is openly accessible.
+    corpus_version: v1.0
+    sha256: "17109f2a365e5959c4d218c412cf6e851e3d51e49cc070e2ff26bda72a90a44f"

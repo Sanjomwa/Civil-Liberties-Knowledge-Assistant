@@ -24,9 +24,13 @@ project folder contains:
 - `docs/data_governance.md` — governance policy.
 - `docs/adr/` — four ADRs (see Section 5), plus `README.md` (process + example
   trigger thresholds).
+- `pyproject.toml` / `uv.lock` — Python dependencies declared and locked
+  (129 packages, `requires-python = ">=3.10,<3.13"`). Verified 2026-07-13
+  with `uv sync` against CPython 3.12.3 — clean install, no conflicts.
 
-No `src/`, no `corpus/`, no `data/`, no notebooks. No data has been
-acquired. No code has been written. The architecture document's own closing
+No `src/`, no `corpus/`, no `data/`, no notebooks — dependency scaffolding
+exists, pipeline code doesn't yet. No data has been acquired. No code has
+been written. The architecture document's own closing
 line states the next artifact is `src/ingestion/` — implementation has not
 started as of this snapshot. The full architecture review (9 items) is
 complete; implementation is the next real step, not yet begun.
@@ -131,7 +135,7 @@ not a retrospective status report. Update the status line below in place
 once work starts; don't let this section drift into describing a milestone
 that's already passed.
 
-**Status: not started.**
+**Status: in progress — acquire.py done (2026-07-13), extract.py next.**
 
 **Definition of success:** one real document flows through the entire
 pipeline — `acquire.py` → `extract.py` → `validate.py` → `metadata.py` →
@@ -148,7 +152,15 @@ tangle a technical proof-of-concept with an unresolved external
 dependency).
 
 **Checklist — all of these, not just "it ran":**
-- `data/raw/` has the file, checksum matches the manifest.
+- [x] `data/raw/` has the file, checksum matches the manifest. Done
+  2026-07-13 — `acquire.py` written, ran clean against
+  `ooni-tz-2025-x-platform-blocking`. One real wrinkle worth keeping: OONI's
+  server sustained a 429 against scripted downloads even with a proper
+  User-Agent and no retry-loop abuse, so `acquire.py` now supports a
+  per-document `acquisition: auto | manual` mode (Opus-consulted) —
+  `manual` means fetched once by hand, script only verifies the checksum.
+  This document is `manual`; `corpus/manifest.csv` and
+  `corpus/checksums.sha256` generated successfully.
 - `data/processed/` has non-empty, plausible extracted text.
 - Tier 1 checks (extraction success, file integrity) ran and passed.
 - Tier 2 checks (language, length, near-duplicate) actually ran and
@@ -208,3 +220,17 @@ embedding-related (already out of scope for the whole pipeline).
   ADR-0003 — retrieval should exclude `status != "active"` by default.
   Nothing to build yet since the retrieval layer itself doesn't exist
   (later module) — noted here so it isn't rediscovered as a surprise.
+- **Retrieval-layer storage: deliberately deferred, not decided.** Ingestion
+  uses JSON files (`data/metadata/`, `data/chunks/`) per the frozen
+  architecture — the right call at this corpus size (40-60 documents, one
+  ingest run, no concurrent writers), and not a trap: the `declared`/
+  `derived`/`lifecycle` schema from ADR-0003 gives any later migration a
+  clean, stable `doc_id`-keyed structure to load from, so this doesn't lock
+  anything in. The real open question is what retrieval uses once that
+  stage is designed — a local index file, or a vector database, depending
+  on whether retrieval ends up doing lexical or vector search (or both).
+  Not decided now because retrieval hasn't been designed yet. Revisit when
+  that design starts, not before — and worth weighing this course's own
+  Module 4 finding (keyword search beat vector search on the lesson corpus)
+  as one data point against assuming a vector database is obviously needed,
+  rather than deciding on intuition alone.

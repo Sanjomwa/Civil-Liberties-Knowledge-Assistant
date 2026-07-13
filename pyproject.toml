@@ -1,0 +1,22 @@
+[project]
+name = "civil-liberties-knowledge-assistant"
+version = "0.1.0"
+description = "RAG assistant answering questions about internet censorship and digital rights in East Africa, grounded in a cited corpus of OONI, Access Now, CIPESA, and Freedom House reports."
+readme = "README.md"
+requires-python = ">=3.10,<3.13"
+dependencies = [
+    "requests>=2.34.2",
+    "pdfplumber>=0.11.0",
+    "langdetect>=1.0.9",
+    "simhash>=2.1.2",
+    "openai>=2.41.0",
+    "python-dotenv>=1.2.2",
+    "pyyaml>=6.0.3",
+    "trafilatura>=1.12.0",
+]
+
+[dependency-groups]
+dev = [
+    "jupyter>=1.1.1",
+    "pytest>=8.0.0",
+]
