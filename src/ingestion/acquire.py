@@ -269,4 +269,18 @@ def main() -> None:
 
     # Always regenerate from whatever succeeded THIS run, even if that's
     # zero rows — a stale manifest from a previous run (pointing at a file
-    # or format that's no longer accurate) is worse than an empty one, a
+    # or format that's no longer accurate) is worse than an empty one, and
+    # downstream scripts (extract.py, validate.py) should never be trusting
+    # leftovers from an earlier, different state of data/raw/.
+    write_manifest(rows)
+    write_checksums(rows)
+
+    print(
+        f"\nDone — {len(rows)} document(s) verified and in the manifest, "
+        f"{pending} still pending (not yet downloaded or not yet placed "
+        f"for manual acquisition)."
+    )
+
+
+if __name__ == "__main__":
+    main()

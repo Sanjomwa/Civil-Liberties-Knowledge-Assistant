@@ -11,12 +11,16 @@ Last updated: 2026-07-13.
 
 ## 1. Current state (snapshot)
 
-**Implementation status: does not exist yet.** As of this update, the
-project folder contains:
+**Implementation status: walking-skeleton milestone complete.** As of this
+update, all six ingestion modules exist in `src/ingestion/` — `acquire.py`,
+`extract.py`, `validate.py`, `metadata.py`, `chunk.py`, `pipeline.py` — and
+one real document (`ooni-tz-2025-x-platform-blocking`) has flowed through
+every stage successfully. See Section 6a for the full checklist and
+real-run results. Project folder now also contains:
 - `docs/archituecture.md.docx` — frozen architecture, now **v1.4** (amended
   2026-07-11 via ADR-0001 through ADR-0004 — see Section 5).
-- `docs/ingestion-design.md` — pre-implementation pipeline reference,
-  synthesizing the architecture plus all four ADRs, with a diagram.
+- `docs/ingestion-design.md` — pipeline reference, synthesizing the
+  architecture plus all four ADRs, with a diagram.
 - `docs/licensing.md` — per-organization source licensing findings.
 - `docs/corpus-inclusion-rubric.md` — concrete criteria for the semantic
   review stage (topic relevance, coverage contribution).
@@ -27,13 +31,22 @@ project folder contains:
 - `pyproject.toml` / `uv.lock` — Python dependencies declared and locked
   (129 packages, `requires-python = ">=3.10,<3.13"`). Verified 2026-07-13
   with `uv sync` against CPython 3.12.3 — clean install, no conflicts.
+- `src/ingestion/` — six modules, all tested (synthetically and/or against
+  the real document — see Section 6a for which).
+- `corpus/sources/ooni.yaml`, `corpus/CORPUS_VERSION`,
+  `corpus/acquisition-log.md`, `corpus/manifest.csv`,
+  `corpus/checksums.sha256`, `corpus/validation-report.md` — generated or
+  hand-written artifacts from the real walking-skeleton run.
+- `data/raw/`, `data/processed/`, `data/metadata/`, `data/chunks/` — one
+  real document's worth of output at each stage (Sam's machine only —
+  these directories are gitignored and don't sync into the Cowork
+  workspace mirror; see the repo's own `.gitignore`).
 
-No `src/`, no `corpus/`, no `data/`, no notebooks — dependency scaffolding
-exists, pipeline code doesn't yet. No data has been acquired. No code has
-been written. The architecture document's own closing
-line states the next artifact is `src/ingestion/` — implementation has not
-started as of this snapshot. The full architecture review (9 items) is
-complete; implementation is the next real step, not yet begun.
+Not yet started: acquiring the remaining ~40-59 documents to build out the
+full corpus (this milestone deliberately proved the pipeline shape on one
+document first, per Section 6a's own stated purpose), and `pipeline.py`'s
+sibling utility `check_drift.py` (correctly deferred — only meaningful once
+a corpus version change actually exists to detect drift against).
 
 **Two unrelated version numbers, don't conflate them:** the architecture
 document has its own revision version (`Document version`, now v1.4,
@@ -77,28 +90,38 @@ limitation. See `docs/ingestion-design.md` for the synthesized picture.
 
 ## 3. Data source re-acquisition
 
-Not yet applicable — no data has been acquired. Once `acquire.py` exists,
-this section must be populated with, per source:
-- Source name and base URL.
-- Access method (API, scrape, manual download).
-- SHA-256 checksums of acquired files (per the architecture's reproducibility
-  requirement).
-- `CORPUS_VERSION` at time of acquisition.
-- Any rate limits, auth requirements, or terms-of-use constraints that
-  affect re-acquisition.
+One document acquired so far (the walking-skeleton milestone, Section 6a),
+not yet the full corpus — this section will grow into a real per-source
+table once acquisition scales past one document. Current precedent:
 
-This section is a placeholder until ingestion exists — do not let it drift
-into aspirational/present-tense language describing a pipeline that isn't
-built yet. Documentation that describes a future state in the present
-tense makes a system look more built than it is; that mistake is cheap to
-avoid and expensive to unwind once several docs repeat it.
+- **OONI** — base URL `ooni.org`. Access method: **manual**, not
+  scripted — OONI's server sustained a 429 against repeated scripted
+  requests (including a proper User-Agent, no retry loop), and separately,
+  two different URLs on the site turned out to sit behind bot-challenge
+  pages under automated access. `corpus/sources/ooni.yaml` marks this
+  org's documents `acquisition: manual` accordingly; `acquire.py` only
+  verifies checksums for them, never fetches. Real document:
+  `ooni-tz-2025-x-platform-blocking`, sha256
+  `17109f2a365e5959c4d218c412cf6e851e3d51e49cc070e2ff26bda72a90a44f`,
+  acquired via a real browser save (Save As → Webpage, HTML Only), not
+  curl or `requests`. `CORPUS_VERSION` at acquisition: `v1.0`.
+- Access Now, CIPESA, Freedom House — no documents acquired yet. Don't
+  assume OONI's manual-acquisition requirement generalizes to these; each
+  org's server behavior needs its own real test before deciding auto vs.
+  manual (see the decisionlog.md 2026-07-13 entry answering Sam's question
+  on exactly this point).
 
 ## 4. Attribution and licensing status
 
-Not yet applicable — to be populated per source once acquisition begins.
-Each of the five v1 sources (OONI, Access Now, CIPESA, Freedom House,
-+2 deferred) has its own data licensing terms; these must be recorded here
-before any content derived from them is published or redistributed.
+One document's worth of precedent (OONI, see Section 3) — full per-source
+table still pending until acquisition scales past the walking-skeleton
+milestone. OONI's measurement *data* license (CC BY-NC-SA 4.0) is
+confirmed in `docs/licensing.md`; the exact license variant for OONI's
+*content* (reports, as opposed to raw measurements) is still an open
+action item — see Section 7. Each of the five v1 sources (OONI, Access Now,
+CIPESA, Freedom House, +2 deferred) has its own data licensing terms; these
+must be recorded here before any content derived from them is published or
+redistributed.
 
 ## 5. Decision records
 
@@ -135,7 +158,9 @@ not a retrospective status report. Update the status line below in place
 once work starts; don't let this section drift into describing a milestone
 that's already passed.
 
-**Status: in progress — acquire.py done (2026-07-13), extract.py next.**
+**Status: COMPLETE (2026-07-13).** One real document flowed through
+every stage, including `pipeline.py` itself. All checklist items below are
+done.
 
 **Definition of success:** one real document flows through the entire
 pipeline — `acquire.py` → `extract.py` → `validate.py` → `metadata.py` →
@@ -144,12 +169,11 @@ into acquiring the full 40-60 document corpus. Proves the pipeline's shape
 and every ADR's design actually holds together, before paying the cost of
 scaling it up.
 
-**Document choice:** one OONI or CIPESA PDF country report — not an HTML
-methodology page (OONI-only, minority code path; PDF is the primary format
-for all four orgs), and deliberately not a Freedom House document (its
-licensing has an open action item — see Section 7 — and using it here would
-tangle a technical proof-of-concept with an unresolved external
-dependency).
+**Document choice:** ended up `ooni-tz-2025-x-platform-blocking`, HTML not
+PDF (see the acquire.py note below for why) — a deliberate departure from
+this section's original PDF-first preference, forced by OONI's PDF path
+sitting behind a bot challenge. Still not Freedom House, per the original
+reasoning (licensing action item still open — see Section 7).
 
 **Checklist — all of these, not just "it ran":**
 - [x] `data/raw/` has the file, checksum matches the manifest. Done
@@ -161,31 +185,66 @@ dependency).
   `manual` means fetched once by hand, script only verifies the checksum.
   This document is `manual`; `corpus/manifest.csv` and
   `corpus/checksums.sha256` generated successfully.
-- `data/processed/` has non-empty, plausible extracted text.
-- Tier 1 checks (extraction success, file integrity) ran and passed.
-- Tier 2 checks (language, length, near-duplicate) actually ran and
-  produced a report — even a clean document passing trivially still proves
-  ADR-0002's routing logic executes, not just that it exists on paper.
-- A human (Sam) does the semantic review for real, using
+- [x] `data/processed/` has non-empty, plausible extracted text. Done
+  2026-07-13 — 4,445 words extracted via `trafilatura` (the document ended
+  up `source_format: html`, not `pdf` — see the acquire.py note above).
+  Real wrinkle: `ooni.org` turned out to challenge scripted HTML requests
+  too, inconsistently, so a second bot-challenge page (different from the
+  first) got treated as verified content until checked by actual text, not
+  just file type — `acquire.py` now checks HTML content for known
+  challenge phrases, the same way it checks PDF magic bytes.
+- [x] Tier 1 checks (extraction success, file integrity) ran and passed.
+  Done 2026-07-13 — `validate.py` tested synthetically first (pass path and
+  auto-exclude path with a deliberately bad checksum), then run for real:
+  Tier 1 passed against the actual document.
+- [x] Tier 2 checks (language, length, near-duplicate) actually ran and
+  produced a report. Done 2026-07-13 — real run shows "Tier 1 passed, Tier
+  2: clean" in `corpus/validation-report.md` (English, 4,445 words, 0
+  near-duplicates — trivially true with one document, but proves the
+  routing logic executes, not just that it exists on paper).
+- [x] A human (Sam) does the semantic review for real, using
   `corpus-inclusion-rubric.md`, marks it Included, and that reasoning is
-  logged in `corpus/acquisition-log.md` — proves the human-in-the-loop step
-  is a real step, not silently bypassed.
-- `data/metadata/{doc_id}.json` matches the amended schema (schema_version
-  1.1): `declared` (including `license`, populated from `licensing.md`),
-  `derived`, `lifecycle` (defaulting to `active`).
-- `data/chunks/{doc_id}/*.json` exist, each carrying the `corpus_version`
-  stamp from ADR-0003.
-- Idempotency: rerun `acquire.py` (or the whole pipeline) on the same
-  document a second time — confirm it's a no-op (skips the download,
-  doesn't reprocess). Cheap to verify now, while there's only one document
-  to reason about.
-- A second, synthetic, deliberately-bad input (a corrupted checksum or an
-  artificially short file) run through `validate.py` alone, to confirm a
-  Tier 1 failure actually auto-excludes and a Tier 2 failure actually
-  surfaces to the report rather than silently vanishing. Not a second real
-  document — a cheap fixture built to break one specific check, since the
-  branching logic (the actual point of ADR-0002) is otherwise never tested
-  by a single clean document.
+  logged in `corpus/acquisition-log.md`. Done 2026-07-13 — clean Include on
+  both topic relevance and coverage contribution (first document in the
+  corpus). While drafting this entry, found the rubric itself named the
+  wrong path (`docs/acquisition-log.md` vs. the actual
+  `corpus/acquisition-log.md`) — fixed in the rubric to match what got
+  built.
+- [x] `data/metadata/{doc_id}.json` matches the amended schema
+  (schema_version 1.1): `declared`, `derived`, `lifecycle` (defaulting to
+  `active`), `chunking` (added by `chunk.py`, not `metadata.py` — it isn't
+  known yet at that point in the pipeline). Done 2026-07-13, verified
+  against the real document's actual JSON output.
+- [x] `data/chunks/{doc_id}/*.json` exist, each carrying the `corpus_version`
+  stamp from ADR-0003. Done 2026-07-13 — 38 chunks for the real document
+  (1500/750 fixed overlapping windows over ~28k extracted characters), each
+  embedding the full `document_metadata` record.
+- [x] Idempotency: rerun `acquire.py` (or the whole pipeline) on the same
+  document a second time — confirm it's a no-op. Confirmed both
+  synthetically (via a dedicated pipeline.py test fixture — four scenarios:
+  stop-after-validate, `--all` continuation, idempotent rerun, and
+  stop-on-failure with a deliberately corrupted checksum) and for real —
+  Sam's second `extract.py`/`chunk.py` runs correctly skipped/regenerated
+  rather than duplicating.
+- [x] A second, synthetic, deliberately-bad input run through `validate.py`
+  alone, confirming a Tier 1 failure actually auto-excludes. Done — tested
+  when `validate.py` was first built (synthetic pass path + synthetic
+  Tier-1-failure path with a bad checksum), and incidentally re-confirmed
+  for real when a stale manifest checksum caused a genuine Tier 1 failure
+  mid-debugging (see the acquire.py truncation-bug note below) before being
+  fixed.
+
+**Real bug found and fixed along the way, worth keeping the record of:** an
+in-place edit to `acquire.py` left the file silently truncated (missing the
+rest of `main()` and the `if __name__ == "__main__":` guard) — it ran with
+zero output and exit code 0 instead of failing loudly, since the functions
+were defined but never called. Took an extended remote debugging session to
+catch (ruled out `uv run`, output buffering, and terminal display before
+actually `cat`-ing the file revealed it just stopped mid-comment). The same
+truncation happened again while writing `pipeline.py` — caught immediately
+that time by checking line count / null bytes via bash right after every
+edit, which is now standard practice for every file touched in this repo,
+not just a one-off fix. Full sequence in `decisionlog.md`, 2026-07-13.
 
 **Explicitly out of scope for this milestone** (don't let it creep):
 the full corpus, cross-document near-duplicate detection actually firing
@@ -195,6 +254,11 @@ embedding-related (already out of scope for the whole pipeline).
 
 ## 7. Open action items (don't lose track of these)
 
+- **Next: scale ingestion past the walking-skeleton milestone.** Section 6a
+  is complete — the six-stage pipeline works end to end on one document.
+  The next real step is acquiring and running the remaining ~40-59
+  documents across the four v1 sources, not further pipeline development
+  (`check_drift.py` excepted, see below).
 - **Freedom House permission request — sent 2026-07-13** (drafted
   2026-07-11, sent by Sam directly from Gmail — no send capability was
   available to Claude, only draft creation, so this was Sam's own action).
@@ -215,7 +279,10 @@ embedding-related (already out of scope for the whole pipeline).
   freeze: `github.com/ooni/license/tree/master/content`.
 - **`check_drift.py` not yet written.** Implied by ADR-0003 — a small
   standalone script asserting `chunking.corpus_version == declared.
-  corpus_version` per document. Write it alongside `chunk.py`, not before.
+  corpus_version` per document. `chunk.py` itself is now done (2026-07-13),
+  but this utility is only meaningful once a real `CORPUS_VERSION` change
+  exists to detect drift against (explicitly out of scope for the
+  walking-skeleton milestone) — still correctly deferred, not overdue.
 - **Retrieval-time `lifecycle.status` filter not yet built.** Implied by
   ADR-0003 — retrieval should exclude `status != "active"` by default.
   Nothing to build yet since the retrieval layer itself doesn't exist

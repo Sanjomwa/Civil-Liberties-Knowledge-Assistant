@@ -1,0 +1,49 @@
+{
+  "doc_id": "ooni-tz-2025-x-platform-blocking",
+  "schema_version": "1.1",
+  "declared": {
+    "title": "OONI Analysis on the Blocking of the X Social Media Platform in Tanzania",
+    "organization": "OONI",
+    "countries": [
+      "TZ"
+    ],
+    "publication_date": "2025-08-07",
+    "url": "https://ooni.org/post/2025-tanzania-blocked-twitter/",
+    "doc_type": "country_report",
+    "source_format": "html",
+    "topics": [
+      "censorship",
+      "network_interference",
+      "social_media_blocking"
+    ],
+    "language": "en",
+    "selection_rationale": "First document processed by the ingestion pipeline (walking-skeleton milestone — see docs/PROJECT_CONTINUITY.md Section 6a). Also a genuine fit for the corpus on its own merits, independent of that: OONI is an approved v1 source, Tanzania is a target country, mid-2025 is inside the 2022-2025 window, and it documents a specific dated censorship event (blocking of X) with technical network-measurement evidence — exactly the kind of source-cited claim the assistant is meant to answer questions about. Originally pointed at the PDF version of this report under ooni.org/documents/; switched to this HTML companion post after the PDF path turned out to sit behind a JS-based bot challenge (Fable-consulted design question — see decisionlog.md, 2026-07-13) that a scripted client can't pass, while this HTML write-up covers the same finding and is openly accessible.",
+    "corpus_version": "v1.0"
+  },
+  "derived": {
+    "sha256": "17109f2a365e5959c4d218c412cf6e851e3d51e49cc070e2ff26bda72a90a44f",
+    "file_size_bytes": 94135,
+    "extracted_word_count": 4445,
+    "extraction_method": "trafilatura",
+    "extraction_date": "2026-07-13",
+    "detected_language": "en",
+    "detected_language_confidence": 1.0,
+    "validation_status": "valid",
+    "validation_warnings": []
+  },
+  "lifecycle": {
+    "status": "active",
+    "superseded_by": null,
+    "supersedes": null,
+    "reason": null,
+    "effective_date": null
+  },
+  "chunking": {
+    "strategy": "fixed_overlap",
+    "chunk_size": 1500,
+    "chunk_step": 750,
+    "total_chunks": 38,
+    "chunking_date": "2026-07-13",
+    "corpus_version": "v1.0"
+  }
+}

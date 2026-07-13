@@ -9,7 +9,7 @@ reviewing — this document makes it explicit, reusable, and auditable.
 
 This is a living document, not a one-time spec. Every real inclusion or
 exclusion decision made during actual corpus building should get logged in
-`docs/acquisition-log.md` against the categories below, and genuinely
+`corpus/acquisition-log.md` against the categories below, and genuinely
 ambiguous cases that come up should get added back here as new precedent
 examples — see Section 4.
 
@@ -156,7 +156,7 @@ licensing status already on file, so the two documents don't drift apart.
 3. Check coverage contribution (Section 2) — same.
 4. If the source is Freedom House, note the rights-check reminder (Section 3).
 5. Log the decision — Included or Excluded, with the reason — in
-   `docs/acquisition-log.md`, per the architecture's own requirement that
+   `corpus/acquisition-log.md`, per the architecture's own requirement that
    "someone reading it should be able to understand every inclusion and
    exclusion decision without reference to any other document."
 6. If the case didn't cleanly fit an existing example in Section 1 or Section 2, add it
