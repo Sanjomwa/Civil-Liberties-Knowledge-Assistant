@@ -216,3 +216,9 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Project-specific: large/regeneratable/licensing-sensitive artifacts
+data/raw/
+data/processed/
+data/chunks/
+data/index/
