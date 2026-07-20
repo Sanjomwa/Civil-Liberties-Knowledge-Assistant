@@ -363,6 +363,26 @@ auto-vs-manual question; scaling further is future work, see Section 7),
 
 ## 7. Open action items (don't lose track of these)
 
+- **DONE, 2026-07-20: `acquire.py`/`extract.py` gained a third
+  `source_format`: `json`.** Needed for OONI's newer "Findings"
+  platform (JS-rendered SPA, real content only reachable via its own
+  JSON API) — `looks_like_declared_format`'s new branch validates
+  structure + a positive title check against the `incident.text`
+  field; `extract_json_text` pulls that field verbatim. Both smoke-
+  tested against a reconstruction of the real fetched payload before
+  use. One new OONI document (`ooni-ug-2026-election-shutdown-and-
+  blocking`) added to `corpus/sources/ooni.yaml` using it, pending
+  acquisition. See `decisionlog.md`, 2026-07-20, for the full
+  reasoning and the false-negative caught during smoke-testing.
+- **DONE, 2026-07-20: 2 new CIPESA documents through the pipeline —
+  corpus now at 23 documents / 3253 chunks.** Both passed validation
+  clean (0 flags, 0 near-dupes), logged Included, chunked; idempotency
+  confirmed against the pre-existing 21-document/2977-chunk total.
+  Per-org: Access Now 4 (668 chunks), CIPESA 4 (924), Freedom House 12
+  (1,542), OONI 3 (119). CIPESA no longer the lowest-count org — OONI
+  now is, capped by its manual-acquisition requirement (Section 3);
+  that's the likelier next research target if scaling continues. See
+  `decisionlog.md`, 2026-07-20, for the full detail.
 - **DONE, 2026-07-20: `claude-code-wsl-CLAUDE.md` relocated into
   `repo/`; Research Questions docx drift fixed.** The retrospective's
   own v3 update (previous entry, below) hit a real blocker the same

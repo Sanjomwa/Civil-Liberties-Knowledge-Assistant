@@ -282,3 +282,38 @@ design.
 **Coverage contribution:** This org's first Ethiopia entry, and documents the exact same event already in this corpus's Freedom House freedomhouse-et-2023-fotn entry (which cites the same platform block as one of its own Key Developments) — a genuine cross-organization account of a shared event via a different tracking methodology (network measurement vs. narrative country survey), coverage contribution per the rubric's own definition (Section 2), not duplication.
 
 **Decision: Included.**
+- **cipesa-africa-2022-sifa-biometrics** — acquire.py failure (2026-07-20): corpus/sources/cipesa.yaml still has a placeholder sha256. Get the real file once by hand, compute its checksum, and put that in the YAML before running this script.
+- **cipesa-ug-2026-shutdown-economic-impact** — acquire.py failure (2026-07-20): corpus/sources/cipesa.yaml still has a placeholder sha256. Get the real file once by hand, compute its checksum, and put that in the YAML before running this script.
+
+## cipesa-africa-2022-sifa-biometrics — Included
+
+**Reviewed:** 2026-07-20. **Automated checks:** Tier 1 passed, Tier 2 clean (24,447 words, no near-duplicates).
+
+**Topic relevance:** Clean include. CIPESA's 9th consecutive annual State of Internet Freedom in Africa report, thematically focused on biometric data collection (national ID, voter registration, CCTV/facial recognition, ePassports, SIM registration) across 16 African countries. Confirmed by reading the full PDF text: Kenya, Tanzania, and Uganda receive substantive dedicated treatment (94 combined mentions), while Ethiopia and Rwanda appear only incidentally (3 combined mentions, passing references, no dedicated analysis) — `countries` in the YAML scoped to KE/TZ/UG only accordingly, same discipline already applied to the 2025 edition's Tanzania exclusion.
+
+**Coverage contribution:** Genuine topic diversity not represented elsewhere in this corpus — biometric/surveillance infrastructure, distinct from the shutdown/blocking focus of most other entries. Different structure from the 2024/2025 CIPESA editions already in the corpus (thematic biometrics focus vs. their per-country findings format), not a template repeat.
+
+**Decision: Included.**
+
+## cipesa-ug-2026-shutdown-economic-impact — Included
+
+**Reviewed:** 2026-07-20. **Automated checks:** Tier 1 passed, Tier 2 clean (2,018 words, no near-duplicates).
+
+**Topic relevance:** Clean include. Single-country CIPESA brief on the January 13-18, 2026 Uganda election-period internet shutdown, in-scope country and window (per ADR-0006).
+
+**Coverage contribution:** Documents the same shutdown already covered by this corpus's existing OONI entry, but from a distinct angle: quantified economic losses (UGX 59.7 billion / USD 16 million via the Cost of Internet Shutdown Tool), sector-by-sector business impact (e-commerce, ride-hailing, fintech/mobile money, digital health, government services), and the ongoing High Court litigation challenging the shutdown's legality — a materially different kind of evidence about the same event, not duplication. This is the real event that originally motivated ADR-0006's window extension to 2026.
+
+**Decision: Included.**
+- **ooni-ug-2026-election-shutdown-and-blocking** — acquire.py failure (2026-07-20): corpus/sources/ooni.yaml still has a placeholder sha256. Get the real file once by hand, compute its checksum, and put that in the YAML before running this script.
+
+## ooni-ug-2026-election-shutdown-and-blocking — Included
+
+**Reviewed:** 2026-07-20. **Automated checks:** Tier 1 passed, Tier 2 clean (1,812 words, no near-duplicates).
+
+**Topic relevance:** Clean include. OONI's own technical account of the January 13-18, 2026 Uganda election-period internet shutdown and the subsequent WhatsApp/Facebook/Instagram/Twitter-X blocks once access was restored — the real event that motivated ADR-0006's window extension, in-scope country and window.
+
+**Coverage contribution:** Written by Maria Xynou, cross-validating the shutdown against IODA, Cloudflare Radar, and Google Traffic data, then separately documenting per-app blocking patterns by ASN (MTN Uganda, Roke Telkom, Airtel Uganda) once connectivity resumed. The corpus's third independent account of this event, alongside CIPESA's economic-impact brief (cipesa-ug-2026-shutdown-economic-impact) and Freedom House's general Uganda country tracking — each contributing genuinely different evidence (network measurement vs. economic quantification vs. narrative survey), not duplication. Also cross-references OONI's own 2016 and 2021 Uganda election-shutdown write-ups, noting the 2021 and 2026 shutdowns coincidentally spanned the identical calendar dates (13th-18th January) — a genuine historical-pattern finding.
+
+**Acquisition note:** first document acquired via the new `source_format: json` path (OONI's "Findings" platform API, `api.ooni.org/api/v1/incidents/show/...`, not the JS-rendered SPA page) — see reports.md for this session's full verification of the new acquire.py/extract.py JSON handling against the live pipeline.
+
+**Decision: Included.**

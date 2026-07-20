@@ -1,0 +1,51 @@
+{
+  "doc_id": "cipesa-africa-2022-sifa-biometrics",
+  "schema_version": "1.1",
+  "declared": {
+    "title": "State of Internet Freedom in Africa 2022: The Rise of Biometric Surveillance",
+    "organization": "CIPESA",
+    "countries": [
+      "KE",
+      "TZ",
+      "UG"
+    ],
+    "publication_date": "2022-09-29",
+    "url": "https://cipesa.org/wp-content/files/reports/State_of_Internet_Freedom_in_Africa_2022.pdf",
+    "doc_type": "annual_report",
+    "source_format": "pdf",
+    "topics": [
+      "digital_rights",
+      "surveillance",
+      "data_privacy"
+    ],
+    "language": "en",
+    "selection_rationale": "CIPESA's 9th consecutive annual State of Internet Freedom in Africa report, thematically focused on biometric data collection (national ID, voter registration, CCTV/facial recognition, ePassports, SIM registration) across 16 African countries -- a different structure from the 2024/2025 editions already in this corpus, which use a per-country findings format. Confirmed by fetching and reading the full PDF text, not the blog announcement alone: Kenya, Tanzania, and Uganda receive substantive treatment (94 combined mentions across dedicated programme-by-programme sections), while Ethiopia and Rwanda appear only incidentally (3 combined mentions, passing references in continent-wide country lists, no dedicated analysis) -- countries above scoped to KE/TZ/UG only, same discipline already applied to the 2025 edition's Tanzania exclusion. Coverage- contribution value: genuine topic diversity, not represented elsewhere in this corpus (biometric/surveillance infrastructure, distinct from the shutdown/blocking focus of most other entries). Publication date confirmed exactly -- both the blog announcement's own published_time metadata and the report's own text (\"published today,\" referring to its FIFAfrica22 Lusaka launch) agree on 2022-09-29.",
+    "corpus_version": "v1.0"
+  },
+  "derived": {
+    "sha256": "2071cc3f7e3aa30d3c3ef6e642f66020bd7ee9ed164638252c65c939884f7c9a",
+    "file_size_bytes": 1828655,
+    "extracted_word_count": 24447,
+    "extraction_method": "pdfplumber",
+    "extraction_date": "2026-07-20",
+    "detected_language": "en",
+    "detected_language_confidence": 1.0,
+    "validation_status": "valid",
+    "validation_warnings": []
+  },
+  "lifecycle": {
+    "status": "active",
+    "superseded_by": null,
+    "supersedes": null,
+    "reason": null,
+    "effective_date": null
+  },
+  "chunking": {
+    "strategy": "fixed_overlap",
+    "chunk_size": 1500,
+    "chunk_step": 750,
+    "total_chunks": 257,
+    "chunking_date": "2026-07-20",
+    "corpus_version": "v1.0"
+  }
+}

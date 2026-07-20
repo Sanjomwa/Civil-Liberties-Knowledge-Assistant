@@ -102,7 +102,14 @@ def build_declared(doc: dict) -> dict:
 
 
 def build_derived(org: str, doc: dict, doc_id: str) -> dict:
-    ext = "pdf" if doc["source_format"] == "pdf" else "html"
+    # Mirrors acquire.py's own extension-resolution dict exactly (2026-07-20:
+    # added "json" for OONI's Findings-platform documents — see acquire.py's
+    # acquire_document() and extract.py's extract_json_text() for the other
+    # two places this same mapping needed to exist. Missed here on first
+    # pass, causing metadata.py to look for a nonexistent .html file for
+    # ooni-ug-2026-election-shutdown-and-blocking — see decisionlog.md,
+    # 2026-07-20, for the incident this comment is here to prevent repeating).
+    ext = {"pdf": "pdf", "json": "json"}.get(doc["source_format"], "html")
     raw_path = RAW_DIR / org / f"{doc_id}.{ext}"
     processed_path = PROCESSED_DIR / org / f"{doc_id}.txt"
 
@@ -130,7 +137,10 @@ def build_derived(org: str, doc: dict, doc_id: str) -> dict:
         detected_language = "unknown"
         detected_language_confidence = 0.0
 
-    extraction_method = "pdfplumber" if doc["source_format"] == "pdf" else "trafilatura"
+    extraction_method = {
+        "pdf": "pdfplumber",
+        "json": "json-field-extraction",
+    }.get(doc["source_format"], "trafilatura")
     # The processed file's own mtime reflects when extract.py actually ran,
     # which is more accurate than "whenever metadata.py happens to run".
     extraction_date = date.fromtimestamp(processed_path.stat().st_mtime).isoformat()

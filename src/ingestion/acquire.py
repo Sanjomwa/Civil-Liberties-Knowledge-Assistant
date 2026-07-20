@@ -83,7 +83,7 @@ import yaml
 HEADERS = {
     "User-Agent": "civil-liberties-knowledge-assistant/0.1 "
                   "(course project; contact via github.com/Sanjomwa)",
-    "Accept": "application/pdf,text/html,*/*;q=0.8",
+    "Accept": "application/pdf,text/html,application/json,*/*;q=0.8",
     "Accept-Language": "en-US,en;q=0.9",
 }
 
@@ -200,6 +200,43 @@ def looks_like_declared_format(path: Path, source_format: str, title: str = ""):
                     f"declared title {title!r} not found in fetched content "
                     f"(missing key word(s): {', '.join(missing)}) — likely a "
                     f"blocked-request or bot-challenge page, not the real "
+                    f"document"
+                )
+        return True, None
+
+    if source_format == "json":
+        # Added 2026-07-20 for OONI's newer "Findings" platform: the
+        # public-facing page (explorer.ooni.org/findings/<id>) is a
+        # JS-rendered SPA with no real content in its raw HTML, but the
+        # same content is served as JSON by a documented API endpoint
+        # (api.ooni.org/api/v1/incidents/show/<id>) with a "text" field
+        # holding the full markdown-ish report body. No magic-number
+        # equivalent exists for JSON, so this checks structural validity
+        # (parses, has a non-empty "text" field) plus the same positive
+        # title-key-word check HTML uses — a JSON error page or an empty
+        # incident record wouldn't pass either check.
+        import json
+
+        text = path.read_text(encoding="utf-8", errors="replace")
+        try:
+            data = json.loads(text)
+        except json.JSONDecodeError as e:
+            return False, f"not valid JSON ({e})"
+
+        body = data.get("incident", {}).get("text", "")
+        if not body:
+            return False, "parsed JSON but found no non-empty 'incident.text' field"
+
+        key_words = _title_key_words(title) if title else []
+        if key_words:
+            normalized_content = _normalize_for_match(body)
+            missing = [w for w in key_words if w not in normalized_content]
+            if missing:
+                return False, (
+                    f"declared title {title!r} not found in the JSON's "
+                    f"'incident.text' field (missing key word(s): "
+                    f"{', '.join(missing)}) — likely the wrong incident id "
+                    f"or an unexpected API response shape, not the real "
                     f"document"
                 )
         return True, None
@@ -340,7 +377,7 @@ def acquire_document(org: str, doc: dict):
     doc_id = doc["doc_id"]
     expected_sha256 = doc["sha256"]
     url = doc["url"]
-    ext = "pdf" if doc["source_format"] == "pdf" else "html"
+    ext = {"pdf": "pdf", "json": "json"}.get(doc["source_format"], "html")
     mode = doc["_acquisition"]
     raw_bytes_stable = doc["_raw_bytes_stable"]
     title = doc.get("title", "")

@@ -75,3 +75,81 @@ documents:
       publication month/day is only approximate.
     corpus_version: v1.0
     sha256: "5a6e1aa0ef024eacd7805f86fdc036d90dc8d04f291cbe6bf82ab771415bd498"
+
+  # --- 2026-07-20 addition: two documents researched and confirmed live
+  # via direct fetch of the actual PDF content (not search-snippet
+  # inference, given this org's prior slug-reuse issue -- see the 2023
+  # edition exclusion note above). One extends the annual SIFA series back
+  # to 2022; the other is a single-country, single-event brief that
+  # directly follows up on the same Jan-2026 Uganda election shutdown that
+  # motivated ADR-0006's window extension, from CIPESA's own economic-
+  # impact angle -- a genuinely different account from the existing OONI
+  # entry for the same event, not a duplicate.
+
+  - doc_id: cipesa-africa-2022-sifa-biometrics
+    title: "State of Internet Freedom in Africa 2022: The Rise of Biometric Surveillance"
+    organization: CIPESA
+    countries: ["KE", "TZ", "UG"]  # ET/RW deliberately excluded -- see rationale below
+    publication_date: "2022-09-29"
+    url: "https://cipesa.org/wp-content/files/reports/State_of_Internet_Freedom_in_Africa_2022.pdf"
+    doc_type: annual_report
+    source_format: pdf
+    topics: ["digital_rights", "surveillance", "data_privacy"]
+    language: en
+    selection_rationale: >
+      CIPESA's 9th consecutive annual State of Internet Freedom in Africa
+      report, thematically focused on biometric data collection (national
+      ID, voter registration, CCTV/facial recognition, ePassports, SIM
+      registration) across 16 African countries -- a different structure
+      from the 2024/2025 editions already in this corpus, which use a
+      per-country findings format. Confirmed by fetching and reading the
+      full PDF text, not the blog announcement alone: Kenya, Tanzania, and
+      Uganda receive substantive treatment (94 combined mentions across
+      dedicated programme-by-programme sections), while Ethiopia and
+      Rwanda appear only incidentally (3 combined mentions, passing
+      references in continent-wide country lists, no dedicated analysis)
+      -- countries above scoped to KE/TZ/UG only, same discipline already
+      applied to the 2025 edition's Tanzania exclusion. Coverage-
+      contribution value: genuine topic diversity, not represented
+      elsewhere in this corpus (biometric/surveillance infrastructure,
+      distinct from the shutdown/blocking focus of most other entries).
+      Publication date confirmed exactly -- both the blog announcement's
+      own published_time metadata and the report's own text ("published
+      today," referring to its FIFAfrica22 Lusaka launch) agree on
+      2022-09-29.
+    corpus_version: v1.0
+    sha256: "2071cc3f7e3aa30d3c3ef6e642f66020bd7ee9ed164638252c65c939884f7c9a"
+
+  - doc_id: cipesa-ug-2026-shutdown-economic-impact
+    title: "Assessing the Impact of the 2026 Internet Shutdown on Uganda's Digital Economy"
+    organization: CIPESA
+    countries: ["UG"]
+    publication_date: "2026-03-01"
+    url: "https://cipesa.org/wp-content/files/reports/Assessing_the_Impact_of_the_2026_Internet_Shutdown_on_Ugandas_Digital_Economy.pdf"
+    doc_type: policy_brief
+    source_format: pdf
+    topics: ["internet_shutdown", "network_interference", "digital_economy"]
+    language: en
+    selection_rationale: >
+      Single-country CIPESA brief on the same January 13-18, 2026 Uganda
+      election-period internet shutdown documented by this corpus's
+      existing OONI entry -- but from a distinct angle: quantified
+      economic losses (UGX 59.7 billion / USD 16 million via the Cost of
+      Internet Shutdown Tool), sector-by-sector business impact
+      (e-commerce, ride-hailing, fintech/mobile money, digital health,
+      government services), and the ongoing High Court litigation
+      challenging the shutdown's legality. Confirmed by fetching and
+      reading the full PDF -- genuinely substantive, not a repackaged
+      press release. This is the real event that originally motivated
+      ADR-0006's window extension to 2026; this document is the corpus's
+      second entry documenting it (after OONI's), each contributing a
+      materially different kind of evidence about the same event rather
+      than duplicating one another. Publication date: PDF's own text
+      states "March, 2026"; the CIPESA blog post announcing it was
+      published 2026-04-01 -- used the PDF's own internal date per this
+      corpus's standing preference for a document's own stated date over
+      its announcement date, consistent with how ADR-0004's
+      reproducibility-citation convention treats this class of
+      discrepancy.
+    corpus_version: v1.0
+    sha256: "f789bf34348f6a0ee4b07f8ca415510df22123639423b223cb0b9b210e647005"

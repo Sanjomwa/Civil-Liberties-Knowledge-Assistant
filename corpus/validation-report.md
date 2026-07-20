@@ -98,6 +98,38 @@ _Semantic review (topic relevance, coverage contribution) is a human judgment ca
 _Semantic review (topic relevance, coverage contribution) is a human judgment call per docs/corpus-inclusion-rubric.md — not automated here. Record the Included/Excluded decision by hand in corpus/acquisition-log.md._
 
 
+## cipesa-africa-2022-sifa-biometrics
+
+**Tier 1:** passed.
+
+**Tier 2:** clean
+.
+
+- Word count: 24447
+- Language: en
+- Near-duplicates found: 0
+- Topic keyword hint (5 matched): blocked, surveillance, digital rights, freedom of expression, vpn
+
+
+_Semantic review (topic relevance, coverage contribution) is a human judgment call per docs/corpus-inclusion-rubric.md — not automated here. Record the Included/Excluded decision by hand in corpus/acquisition-log.md._
+
+
+## cipesa-ug-2026-shutdown-economic-impact
+
+**Tier 1:** passed.
+
+**Tier 2:** clean
+.
+
+- Word count: 2018
+- Language: en
+- Near-duplicates found: 0
+- Topic keyword hint (4 matched): censorship, internet shutdown, digital rights, freedom of expression
+
+
+_Semantic review (topic relevance, coverage contribution) is a human judgment call per docs/corpus-inclusion-rubric.md — not automated here. Record the Included/Excluded decision by hand in corpus/acquisition-log.md._
+
+
 ## freedomhouse-ke-2024-fotn
 
 **Tier 1:** passed.
@@ -341,6 +373,22 @@ _Semantic review (topic relevance, coverage contribution) is a human judgment ca
 - Language: en
 - Near-duplicates found: 0
 - Topic keyword hint (3 matched): blocked, blocking, freedom of expression
+
+
+_Semantic review (topic relevance, coverage contribution) is a human judgment call per docs/corpus-inclusion-rubric.md — not automated here. Record the Included/Excluded decision by hand in corpus/acquisition-log.md._
+
+
+## ooni-ug-2026-election-shutdown-and-blocking
+
+**Tier 1:** passed.
+
+**Tier 2:** clean
+.
+
+- Word count: 1812
+- Language: en
+- Near-duplicates found: 0
+- Topic keyword hint (3 matched): internet shutdown, blocked, blocking
 
 
 _Semantic review (topic relevance, coverage contribution) is a human judgment call per docs/corpus-inclusion-rubric.md — not automated here. Record the Included/Excluded decision by hand in corpus/acquisition-log.md._

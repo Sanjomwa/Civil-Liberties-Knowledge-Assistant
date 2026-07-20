@@ -1,0 +1,49 @@
+{
+  "doc_id": "cipesa-ug-2026-shutdown-economic-impact",
+  "schema_version": "1.1",
+  "declared": {
+    "title": "Assessing the Impact of the 2026 Internet Shutdown on Uganda's Digital Economy",
+    "organization": "CIPESA",
+    "countries": [
+      "UG"
+    ],
+    "publication_date": "2026-03-01",
+    "url": "https://cipesa.org/wp-content/files/reports/Assessing_the_Impact_of_the_2026_Internet_Shutdown_on_Ugandas_Digital_Economy.pdf",
+    "doc_type": "policy_brief",
+    "source_format": "pdf",
+    "topics": [
+      "internet_shutdown",
+      "network_interference",
+      "digital_economy"
+    ],
+    "language": "en",
+    "selection_rationale": "Single-country CIPESA brief on the same January 13-18, 2026 Uganda election-period internet shutdown documented by this corpus's existing OONI entry -- but from a distinct angle: quantified economic losses (UGX 59.7 billion / USD 16 million via the Cost of Internet Shutdown Tool), sector-by-sector business impact (e-commerce, ride-hailing, fintech/mobile money, digital health, government services), and the ongoing High Court litigation challenging the shutdown's legality. Confirmed by fetching and reading the full PDF -- genuinely substantive, not a repackaged press release. This is the real event that originally motivated ADR-0006's window extension to 2026; this document is the corpus's second entry documenting it (after OONI's), each contributing a materially different kind of evidence about the same event rather than duplicating one another. Publication date: PDF's own text states \"March, 2026\"; the CIPESA blog post announcing it was published 2026-04-01 -- used the PDF's own internal date per this corpus's standing preference for a document's own stated date over its announcement date, consistent with how ADR-0004's reproducibility-citation convention treats this class of discrepancy.",
+    "corpus_version": "v1.0"
+  },
+  "derived": {
+    "sha256": "f789bf34348f6a0ee4b07f8ca415510df22123639423b223cb0b9b210e647005",
+    "file_size_bytes": 843901,
+    "extracted_word_count": 2018,
+    "extraction_method": "pdfplumber",
+    "extraction_date": "2026-07-20",
+    "detected_language": "en",
+    "detected_language_confidence": 1.0,
+    "validation_status": "valid",
+    "validation_warnings": []
+  },
+  "lifecycle": {
+    "status": "active",
+    "superseded_by": null,
+    "supersedes": null,
+    "reason": null,
+    "effective_date": null
+  },
+  "chunking": {
+    "strategy": "fixed_overlap",
+    "chunk_size": 1500,
+    "chunk_step": 750,
+    "total_chunks": 19,
+    "chunking_date": "2026-07-20",
+    "corpus_version": "v1.0"
+  }
+}

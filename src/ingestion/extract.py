@@ -143,6 +143,23 @@ def extract_html_text(path: Path) -> str:
     return text.strip()
 
 
+def extract_json_text(path: Path) -> str:
+    """Added 2026-07-20 for OONI's "Findings" platform documents (see
+    acquire.py's looks_like_declared_format, source_format == "json"
+    branch, for the matching acquisition-side check). The public page is a
+    JS-rendered SPA with nothing extractable in its raw HTML; the same
+    content is available as JSON from a documented API endpoint, with a
+    "text" field holding the full report body as markdown (headings,
+    links, and a few custom <MAT .../> chart-embed tags mixed in). No
+    markdown-to-plaintext conversion here — chunk.py works on raw text for
+    every other format too, and stripping markdown risks losing structure
+    (headings, list items) that's meaningful in the source itself."""
+    import json
+
+    data = json.loads(path.read_text(encoding="utf-8", errors="replace"))
+    return data.get("incident", {}).get("text", "").strip()
+
+
 def extract_document(row: dict, declarations: dict[str, tuple[str, str]]) -> bool:
     """Extract one document. Returns True on success, False on any failure
     (reported clearly, doesn't crash the run — other documents still get
@@ -177,6 +194,8 @@ def extract_document(row: dict, declarations: dict[str, tuple[str, str]]) -> boo
             text = extract_pdf_text(raw_path)
         elif suffix in (".html", ".htm"):
             text = extract_html_text(raw_path)
+        elif suffix == ".json":
+            text = extract_json_text(raw_path)
         else:
             print(f"[fail] {doc_id} — unsupported format {suffix}", file=sys.stderr)
             return False
