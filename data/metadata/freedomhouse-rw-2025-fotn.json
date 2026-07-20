@@ -1,0 +1,49 @@
+{
+  "doc_id": "freedomhouse-rw-2025-fotn",
+  "schema_version": "1.1",
+  "declared": {
+    "title": "Rwanda: Freedom on the Net 2025 Country Report",
+    "organization": "Freedom House",
+    "countries": [
+      "RW"
+    ],
+    "publication_date": "2025-10-01",
+    "url": "https://freedomhouse.org/country/rwanda/freedom-net/2025",
+    "doc_type": "country_report",
+    "source_format": "html",
+    "topics": [
+      "digital_rights",
+      "censorship",
+      "internet_freedom"
+    ],
+    "language": "en",
+    "selection_rationale": "Confirmed live via direct fetch, 2026-07-20 (real page title matched: \"Rwanda: Freedom on the Net 2025 Country Report\", coverage period \"June 1, 2024 - May 31, 2025\"). Fourth Rwanda data point. Coverage-contribution value: documents coordinated pro-government inauthentic-behavior networks (AI-generated content) targeting critics around the July 2024 election and, notably, a March 2025 diplomatic-rift-driven harassment campaign against Belgian officials by the same network -- a genuinely new finding not covered by the existing 2024 chapter (which only covers through May 2024, before the election). Full content not yet read in detail; specific findings to be logged at semantic review.",
+    "corpus_version": "v1.0"
+  },
+  "derived": {
+    "sha256": "23494c01e1cdd1803b5abb29c062863f6065e51be37a898f9aed09398ce7ccb1",
+    "file_size_bytes": 83922,
+    "extracted_word_count": 1220,
+    "extraction_method": "trafilatura",
+    "extraction_date": "2026-07-20",
+    "detected_language": "en",
+    "detected_language_confidence": 1.0,
+    "validation_status": "valid",
+    "validation_warnings": []
+  },
+  "lifecycle": {
+    "status": "active",
+    "superseded_by": null,
+    "supersedes": null,
+    "reason": null,
+    "effective_date": null
+  },
+  "chunking": {
+    "strategy": "fixed_overlap",
+    "chunk_size": 1500,
+    "chunk_step": 750,
+    "total_chunks": 11,
+    "chunking_date": "2026-07-20",
+    "corpus_version": "v1.0"
+  }
+}

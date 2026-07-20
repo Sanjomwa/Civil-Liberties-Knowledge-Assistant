@@ -317,3 +317,51 @@ design.
 **Acquisition note:** first document acquired via the new `source_format: json` path (OONI's "Findings" platform API, `api.ooni.org/api/v1/incidents/show/...`, not the JS-rendered SPA page) — see reports.md for this session's full verification of the new acquire.py/extract.py JSON handling against the live pipeline.
 
 **Decision: Included.**
+
+## freedomhouse-ke-2025-fotn — Included
+
+**Reviewed:** 2026-07-20. **Automated checks:** Tier 1 passed, Tier 2 clean (1,906 words, no near-duplicates).
+
+**Topic relevance:** Clean include. Country-specific Freedom on the Net chapter, in-scope country and window.
+
+**Coverage contribution:** New Kenya year (2025) not yet in the corpus. This edition is noticeably shorter than 2022-2024 — Freedom House abridged the entire 2025 FOTN series for budget reasons, and this chapter says so explicitly, pointing readers to "last year's full report" for background — but still contains genuine, specific, dated, footnoted findings not already in the corpus: the June 2024 #RejectFinanceBill protest-related connectivity disruption, software developer Rose Njeri's May 2025 arrest under the Computer Misuse and Cybercrime Act, and blogger Albert Ojwang's June 2025 death in police custody after online criticism of a police official. Genuine coverage contribution despite the shorter format, not a thin repeat.
+
+**Rights/licensing note:** Freedom House content, permission-gated per docs/licensing.md — internal course-project use only, pending permission response.
+
+**Decision: Included.**
+
+## freedomhouse-ug-2025-fotn — Included
+
+**Reviewed:** 2026-07-20. **Automated checks:** Tier 1 passed, Tier 2 clean (1,134 words, no near-duplicates).
+
+**Topic relevance:** Clean include. Country-specific Freedom on the Net chapter, in-scope country and window.
+
+**Coverage contribution:** New Uganda year (2025) not yet in the corpus, same abridged-2025-series format as the other three entries in this batch — still substantive: documents multiyear prison sentences for TikTok posts criticizing the president and continued anti-LGBT+ online entrapment. Coverage period ends just before the January 2026 shutdown this corpus's OONI and CIPESA entries document — a useful "immediately before" baseline for that later event, not overlapping it.
+
+**Rights/licensing note:** Same as above — permission pending, internal use only.
+
+**Decision: Included.**
+
+## freedomhouse-et-2025-fotn — Included
+
+**Reviewed:** 2026-07-20. **Automated checks:** Tier 1 passed, Tier 2 clean (1,382 words, no near-duplicates).
+
+**Topic relevance:** Clean include. Country-specific Freedom on the Net chapter, in-scope country and window.
+
+**Coverage contribution:** New Ethiopia year (2025) not yet in the corpus, same abridged-2025-series format. Documents the July 2024 lifting of the near-year-long Amhara region shutdown and continued localized Oromia disruptions — a genuine "next chapter" in this corpus's most active live-conflict censorship story (Tigray/Oromia/Amhara), distinct from the 2022/2023 entries' findings.
+
+**Rights/licensing note:** Same as above — permission pending, internal use only.
+
+**Decision: Included.**
+
+## freedomhouse-rw-2025-fotn — Included
+
+**Reviewed:** 2026-07-20. **Automated checks:** Tier 1 passed, Tier 2 clean (1,220 words, no near-duplicates).
+
+**Topic relevance:** Clean include. Country-specific Freedom on the Net chapter, in-scope country and window.
+
+**Coverage contribution:** New Rwanda year (2025) not yet in the corpus, same abridged-2025-series format. Documents a March 2025 coordinated-inauthentic-behavior harassment campaign against Belgian officials, run by the same network active during the July 2024 election — distinct from the 2022/2023 entries' findings and a genuinely new angle (state-linked influence operations targeting foreign officials, not just domestic journalists/critics).
+
+**Rights/licensing note:** Same as above — permission pending, internal use only.
+
+**Decision: Included.**

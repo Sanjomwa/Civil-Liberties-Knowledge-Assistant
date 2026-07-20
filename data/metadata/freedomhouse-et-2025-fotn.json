@@ -1,0 +1,50 @@
+{
+  "doc_id": "freedomhouse-et-2025-fotn",
+  "schema_version": "1.1",
+  "declared": {
+    "title": "Ethiopia: Freedom on the Net 2025 Country Report",
+    "organization": "Freedom House",
+    "countries": [
+      "ET"
+    ],
+    "publication_date": "2025-10-01",
+    "url": "https://freedomhouse.org/country/ethiopia/freedom-net/2025",
+    "doc_type": "country_report",
+    "source_format": "html",
+    "topics": [
+      "digital_rights",
+      "censorship",
+      "internet_freedom",
+      "network_interference"
+    ],
+    "language": "en",
+    "selection_rationale": "Confirmed live via direct fetch, 2026-07-20 (real page title matched: \"Ethiopia: Freedom on the Net 2025 Country Report\", coverage period \"June 1, 2024 - May 31, 2025\"). Fourth Ethiopia data point. Coverage-contribution value: documents the July 2024 lifting of a near-year-long Amhara region shutdown alongside continued localized Oromia disruptions -- a genuine trajectory signal (score improved from 27 to 30, still \"Not Free\") that complements this corpus's existing OONI/Freedom House entries on Ethiopia's conflict-related connectivity restrictions. Full content not yet read in detail; specific findings to be logged at semantic review.",
+    "corpus_version": "v1.0"
+  },
+  "derived": {
+    "sha256": "6c0fc57b71b810d01f497a18d2f72979c743379149094a1835b24e98cc3ed8e8",
+    "file_size_bytes": 90745,
+    "extracted_word_count": 1382,
+    "extraction_method": "trafilatura",
+    "extraction_date": "2026-07-20",
+    "detected_language": "en",
+    "detected_language_confidence": 1.0,
+    "validation_status": "valid",
+    "validation_warnings": []
+  },
+  "lifecycle": {
+    "status": "active",
+    "superseded_by": null,
+    "supersedes": null,
+    "reason": null,
+    "effective_date": null
+  },
+  "chunking": {
+    "strategy": "fixed_overlap",
+    "chunk_size": 1500,
+    "chunk_step": 750,
+    "total_chunks": 13,
+    "chunking_date": "2026-07-20",
+    "corpus_version": "v1.0"
+  }
+}

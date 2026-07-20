@@ -1,0 +1,49 @@
+{
+  "doc_id": "freedomhouse-ug-2025-fotn",
+  "schema_version": "1.1",
+  "declared": {
+    "title": "Uganda: Freedom on the Net 2025 Country Report",
+    "organization": "Freedom House",
+    "countries": [
+      "UG"
+    ],
+    "publication_date": "2025-10-01",
+    "url": "https://freedomhouse.org/country/uganda/freedom-net/2025",
+    "doc_type": "country_report",
+    "source_format": "html",
+    "topics": [
+      "digital_rights",
+      "censorship",
+      "internet_freedom"
+    ],
+    "language": "en",
+    "selection_rationale": "Confirmed live via direct fetch, 2026-07-20 (real page title matched: \"Uganda: Freedom on the Net 2025 Country Report\", coverage period \"June 1, 2024 - May 31, 2025\"). Fourth Uganda data point. Coverage-contribution value: documents multiyear prison sentences for TikTok posts criticizing the president and continued anti- LGBT+ online entrapment (citing a May 2025 Access Now report by name) -- this coverage period ends just before the Jan 2026 election-period shutdown this corpus's OONI and CIPESA entries document, so read together the three give near-continuous Uganda coverage from mid-2024 through Jan 2026. Full content not yet read in detail; specific findings to be logged at semantic review.",
+    "corpus_version": "v1.0"
+  },
+  "derived": {
+    "sha256": "69c324cef51cc8786f1d4182f50b5d97bd83092d55374db7cd4f5961897815d5",
+    "file_size_bytes": 81291,
+    "extracted_word_count": 1134,
+    "extraction_method": "trafilatura",
+    "extraction_date": "2026-07-20",
+    "detected_language": "en",
+    "detected_language_confidence": 1.0,
+    "validation_status": "valid",
+    "validation_warnings": []
+  },
+  "lifecycle": {
+    "status": "active",
+    "superseded_by": null,
+    "supersedes": null,
+    "reason": null,
+    "effective_date": null
+  },
+  "chunking": {
+    "strategy": "fixed_overlap",
+    "chunk_size": 1500,
+    "chunk_step": 750,
+    "total_chunks": 10,
+    "chunking_date": "2026-07-20",
+    "corpus_version": "v1.0"
+  }
+}

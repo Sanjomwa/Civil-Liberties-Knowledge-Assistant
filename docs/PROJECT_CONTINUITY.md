@@ -363,17 +363,18 @@ auto-vs-manual question; scaling further is future work, see Section 7),
 
 ## 7. Open action items (don't lose track of these)
 
-- **DONE, 2026-07-20: `acquire.py`/`extract.py` gained a third
-  `source_format`: `json`.** Needed for OONI's newer "Findings"
-  platform (JS-rendered SPA, real content only reachable via its own
-  JSON API) — `looks_like_declared_format`'s new branch validates
-  structure + a positive title check against the `incident.text`
-  field; `extract_json_text` pulls that field verbatim. Both smoke-
-  tested against a reconstruction of the real fetched payload before
-  use. One new OONI document (`ooni-ug-2026-election-shutdown-and-
-  blocking`) added to `corpus/sources/ooni.yaml` using it, pending
-  acquisition. See `decisionlog.md`, 2026-07-20, for the full
-  reasoning and the false-negative caught during smoke-testing.
+- **DONE, 2026-07-20: `acquire.py`/`extract.py`/`metadata.py` all
+  support a third `source_format`: `json` — corpus now at 24
+  documents, 3283 chunks, all fully pipelined.** Needed for OONI's
+  newer "Findings" platform (JS-rendered SPA, real content only
+  reachable via its own JSON API). `metadata.py`'s `build_derived()`
+  was missed on the first pass (same binary pdf-vs-html pattern
+  `acquire.py` had before its own fix) — caught by Claude Code
+  actually running the pipeline end to end, fixed same day. Real
+  process lesson: this extension-mapping logic exists in three places
+  (`acquire.py` twice, `metadata.py` once, not two) — check all three
+  next time a new source_format is added. See `decisionlog.md`,
+  2026-07-20 (two entries), for the full incident and fix.
 - **DONE, 2026-07-20: 2 new CIPESA documents through the pipeline —
   corpus now at 23 documents / 3253 chunks.** Both passed validation
   clean (0 flags, 0 near-dupes), logged Included, chunked; idempotency

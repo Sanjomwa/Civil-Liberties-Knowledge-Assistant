@@ -330,6 +330,70 @@ _Semantic review (topic relevance, coverage contribution) is a human judgment ca
 _Semantic review (topic relevance, coverage contribution) is a human judgment call per docs/corpus-inclusion-rubric.md — not automated here. Record the Included/Excluded decision by hand in corpus/acquisition-log.md._
 
 
+## freedomhouse-ke-2025-fotn
+
+**Tier 1:** passed.
+
+**Tier 2:** clean
+.
+
+- Word count: 1906
+- Language: en
+- Near-duplicates found: 0
+- Topic keyword hint (7 matched): censorship, blocked, blocking, network interference, surveillance, digital rights, freedom of expression
+
+
+_Semantic review (topic relevance, coverage contribution) is a human judgment call per docs/corpus-inclusion-rubric.md — not automated here. Record the Included/Excluded decision by hand in corpus/acquisition-log.md._
+
+
+## freedomhouse-ug-2025-fotn
+
+**Tier 1:** passed.
+
+**Tier 2:** clean
+.
+
+- Word count: 1134
+- Language: en
+- Near-duplicates found: 0
+- Topic keyword hint (4 matched): censorship, blocked, surveillance, freedom of expression
+
+
+_Semantic review (topic relevance, coverage contribution) is a human judgment call per docs/corpus-inclusion-rubric.md — not automated here. Record the Included/Excluded decision by hand in corpus/acquisition-log.md._
+
+
+## freedomhouse-et-2025-fotn
+
+**Tier 1:** passed.
+
+**Tier 2:** clean
+.
+
+- Word count: 1382
+- Language: en
+- Near-duplicates found: 0
+- Topic keyword hint (5 matched): censorship, internet shutdown, blocked, surveillance, freedom of expression
+
+
+_Semantic review (topic relevance, coverage contribution) is a human judgment call per docs/corpus-inclusion-rubric.md — not automated here. Record the Included/Excluded decision by hand in corpus/acquisition-log.md._
+
+
+## freedomhouse-rw-2025-fotn
+
+**Tier 1:** passed.
+
+**Tier 2:** clean
+.
+
+- Word count: 1220
+- Language: en
+- Near-duplicates found: 0
+- Topic keyword hint (4 matched): censorship, blocked, surveillance, freedom of expression
+
+
+_Semantic review (topic relevance, coverage contribution) is a human judgment call per docs/corpus-inclusion-rubric.md — not automated here. Record the Included/Excluded decision by hand in corpus/acquisition-log.md._
+
+
 ## ooni-tz-2025-x-platform-blocking
 
 **Tier 1:** passed.
