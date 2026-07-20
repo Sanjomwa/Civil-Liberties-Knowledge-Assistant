@@ -537,3 +537,35 @@ _Semantic review (topic relevance, coverage contribution) is a human judgment ca
 
 _Semantic review (topic relevance, coverage contribution) is a human judgment call per docs/corpus-inclusion-rubric.md — not automated here. Record the Included/Excluded decision by hand in corpus/acquisition-log.md._
 
+
+## ooni-tz-2024-lgbtiq-censorship
+
+**Tier 1:** passed.
+
+**Tier 2:** clean
+.
+
+- Word count: 7345
+- Language: en
+- Near-duplicates found: 0
+- Topic keyword hint (6 matched): censorship, blocked, blocking, network interference, freedom of expression, vpn
+
+
+_Semantic review (topic relevance, coverage contribution) is a human judgment call per docs/corpus-inclusion-rubric.md — not automated here. Record the Included/Excluded decision by hand in corpus/acquisition-log.md._
+
+
+## ooni-tz-2024-twitter-x-blocking
+
+**Tier 1:** passed.
+
+**Tier 2:** clean
+.
+
+- Word count: 514
+- Language: en
+- Near-duplicates found: 0
+- Topic keyword hint (3 matched): censorship, blocked, blocking
+
+
+_Semantic review (topic relevance, coverage contribution) is a human judgment call per docs/corpus-inclusion-rubric.md — not automated here. Record the Included/Excluded decision by hand in corpus/acquisition-log.md._
+

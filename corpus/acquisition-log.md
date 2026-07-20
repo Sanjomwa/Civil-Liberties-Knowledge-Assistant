@@ -420,3 +420,25 @@ design.
 **Coverage contribution:** Same as above, for Ethiopia. Documents the July 2024 deregistration of 1,514 CSOs, Ethiopia's National AI Policy (security-first, no ethical oversight) paired with Pegasus/Chinese surveillance tech reliance, and AI-assisted drone warfare sourcing in the Tigray conflict.
 
 **Decision: Included.**
+- **ooni-tz-2024-lgbtiq-censorship** — acquire.py failure (2026-07-20): corpus/sources/ooni.yaml still has a placeholder sha256. Get the real file once by hand, compute its checksum, and put that in the YAML before running this script.
+- **ooni-tz-2024-twitter-x-blocking** — acquire.py failure (2026-07-20): corpus/sources/ooni.yaml still has a placeholder sha256. Get the real file once by hand, compute its checksum, and put that in the YAML before running this script.
+
+## ooni-tz-2024-lgbtiq-censorship — Included
+
+**Reviewed:** 2026-07-20. **Automated checks:** Tier 1 passed, Tier 2 clean (7,345 words, no near-duplicates).
+
+**Topic relevance:** Clean include. Full-length OONI report on LGBTIQ website blocking in Tanzania (Grindr, ILGA, OutRight, Trevor Project) plus other targeted blocks (dating sites, human-rights orgs, Clubhouse, ProtonVPN), via consistent TLS-interference signatures over a 13-month analysis period.
+
+**Coverage contribution:** This corpus's first LGBTIQ-censorship-specific document, distinct from existing platform-blocking Tanzania entries — a genuinely new topical angle, not a repeat.
+
+**Decision: Included.**
+
+## ooni-tz-2024-twitter-x-blocking — Included
+
+**Reviewed:** 2026-07-20. **Automated checks:** Tier 1 passed, Tier 2 clean (514 words, clears the 500-word minimum, no near-duplicates).
+
+**Topic relevance:** Clean include. OONI Findings incident on an August 30, 2024 Twitter/X block in Tanzania, a distinct dated event from the existing 2025 entry (ooni-tz-2025-x-platform-blocking) — same pattern already established for the Kenya KCSE exam-blocking entries (each dated event gets its own account, not merged).
+
+**Coverage contribution:** Technical account distinguishing real censorship (TLS interference across Vodacom, Habari, Tigo, and Airtel networks) from a separate corporate-filtering false positive (a Sophos MITM device on a different network) — a methodological nuance worth preserving, not just a bare "X was blocked" claim.
+
+**Decision: Included.**

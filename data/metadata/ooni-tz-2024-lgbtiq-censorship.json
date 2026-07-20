@@ -1,0 +1,50 @@
+{
+  "doc_id": "ooni-tz-2024-lgbtiq-censorship",
+  "schema_version": "1.1",
+  "declared": {
+    "title": "Tanzania: Surge in online LGBTIQ censorship and other targeted blocks",
+    "organization": "OONI",
+    "countries": [
+      "TZ"
+    ],
+    "publication_date": "2024-04-11",
+    "url": "https://ooni.org/post/2024-tanzania-lgbtiq-censorship-and-other-targeted-blocks/",
+    "doc_type": "country_report",
+    "source_format": "html",
+    "topics": [
+      "censorship",
+      "network_interference",
+      "human_rights",
+      "lgbtiq"
+    ],
+    "language": "en",
+    "selection_rationale": "Full-length OONI blog report (Maria Xynou, Mehul Gulati, Tori Fransis), not a short Finding -- Key Findings, Introduction, Methods (with an explicit Limitations subsection), Findings (5 subsections), Conclusion, Acknowledgements. Genuine coverage contribution: this corpus's existing Tanzania entries cover platform blocking (X/Twitter) and human-rights context generally, but nothing on LGBTIQ-specific censorship -- this report documents the blocking of Grindr, Romeo, Hornet (LGBTIQ social networks), ILGA/OutRight International (LGBTIQ rights orgs), Queerty (LGBTIQ news), and The Trevor Project (LGBTIQ suicide prevention), plus separately Tinder/OKCupid (dating), Change.org/Global Fund for Women (human-rights grants/petitions), Clubhouse/4chan, and ProtonVPN -- all via consistent TLS-interference (ClientHello timeout) signatures across multiple networks, analyzed over a 13-month period (Jan 2023-Jan 2024). Grounds the technical finding in real human-rights context: Tanzania's colonial-era Penal Code criminalizing same-sex acts, a 2018 government task-force targeting suspected gay people (UN High Commissioner response cited), and the April 2023 murder of Milembe Suleiman in a suspected homophobic attack. Publication date confirmed exactly from the post's own byline (\"2024-04-11\").",
+    "corpus_version": "v1.0"
+  },
+  "derived": {
+    "sha256": "da9818301ee28e68fc6bce7efd473ced18b00cf9cbbca1df9282e5b060206689",
+    "file_size_bytes": 142745,
+    "extracted_word_count": 7345,
+    "extraction_method": "trafilatura",
+    "extraction_date": "2026-07-20",
+    "detected_language": "en",
+    "detected_language_confidence": 1.0,
+    "validation_status": "valid",
+    "validation_warnings": []
+  },
+  "lifecycle": {
+    "status": "active",
+    "superseded_by": null,
+    "supersedes": null,
+    "reason": null,
+    "effective_date": null
+  },
+  "chunking": {
+    "strategy": "fixed_overlap",
+    "chunk_size": 1500,
+    "chunk_step": 750,
+    "total_chunks": 65,
+    "chunking_date": "2026-07-20",
+    "corpus_version": "v1.0"
+  }
+}

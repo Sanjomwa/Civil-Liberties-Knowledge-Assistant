@@ -363,15 +363,30 @@ auto-vs-manual question; scaling further is future work, see Section 7),
 
 ## 7. Open action items (don't lose track of these)
 
-- **PENDING ACQUISITION, 2026-07-20: Kenya and Ethiopia CIPESA SIFA AI
-  country reports added to `cipesa.yaml` (sha256 REPLACE_ME), content
-  verified but not yet downloaded through the real pipeline.** Both
-  confirmed genuine, full-length, non-abridged via a Claude Code
-  research-only pass (Cowork's own tools couldn't extract text from
-  either ~27MB PDF). Next step: acquisition prompt to Claude Code
-  (download, log Included, run metadata.py/chunk.py) — corpus would go
-  from 31 to 33 documents once done. See `decisionlog.md`, 2026-07-20,
-  for the full verification detail.
+- **PENDING ACQUISITION, 2026-07-20: two Tanzania OONI documents added
+  to `ooni.yaml` (sha256 REPLACE_ME) — a 2024 LGBTIQ-censorship blog
+  report and an August 2024 Twitter/X-blocking Findings incident, both
+  content-verified.** Rwanda's zero-OONI-coverage gap reconfirmed as
+  genuine (checked the full reports archive + all Findings incidents,
+  not just a search miss). A real Kenya candidate (June 2025
+  anti-government-protest Telegram block) was rejected for length
+  (~320 words, below this corpus's 500-word floor). Next step:
+  acquisition prompt to Claude Code — corpus would go from 33 to 35
+  documents once done. See `decisionlog.md`, 2026-07-20, for detail.
+- **DONE, 2026-07-20: Kenya and Ethiopia CIPESA SIFA AI country reports
+  acquired, validated, Included, pipelined — corpus now at 33
+  documents / 3,711 chunks.** Both passed Tier 1/Tier 2 validation
+  clean, including a genuine near-duplicate check against the
+  structurally similar Uganda companion already in the corpus (0
+  near-dupes flagged despite the shared report template) — confirms
+  distinct per-country content, not just distinct metadata. Real
+  sha256 hashes replace the `REPLACE_ME` placeholders; byte sizes
+  matched the prior research pass exactly (27,898,015 / 27,037,527),
+  confirming stable content since verification. Chunk-count
+  idempotency confirmed: 31 pre-existing documents still sum to 3,488
+  unchanged, +223 new (125 Kenya, 98 Ethiopia) = 3,711. Per-org: Access
+  Now 4 (668), CIPESA 9 (1,299), Freedom House 16 (1,595), OONI 4
+  (149). See `decisionlog.md`, 2026-07-20, for the full detail.
 - **DONE, 2026-07-20: 3 new CIPESA catalog documents (Tanzania UPR,
   Rwanda UPR, Uganda SIFA AI country report) through the pipeline —
   corpus now at 31 documents / 3,488 chunks.** Sam ran the acquisition

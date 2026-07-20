@@ -1,0 +1,49 @@
+{
+  "doc_id": "ooni-tz-2024-twitter-x-blocking",
+  "schema_version": "1.1",
+  "declared": {
+    "title": "Tanzania blocked Twitter/X",
+    "organization": "OONI",
+    "countries": [
+      "TZ"
+    ],
+    "publication_date": "2024-08-30",
+    "url": "https://api.ooni.org/api/v1/incidents/show/188763810301",
+    "doc_type": "incident_report",
+    "source_format": "json",
+    "topics": [
+      "censorship",
+      "network_interference",
+      "social_media_blocking"
+    ],
+    "language": "en",
+    "selection_rationale": "OONI Findings-platform incident report on a 30 August 2024 blocking of Twitter/X in Tanzania -- a distinct, earlier dated event from this corpus's existing 2025 X-platform-blocking entry (ooni-tz-2025-x-platform-blocking), same pattern already established for the Kenya KCSE exam-blocking entries (each dated event gets its own account, not merged). Confirmed substantive via the Findings API's own `text` field (~750 words, well over this file's 500-word floor): detailed technical account of TLS interference via ClientHello-message SNI inspection, explicitly distinguishing genuine censorship (observed on Vodacom Tanzania, Habari, Tigo, Airtel) from a separate corporate-filtering false positive (a Sophos MITM device on a different network) that could have been mistaken for the same thing -- a methodological nuance worth preserving, not just a bare \"X was blocked\" claim. Publication date: the API's own `start_time` field.",
+    "corpus_version": "v1.0"
+  },
+  "derived": {
+    "sha256": "b58e1974c0f848ea84b60f1278df26350aa41e20bb68f43f3a7ab114d5e7701f",
+    "file_size_bytes": 6614,
+    "extracted_word_count": 514,
+    "extraction_method": "json-field-extraction",
+    "extraction_date": "2026-07-20",
+    "detected_language": "en",
+    "detected_language_confidence": 1.0,
+    "validation_status": "valid",
+    "validation_warnings": []
+  },
+  "lifecycle": {
+    "status": "active",
+    "superseded_by": null,
+    "supersedes": null,
+    "reason": null,
+    "effective_date": null
+  },
+  "chunking": {
+    "strategy": "fixed_overlap",
+    "chunk_size": 1500,
+    "chunk_step": 750,
+    "total_chunks": 7,
+    "chunking_date": "2026-07-20",
+    "corpus_version": "v1.0"
+  }
+}

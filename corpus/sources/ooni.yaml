@@ -190,3 +190,80 @@ documents:
       to the second, not just approximate month/day).
     corpus_version: v1.0
     sha256: "dff4a0684bb9b9ba99c26c884d33a6323cf7b2c4fea5c1c4acea5e303b815b89"
+
+  # --- 2026-07-20 addition: two Tanzania documents, researched while
+  # trying to grow OONI's document count (this org's lowest-count until
+  # the CIPESA catalog pass). Confirmed real Rwanda coverage does not
+  # exist anywhere in OONI's output (checked both the full ooni.org/
+  # reports archive and all incidents in the Findings platform's
+  # /incidents/search index) -- not pursued further, a genuine source
+  # gap, not a search failure. One Kenya candidate (Telegram blocked
+  # amid June 2025 anti-government protests, id 224470320900) was
+  # considered and rejected: real and topically distinct from this
+  # corpus's existing exam-blocking Kenya entries, but only ~320 words
+  # via the Findings API -- below this file's own 500-word floor for a
+  # real document vs. a short data note.
+
+  - doc_id: ooni-tz-2024-lgbtiq-censorship
+    title: "Tanzania: Surge in online LGBTIQ censorship and other targeted blocks"
+    organization: OONI
+    countries: ["TZ"]
+    publication_date: "2024-04-11"
+    url: "https://ooni.org/post/2024-tanzania-lgbtiq-censorship-and-other-targeted-blocks/"
+    doc_type: country_report
+    source_format: html
+    topics: ["censorship", "network_interference", "human_rights", "lgbtiq"]
+    language: en
+    selection_rationale: >
+      Full-length OONI blog report (Maria Xynou, Mehul Gulati, Tori
+      Fransis), not a short Finding -- Key Findings, Introduction,
+      Methods (with an explicit Limitations subsection), Findings (5
+      subsections), Conclusion, Acknowledgements. Genuine coverage
+      contribution: this corpus's existing Tanzania entries cover
+      platform blocking (X/Twitter) and human-rights context generally,
+      but nothing on LGBTIQ-specific censorship -- this report documents
+      the blocking of Grindr, Romeo, Hornet (LGBTIQ social networks),
+      ILGA/OutRight International (LGBTIQ rights orgs), Queerty (LGBTIQ
+      news), and The Trevor Project (LGBTIQ suicide prevention), plus
+      separately Tinder/OKCupid (dating), Change.org/Global Fund for
+      Women (human-rights grants/petitions), Clubhouse/4chan, and
+      ProtonVPN -- all via consistent TLS-interference (ClientHello
+      timeout) signatures across multiple networks, analyzed over a
+      13-month period (Jan 2023-Jan 2024). Grounds the technical finding
+      in real human-rights context: Tanzania's colonial-era Penal Code
+      criminalizing same-sex acts, a 2018 government task-force
+      targeting suspected gay people (UN High Commissioner response
+      cited), and the April 2023 murder of Milembe Suleiman in a
+      suspected homophobic attack. Publication date confirmed exactly
+      from the post's own byline ("2024-04-11").
+    corpus_version: v1.0
+    sha256: "da9818301ee28e68fc6bce7efd473ced18b00cf9cbbca1df9282e5b060206689"
+
+  - doc_id: ooni-tz-2024-twitter-x-blocking
+    title: "Tanzania blocked Twitter/X"
+    organization: OONI
+    countries: ["TZ"]
+    publication_date: "2024-08-30"
+    url: "https://api.ooni.org/api/v1/incidents/show/188763810301"
+    doc_type: incident_report
+    source_format: json
+    topics: ["censorship", "network_interference", "social_media_blocking"]
+    language: en
+    selection_rationale: >
+      OONI Findings-platform incident report on a 30 August 2024
+      blocking of Twitter/X in Tanzania -- a distinct, earlier dated
+      event from this corpus's existing 2025 X-platform-blocking entry
+      (ooni-tz-2025-x-platform-blocking), same pattern already
+      established for the Kenya KCSE exam-blocking entries (each dated
+      event gets its own account, not merged). Confirmed substantive via
+      the Findings API's own `text` field (~750 words, well over this
+      file's 500-word floor): detailed technical account of TLS
+      interference via ClientHello-message SNI inspection, explicitly
+      distinguishing genuine censorship (observed on Vodacom Tanzania,
+      Habari, Tigo, Airtel) from a separate corporate-filtering false
+      positive (a Sophos MITM device on a different network) that could
+      have been mistaken for the same thing -- a methodological
+      nuance worth preserving, not just a bare "X was blocked" claim.
+      Publication date: the API's own `start_time` field.
+    corpus_version: v1.0
+    sha256: "b58e1974c0f848ea84b60f1278df26350aa41e20bb68f43f3a7ab114d5e7701f"
