@@ -61,12 +61,24 @@ fidelity, where it matters, is `extract.py`'s `content_sha256` job instead
 (computed over canonicalized extracted text, immune to markup-level
 randomness) — see ADR-0005 for the full reasoning.
 
+Storage location (ADR-0007, 2026-07-20): a stable source's first-ever
+discovered `sha256` is genuinely declared data (a human-verified,
+security-relevant pre-declared gate) and stays in `corpus/sources/*.yaml`,
+written via `write_yaml_field()` exactly as before. A volatile source's
+trust-on-first-use `sha256` baseline is purely derived (never a human
+declaration, never gates anything) and now lives in
+`corpus/derived-checksums/{org}.json` instead — plain JSON, no regex
+surgery needed, since nothing about that file needs a human's comments
+preserved. See ADR-0007 for the full reasoning and the one deliberate
+case where `write_yaml_field()` still applies.
+
 Usage:
     uv run python src/ingestion/acquire.py
 """
 
 import csv
 import hashlib
+import json
 import re
 import sys
 from datetime import date
@@ -93,6 +105,7 @@ RAW_DIR = PROJECT_ROOT / "data" / "raw"
 MANIFEST_PATH = PROJECT_ROOT / "corpus" / "manifest.csv"
 CHECKSUMS_PATH = PROJECT_ROOT / "corpus" / "checksums.sha256"
 ACQUISITION_LOG_PATH = PROJECT_ROOT / "corpus" / "acquisition-log.md"
+DERIVED_CHECKSUMS_DIR = PROJECT_ROOT / "corpus" / "derived-checksums"
 
 MANIFEST_FIELDS = [
     "doc_id", "org", "title", "countries", "publication_date", "sha256", "local_path",
@@ -307,6 +320,95 @@ def write_yaml_field(org: str, doc_id: str, field: str, value: str) -> None:
     path.write_text(text, encoding="utf-8")
 
 
+def load_derived_checksums(org: str) -> dict:
+    """doc_id -> {"sha256": ..., "content_sha256": ...} (only keys
+    actually recorded are present) from corpus/derived-checksums/{org}.json
+    (ADR-0007). Returns {} if the file doesn't exist yet. Unlike
+    write_yaml_field()'s regex surgery, this file is machine-owned end
+    to end — no comments or hand-formatting to preserve, so a plain
+    JSON read/write is the whole mechanism."""
+    path = DERIVED_CHECKSUMS_DIR / f"{org}.json"
+    if not path.exists():
+        return {}
+    with open(path, encoding="utf-8") as f:
+        return json.load(f)
+
+
+def write_derived_checksum(org: str, doc_id: str, field: str, value: str) -> None:
+    """Record one derived checksum field — either a raw_bytes_stable:
+    false source's trust-on-first-use sha256 baseline, or (from
+    extract.py) a content_sha256 — into
+    corpus/derived-checksums/{org}.json. ADR-0007's replacement for
+    write_yaml_field() on these two specifically-derived cases; the
+    third case (a stable-org's first-discovered sha256, which IS
+    legitimately declared, security-gating data) still uses
+    write_yaml_field() as before — see ADR-0007's Decision section for
+    the reasoning behind keeping that one case where it is."""
+    DERIVED_CHECKSUMS_DIR.mkdir(parents=True, exist_ok=True)
+    path = DERIVED_CHECKSUMS_DIR / f"{org}.json"
+    data = load_derived_checksums(org)
+    data.setdefault(doc_id, {})[field] = value
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2, sort_keys=True)
+        f.write("\n")
+
+
+def resolve_stable_baseline_sha256(org: str, doc_id: str, yaml_declared_sha256: str) -> str | None:
+    """For a raw_bytes_stable: false source, find whatever trust-on-
+    first-use baseline sha256 already exists for this document.
+    Prefers corpus/derived-checksums/{org}.json (ADR-0007's home for
+    this data going forward). Falls back to a real (non-REPLACE_ME)
+    value already sitting in corpus/sources/{org}.yaml from before
+    ADR-0007 existed — migrating it into derived-checksums on read, so
+    the one-time migration only ever happens once per document, not
+    re-checked on every future run. Returns None if no baseline exists
+    anywhere yet (a genuinely new document)."""
+    derived = load_derived_checksums(org)
+    existing = derived.get(doc_id, {}).get("sha256")
+    if existing:
+        return existing
+    if yaml_declared_sha256 and not yaml_declared_sha256.startswith("REPLACE_ME"):
+        write_derived_checksum(org, doc_id, "sha256", yaml_declared_sha256)
+        print(
+            f"[migrate] {doc_id} — moved pre-ADR-0007 sha256 baseline "
+            f"from corpus/sources/{org}.yaml into "
+            f"corpus/derived-checksums/{org}.json"
+        )
+        return yaml_declared_sha256
+    return None
+
+
+def resolve_legacy_content_sha256(org: str, doc_id: str) -> str | None:
+    """Same migration pattern as resolve_stable_baseline_sha256(), for the
+    other field ADR-0007 relocated: a document may already have a real
+    content_sha256 sitting in corpus/sources/{org}.yaml from before this
+    fix existed (extract.py's original ADR-0005 implementation wrote it
+    there via write_yaml_field()). Freedom House specifically has 17 such
+    values already recorded as of 2026-07-20. Migrates on first read, so
+    a real pre-existing baseline is compared against on the very next
+    run instead of being silently discarded and re-bootstrapped as if
+    the document were being seen for the first time — which would mean
+    any genuine content drift that happened between the original
+    recording and this migration goes undetected."""
+    derived = load_derived_checksums(org)
+    existing = derived.get(doc_id, {}).get("content_sha256")
+    if existing:
+        return existing
+    for src_org, doc in load_sources():
+        if src_org == org and doc["doc_id"] == doc_id:
+            legacy = doc.get("content_sha256")
+            if legacy and not str(legacy).startswith("REPLACE_ME"):
+                write_derived_checksum(org, doc_id, "content_sha256", legacy)
+                print(
+                    f"[migrate] {doc_id} — moved pre-ADR-0007 content_sha256 "
+                    f"baseline from corpus/sources/{org}.yaml into "
+                    f"corpus/derived-checksums/{org}.json"
+                )
+                return legacy
+            break
+    return None
+
+
 def append_acquisition_log_failure(doc_id: str, reason: str) -> None:
     ACQUISITION_LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
     is_new = not ACQUISITION_LOG_PATH.exists()
@@ -394,7 +496,16 @@ def acquire_document(org: str, doc: dict):
                 f"Get the real file once by hand, compute its checksum, and "
                 f"put that in the YAML before running this script."
             )
-    elif is_placeholder or not dest.exists():
+        stable_baseline = expected_sha256
+    else:
+        # ADR-0007: the baseline for a volatile-bytes source now lives in
+        # corpus/derived-checksums/{org}.json, not written back into the
+        # hand-authored YAML. resolve_stable_baseline_sha256() also
+        # transparently migrates a pre-ADR-0007 value already sitting in
+        # the YAML, the first time it's read.
+        stable_baseline = resolve_stable_baseline_sha256(org, doc_id, expected_sha256)
+
+    if not raw_bytes_stable and stable_baseline is None:
         # Trust-on-first-use bootstrap (ADR-0005 decision #1, corrected):
         # raw bytes are declared volatile, so there's no baseline to gate
         # against yet. Get a real file onto disk one way or another, then
@@ -413,11 +524,13 @@ def acquire_document(org: str, doc: dict):
                     f"file before re-running."
                 )
             actual_sha256 = sha256_of(dest)
-            write_yaml_field(org, doc_id, "sha256", actual_sha256)
+            write_derived_checksum(org, doc_id, "sha256", actual_sha256)
             print(
                 f"[bootstrap] {doc_id} — raw_bytes_stable: false; recorded "
-                f"baseline checksum {actual_sha256} from the existing local "
-                f"file (not verified against a live fetch — see ADR-0005)"
+                f"baseline checksum {actual_sha256} in "
+                f"corpus/derived-checksums/{org}.json from the existing "
+                f"local file (not verified against a live fetch — see "
+                f"ADR-0005/ADR-0007)"
             )
             return {
                 **doc,
@@ -453,12 +566,13 @@ def acquire_document(org: str, doc: dict):
 
         actual_sha256 = sha256_of(tmp_path)
         tmp_path.rename(dest)
-        write_yaml_field(org, doc_id, "sha256", actual_sha256)
+        write_derived_checksum(org, doc_id, "sha256", actual_sha256)
         print(
             f"[ok] {doc_id} — downloaded and verified ({len(content)} bytes); "
-            f"raw_bytes_stable: false, so {actual_sha256} is recorded as a "
-            f"new local-rot baseline, not verified against a pre-declared "
-            f"value (see ADR-0005)"
+            f"raw_bytes_stable: false, so {actual_sha256} is recorded in "
+            f"corpus/derived-checksums/{org}.json as a new local-rot "
+            f"baseline, not verified against a pre-declared value (see "
+            f"ADR-0005/ADR-0007)"
         )
         return {
             **doc,
@@ -467,15 +581,18 @@ def acquire_document(org: str, doc: dict):
             "local_path": str(dest.relative_to(PROJECT_ROOT)),
         }
 
-    # Existing behavior, unchanged: stable-bytes sources always take this
-    # path; volatile-bytes sources (raw_bytes_stable: false) take it too
-    # once a baseline has already been recorded above. Either way this only
-    # ever checks the local file against its own previously-recorded hash —
-    # local-disk integrity, never live-source fidelity (see module
-    # docstring, ADR-0005).
+    # Existing behavior, unchanged in spirit: stable-bytes sources always
+    # take this path (comparing against the YAML's own declared sha256);
+    # volatile-bytes sources (raw_bytes_stable: false) take it too once a
+    # baseline has already been recorded above (comparing against
+    # stable_baseline, now sourced from corpus/derived-checksums/{org}.json
+    # per ADR-0007 rather than the YAML). Either way this only ever checks
+    # the local file against its own previously-recorded hash — local-disk
+    # integrity, never live-source fidelity (see module docstring,
+    # ADR-0005).
     if dest.exists():
         actual = sha256_of(dest)
-        if actual == expected_sha256:
+        if actual == stable_baseline:
             ok, reason = looks_like_declared_format(dest, doc["source_format"], title)
             if not ok:
                 raise AcquisitionFailure(
@@ -484,14 +601,15 @@ def acquire_document(org: str, doc: dict):
                     f"blocked-request or challenge page saved by mistake, "
                     f"with a checksum that's now just consistently "
                     f"re-verifying the wrong file — replace it with the "
-                    f"real one and update sha256 in corpus/sources/{org}.yaml."
+                    f"real one and update sha256 in corpus/sources/{org}.yaml"
+                    f"{'' if raw_bytes_stable else f' or corpus/derived-checksums/{org}.json'}."
                 )
             print(f"[skip] {doc_id} — already present, checksum matches")
             return {**doc, "org": org, "local_path": str(dest.relative_to(PROJECT_ROOT))}
         if mode == "manual":
             raise AcquisitionFailure(
                 f"checksum mismatch (manual acquisition): expected "
-                f"{expected_sha256}, got {actual}. The file at {dest} "
+                f"{stable_baseline}, got {actual}. The file at {dest} "
                 f"doesn't match what was declared — check it's the right "
                 f"file before re-running."
             )

@@ -28,8 +28,10 @@
     "extraction_date": "2026-07-20",
     "detected_language": "en",
     "detected_language_confidence": 1.0,
-    "validation_status": "valid",
-    "validation_warnings": []
+    "validation_status": "valid_with_warnings",
+    "validation_warnings": [
+      "near-duplicate of: freedomhouse-ug-2024-fotn, freedomhouse-ug-2023-fotn"
+    ]
   },
   "lifecycle": {
     "status": "active",

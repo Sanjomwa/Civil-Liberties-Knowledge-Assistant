@@ -15,6 +15,20 @@ derived + lifecycle blocks). The chunking block is intentionally not
 written here — it doesn't exist yet at this point in the pipeline, and
 gets added later by chunk.py, once chunking has actually happened.
 
+Language/word-count source (ADR-0007, 2026-07-20): these used to be
+computed here a second time, independently of validate.py's own Tier 2
+langdetect call — two separate detectors, on the same text, that could
+in principle disagree with no error raised (a bug found in the
+end-of-ingestion-phase Opus+Fable review — see decisionlog.md). This
+module now reads corpus/validation-results.json (written by validate.py)
+instead of calling langdetect itself, so the two stages can never
+quietly diverge on the same fact. A document marked Included in
+acquisition-log.md that has no matching validation-results.json entry
+(or whose Tier 1 failed) is a hard failure here, not a silent skip —
+that combination means validate.py hasn't actually been run (or rerun)
+against the current corpus state, which the pipeline should never paper
+over.
+
 Idempotent: rerunning regenerates every included document's metadata file
 from scratch — a metadata file with a since-changed source YAML or
 re-extracted text should never carry stale derived facts forward.
@@ -30,7 +44,6 @@ from datetime import date
 from pathlib import Path
 
 import yaml
-from langdetect import LangDetectException, detect_langs
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 SOURCES_DIR = PROJECT_ROOT / "corpus" / "sources"
@@ -38,6 +51,7 @@ RAW_DIR = PROJECT_ROOT / "data" / "raw"
 PROCESSED_DIR = PROJECT_ROOT / "data" / "processed"
 METADATA_DIR = PROJECT_ROOT / "data" / "metadata"
 ACQUISITION_LOG_PATH = PROJECT_ROOT / "corpus" / "acquisition-log.md"
+VALIDATION_RESULTS_PATH = PROJECT_ROOT / "corpus" / "validation-results.json"
 
 SCHEMA_VERSION = "1.1"
 
@@ -81,6 +95,22 @@ def included_doc_ids() -> set:
     return set(INCLUDED_HEADING_RE.findall(text))
 
 
+def load_validation_results() -> dict:
+    """ADR-0007: the single source of truth for language/word-count facts,
+    written by validate.py. Missing entirely means validate.py hasn't been
+    run yet against the current manifest."""
+    if not VALIDATION_RESULTS_PATH.exists():
+        print(
+            f"No {VALIDATION_RESULTS_PATH.relative_to(PROJECT_ROOT)} yet — "
+            f"run validate.py before metadata.py (ADR-0007: metadata.py no "
+            f"longer computes language/word-count itself).",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+    with open(VALIDATION_RESULTS_PATH, encoding="utf-8") as f:
+        return json.load(f)
+
+
 def build_declared(doc: dict) -> dict:
     # Only the fields the architecture's metadata schema actually specifies
     # under "declared". corpus/sources/*.yaml also carries a couple of
@@ -101,7 +131,7 @@ def build_declared(doc: dict) -> dict:
     }
 
 
-def build_derived(org: str, doc: dict, doc_id: str) -> dict:
+def build_derived(org: str, doc: dict, doc_id: str, validation_results: dict) -> dict:
     # Mirrors acquire.py's own extension-resolution dict exactly (2026-07-20:
     # added "json" for OONI's Findings-platform documents — see acquire.py's
     # acquire_document() and extract.py's extract_json_text() for the other
@@ -126,16 +156,30 @@ def build_derived(org: str, doc: dict, doc_id: str) -> dict:
             f"extract.py first."
         )
 
-    text = processed_path.read_text(encoding="utf-8")
-    word_count = len(text.split())
-
-    try:
-        top = detect_langs(text)[0]
-        detected_language = top.lang
-        detected_language_confidence = round(top.prob, 4)
-    except LangDetectException:
-        detected_language = "unknown"
-        detected_language_confidence = 0.0
+    # ADR-0007: language/word-count come from validate.py's own recorded
+    # result, not a second independent langdetect call here. An Included
+    # document with no result, or one whose Tier 1 didn't pass, means
+    # validate.py hasn't actually been (re)run against the current corpus
+    # state — a real gap, not something to paper over with a fallback.
+    result = validation_results.get(doc_id)
+    if result is None:
+        raise FileNotFoundError(
+            f"{doc_id}: marked Included but has no entry in "
+            f"{VALIDATION_RESULTS_PATH.relative_to(PROJECT_ROOT)}. Run "
+            f"validate.py first (or rerun it — the manifest/corpus may "
+            f"have changed since it last ran)."
+        )
+    if not result.get("tier1_passed"):
+        raise FileNotFoundError(
+            f"{doc_id}: marked Included, but validate.py recorded a Tier 1 "
+            f"failure for it ({result.get('tier1')}). That's a "
+            f"contradiction — either the Included decision or the Tier 1 "
+            f"result is stale. Resolve before generating metadata."
+        )
+    tier2 = result["tier2"]
+    word_count = tier2["word_count"]
+    detected_language = tier2["language"]
+    detected_language_confidence = tier2.get("language_confidence", 0.0)
 
     extraction_method = {
         "pdf": "pdfplumber",
@@ -145,11 +189,7 @@ def build_derived(org: str, doc: dict, doc_id: str) -> dict:
     # which is more accurate than "whenever metadata.py happens to run".
     extraction_date = date.fromtimestamp(processed_path.stat().st_mtime).isoformat()
 
-    warnings = []
-    if detected_language != "en":
-        warnings.append(f"detected language '{detected_language}', not English")
-    if word_count < 500:
-        warnings.append(f"only {word_count} words, below the 500-word minimum")
+    warnings = list(result.get("tier2_flags", []))
 
     return {
         "sha256": doc["sha256"],
@@ -176,12 +216,12 @@ def build_lifecycle() -> dict:
     }
 
 
-def write_metadata_record(doc_id: str, org: str, doc: dict) -> Path:
+def write_metadata_record(doc_id: str, org: str, doc: dict, validation_results: dict) -> Path:
     record = {
         "doc_id": doc_id,
         "schema_version": SCHEMA_VERSION,
         "declared": build_declared(doc),
-        "derived": build_derived(org, doc, doc_id),
+        "derived": build_derived(org, doc, doc_id, validation_results),
         "lifecycle": build_lifecycle(),
     }
     METADATA_DIR.mkdir(parents=True, exist_ok=True)
@@ -200,6 +240,8 @@ def main() -> None:
         print("No documents marked Included yet — nothing to do.")
         return
 
+    validation_results = load_validation_results()
+
     written = 0
     for doc_id in sorted(included):
         if doc_id not in declared_docs:
@@ -213,7 +255,7 @@ def main() -> None:
             sys.exit(1)
         org, doc = declared_docs[doc_id]
         try:
-            out_path = write_metadata_record(doc_id, org, doc)
+            out_path = write_metadata_record(doc_id, org, doc, validation_results)
         except FileNotFoundError as e:
             print(f"[FAIL] {e}", file=sys.stderr)
             sys.exit(1)

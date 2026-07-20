@@ -80,18 +80,23 @@ observable condition, not just a feeling that something isn't working.
 
 ## Status
 
-Six ADRs exist as of 2026-07-20 (architecture doc now at v1.6):
+Eight ADRs exist as of 2026-07-20 (architecture doc now at v1.8):
 `0001-english-only-corpus-disclosure.md`,
 `0002-tiered-validation-routing.md`,
 `0003-provenance-lifecycle-metadata.md`,
 `0004-editorial-corrections.md`, all written during architecture review,
-before implementation started, plus two written during implementation
-(both 2026-07-20, both prompted by real findings rather than
-architecture review): `0005-content-checksum-for-cdn-served-html.md`
-(a real acquisition-time finding), and
-`0006-extend-corpus-window-to-2026.md` (a real document found during
-research that the frozen 2022-2025 window excluded on a date
-technicality). Note: ADR-0005 declared a v1.4->v1.5 architecture-doc
-bump that was never actually applied to `archituecture.md.docx` until
-ADR-0006's own edit caught and fixed it in the same pass — both bumps
-are now correctly reflected (v1.4 -> v1.5 -> v1.6).
+before implementation started, plus four written during implementation
+(all 2026-07-20, all prompted by real findings rather than architecture
+review): `0005-content-checksum-for-cdn-served-html.md` (a real
+acquisition-time finding), `0006-extend-corpus-window-to-2026.md` (a
+real document found during research that the frozen 2022-2025 window
+excluded on a date technicality), `0007-pipeline-consistency-fixes.md`
+and `0008-page-level-citation-provenance.md` (both prompted by an
+independent Opus+Fable review of the completed ingestion phase — see
+`decisionlog.md`, 2026-07-20 — fixing four internal data-flow/storage
+inconsistencies and adding page-level citation provenance for
+PDF-sourced chunks, respectively). Note: ADR-0005 declared a v1.4->v1.5
+architecture-doc bump that was never actually applied to
+`archituecture.md.docx` until ADR-0006's own edit caught and fixed it
+in the same pass — all bumps are now correctly reflected
+(v1.4 -> v1.5 -> v1.6 -> v1.7 -> v1.8).

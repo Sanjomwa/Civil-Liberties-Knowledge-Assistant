@@ -30,6 +30,15 @@ Chunking is deliberately a separate stage from extraction (per the
 architecture's own "Chunking is separate from ingestion" principle) —
 re-chunking with different parameters never requires re-extracting.
 
+Page provenance (ADR-0008, 2026-07-20): for PDF-sourced documents, each
+chunk record now also carries a `"pages"` field — the sorted list of true
+PDF page numbers (see src/ingestion/pages.py) the chunk's
+[char_start, char_end) range overlaps, resolved against the
+data/processed/{org}/{doc_id}.pages.json sidecar extract.py writes. `null`
+for non-PDF sources (no sidecar exists) or if the sidecar hasn't been
+generated yet for this document. Pure addition to the chunk schema — no
+existing field changes meaning, and chunk counts are unaffected.
+
 Usage:
     uv run python src/ingestion/chunk.py
 """
@@ -41,6 +50,9 @@ from datetime import date
 from pathlib import Path
 
 import yaml
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from pages import load_pages_sidecar, pages_sidecar_path, resolve_page_range  # noqa: E402
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 SOURCES_DIR = PROJECT_ROOT / "corpus" / "sources"
@@ -97,6 +109,13 @@ def chunk_document(doc_id: str, org: str, metadata: dict) -> int:
     text = processed_path.read_text(encoding="utf-8")
     windows = make_windows(text)
 
+    # ADR-0008: load once per document, not once per chunk. None for
+    # non-PDF sources or a PDF not yet re-extracted since ADR-0008 landed
+    # (extract.py's own self-migrating skip logic handles that latter case
+    # on its next run — chunk.py just reflects whatever sidecar state
+    # currently exists).
+    breakpoints = load_pages_sidecar(pages_sidecar_path(PROCESSED_DIR, org, doc_id))
+
     doc_chunk_dir = CHUNKS_DIR / doc_id
     if doc_chunk_dir.exists():
         shutil.rmtree(doc_chunk_dir)
@@ -111,6 +130,7 @@ def chunk_document(doc_id: str, org: str, metadata: dict) -> int:
             "char_start": char_start,
             "char_end": char_end,
             "text": text[char_start:char_end],
+            "pages": resolve_page_range(breakpoints, char_start, char_end),
             "document_metadata": metadata,
         }
         out_path = doc_chunk_dir / f"{chunk_id}.json"

@@ -1,0 +1,732 @@
+{
+  "accessnow-africa-2022-keepiton-shutdowns": {
+    "org": "accessnow",
+    "tier1": {
+      "extraction_ok": true,
+      "integrity_ok": true
+    },
+    "tier1_passed": true,
+    "tier2": {
+      "content_drift": null,
+      "language": "en",
+      "language_confidence": 1.0,
+      "language_ok": true,
+      "length_ok": true,
+      "near_duplicates": [],
+      "word_count": 16439
+    },
+    "tier2_flags": []
+  },
+  "accessnow-africa-2023-keepiton-shutdowns": {
+    "org": "accessnow",
+    "tier1": {
+      "extraction_ok": true,
+      "integrity_ok": true
+    },
+    "tier1_passed": true,
+    "tier2": {
+      "content_drift": null,
+      "language": "en",
+      "language_confidence": 1.0,
+      "language_ok": true,
+      "length_ok": true,
+      "near_duplicates": [],
+      "word_count": 25491
+    },
+    "tier2_flags": []
+  },
+  "accessnow-africa-2024-keepiton-shutdowns": {
+    "org": "accessnow",
+    "tier1": {
+      "extraction_ok": true,
+      "integrity_ok": true
+    },
+    "tier1_passed": true,
+    "tier2": {
+      "content_drift": null,
+      "language": "en",
+      "language_confidence": 1.0,
+      "language_ok": true,
+      "length_ok": true,
+      "near_duplicates": [],
+      "word_count": 9286
+    },
+    "tier2_flags": []
+  },
+  "accessnow-africa-2025-keepiton-shutdowns": {
+    "org": "accessnow",
+    "tier1": {
+      "extraction_ok": true,
+      "integrity_ok": true
+    },
+    "tier1_passed": true,
+    "tier2": {
+      "content_drift": null,
+      "language": "en",
+      "language_confidence": 1.0,
+      "language_ok": true,
+      "length_ok": true,
+      "near_duplicates": [],
+      "word_count": 13949
+    },
+    "tier2_flags": []
+  },
+  "cipesa-africa-2022-sifa-biometrics": {
+    "org": "cipesa",
+    "tier1": {
+      "extraction_ok": true,
+      "integrity_ok": true
+    },
+    "tier1_passed": true,
+    "tier2": {
+      "content_drift": null,
+      "language": "en",
+      "language_confidence": 1.0,
+      "language_ok": true,
+      "length_ok": true,
+      "near_duplicates": [],
+      "word_count": 24447
+    },
+    "tier2_flags": []
+  },
+  "cipesa-africa-2024-sifa-elections": {
+    "org": "cipesa",
+    "tier1": {
+      "extraction_ok": true,
+      "integrity_ok": true
+    },
+    "tier1_passed": true,
+    "tier2": {
+      "content_drift": null,
+      "language": "en",
+      "language_confidence": 1.0,
+      "language_ok": true,
+      "length_ok": true,
+      "near_duplicates": [],
+      "word_count": 30247
+    },
+    "tier2_flags": []
+  },
+  "cipesa-africa-2025-sifa-ai": {
+    "org": "cipesa",
+    "tier1": {
+      "extraction_ok": true,
+      "integrity_ok": true
+    },
+    "tier1_passed": true,
+    "tier2": {
+      "content_drift": null,
+      "language": "en",
+      "language_confidence": 1.0,
+      "language_ok": true,
+      "length_ok": true,
+      "near_duplicates": [],
+      "word_count": 29857
+    },
+    "tier2_flags": []
+  },
+  "cipesa-et-2025-sifa-ai-country": {
+    "org": "cipesa",
+    "tier1": {
+      "extraction_ok": true,
+      "integrity_ok": true
+    },
+    "tier1_passed": true,
+    "tier2": {
+      "content_drift": null,
+      "language": "en",
+      "language_confidence": 1.0,
+      "language_ok": true,
+      "length_ok": true,
+      "near_duplicates": [],
+      "word_count": 9417
+    },
+    "tier2_flags": []
+  },
+  "cipesa-ke-2025-sifa-ai-country": {
+    "org": "cipesa",
+    "tier1": {
+      "extraction_ok": true,
+      "integrity_ok": true
+    },
+    "tier1_passed": true,
+    "tier2": {
+      "content_drift": null,
+      "language": "en",
+      "language_confidence": 1.0,
+      "language_ok": true,
+      "length_ok": true,
+      "near_duplicates": [],
+      "word_count": 12322
+    },
+    "tier2_flags": []
+  },
+  "cipesa-rw-2025-upr-submission": {
+    "org": "cipesa",
+    "tier1": {
+      "extraction_ok": true,
+      "integrity_ok": true
+    },
+    "tier1_passed": true,
+    "tier2": {
+      "content_drift": null,
+      "language": "en",
+      "language_confidence": 1.0,
+      "language_ok": true,
+      "length_ok": true,
+      "near_duplicates": [],
+      "word_count": 1216
+    },
+    "tier2_flags": []
+  },
+  "cipesa-tz-2026-upr-submission": {
+    "org": "cipesa",
+    "tier1": {
+      "extraction_ok": true,
+      "integrity_ok": true
+    },
+    "tier1_passed": true,
+    "tier2": {
+      "content_drift": null,
+      "language": "en",
+      "language_confidence": 1.0,
+      "language_ok": true,
+      "length_ok": true,
+      "near_duplicates": [],
+      "word_count": 4852
+    },
+    "tier2_flags": []
+  },
+  "cipesa-ug-2025-sifa-ai-country": {
+    "org": "cipesa",
+    "tier1": {
+      "extraction_ok": true,
+      "integrity_ok": true
+    },
+    "tier1_passed": true,
+    "tier2": {
+      "content_drift": null,
+      "language": "en",
+      "language_confidence": 1.0,
+      "language_ok": true,
+      "length_ok": true,
+      "near_duplicates": [],
+      "word_count": 9320
+    },
+    "tier2_flags": []
+  },
+  "cipesa-ug-2026-shutdown-economic-impact": {
+    "org": "cipesa",
+    "tier1": {
+      "extraction_ok": true,
+      "integrity_ok": true
+    },
+    "tier1_passed": true,
+    "tier2": {
+      "content_drift": null,
+      "language": "en",
+      "language_confidence": 1.0,
+      "language_ok": true,
+      "length_ok": true,
+      "near_duplicates": [],
+      "word_count": 2018
+    },
+    "tier2_flags": []
+  },
+  "freedomhouse-et-2022-fotn": {
+    "org": "freedomhouse",
+    "tier1": {
+      "extraction_ok": true,
+      "integrity_ok": true
+    },
+    "tier1_passed": true,
+    "tier2": {
+      "content_drift": {
+        "actual": "1e077cde34be8140af71e216af711076cf5d6c917c2c2bff73625586cb960b4c",
+        "drifted": false,
+        "expected": "1e077cde34be8140af71e216af711076cf5d6c917c2c2bff73625586cb960b4c"
+      },
+      "language": "en",
+      "language_confidence": 1.0,
+      "language_ok": true,
+      "length_ok": true,
+      "near_duplicates": [
+        "freedomhouse-et-2023-fotn"
+      ],
+      "word_count": 11673
+    },
+    "tier2_flags": [
+      "near-duplicate of: freedomhouse-et-2023-fotn"
+    ]
+  },
+  "freedomhouse-et-2023-fotn": {
+    "org": "freedomhouse",
+    "tier1": {
+      "extraction_ok": true,
+      "integrity_ok": true
+    },
+    "tier1_passed": true,
+    "tier2": {
+      "content_drift": {
+        "actual": "e378c3a2da95d87b87f95ce10cbfc840bd0b80bf8726ff1d7912aabdd3130cfa",
+        "drifted": false,
+        "expected": "e378c3a2da95d87b87f95ce10cbfc840bd0b80bf8726ff1d7912aabdd3130cfa"
+      },
+      "language": "en",
+      "language_confidence": 1.0,
+      "language_ok": true,
+      "length_ok": true,
+      "near_duplicates": [
+        "freedomhouse-et-2022-fotn"
+      ],
+      "word_count": 12762
+    },
+    "tier2_flags": [
+      "near-duplicate of: freedomhouse-et-2022-fotn"
+    ]
+  },
+  "freedomhouse-et-2024-fotn": {
+    "org": "freedomhouse",
+    "tier1": {
+      "extraction_ok": true,
+      "integrity_ok": true
+    },
+    "tier1_passed": true,
+    "tier2": {
+      "content_drift": {
+        "actual": "3afc8524b8e1c217ce3c5822d5b7f7fd42ddf6f0c43762a6c79d29e911ba4efc",
+        "drifted": false,
+        "expected": "3afc8524b8e1c217ce3c5822d5b7f7fd42ddf6f0c43762a6c79d29e911ba4efc"
+      },
+      "language": "en",
+      "language_confidence": 1.0,
+      "language_ok": true,
+      "length_ok": true,
+      "near_duplicates": [],
+      "word_count": 14308
+    },
+    "tier2_flags": []
+  },
+  "freedomhouse-et-2025-fotn": {
+    "org": "freedomhouse",
+    "tier1": {
+      "extraction_ok": true,
+      "integrity_ok": true
+    },
+    "tier1_passed": true,
+    "tier2": {
+      "content_drift": {
+        "actual": "51ab40f6a820a1627ede5e8798d90c4ca1011b96fec2b31daf66a97bc5a9fa91",
+        "drifted": false,
+        "expected": "51ab40f6a820a1627ede5e8798d90c4ca1011b96fec2b31daf66a97bc5a9fa91"
+      },
+      "language": "en",
+      "language_confidence": 1.0,
+      "language_ok": true,
+      "length_ok": true,
+      "near_duplicates": [],
+      "word_count": 1382
+    },
+    "tier2_flags": []
+  },
+  "freedomhouse-ke-2022-fotn": {
+    "org": "freedomhouse",
+    "tier1": {
+      "extraction_ok": true,
+      "integrity_ok": true
+    },
+    "tier1_passed": true,
+    "tier2": {
+      "content_drift": {
+        "actual": "dd24642315eac4059abdea35e10782abf4dbed1547ff31ceba741ccbcb6bf651",
+        "drifted": false,
+        "expected": "dd24642315eac4059abdea35e10782abf4dbed1547ff31ceba741ccbcb6bf651"
+      },
+      "language": "en",
+      "language_confidence": 1.0,
+      "language_ok": true,
+      "length_ok": true,
+      "near_duplicates": [
+        "freedomhouse-ke-2023-fotn"
+      ],
+      "word_count": 11865
+    },
+    "tier2_flags": [
+      "near-duplicate of: freedomhouse-ke-2023-fotn"
+    ]
+  },
+  "freedomhouse-ke-2023-fotn": {
+    "org": "freedomhouse",
+    "tier1": {
+      "extraction_ok": true,
+      "integrity_ok": true
+    },
+    "tier1_passed": true,
+    "tier2": {
+      "content_drift": {
+        "actual": "3165febdd5ad07191e1bbd20b16b828853549d27a08907316358f5c249a4a3af",
+        "drifted": false,
+        "expected": "3165febdd5ad07191e1bbd20b16b828853549d27a08907316358f5c249a4a3af"
+      },
+      "language": "en",
+      "language_confidence": 1.0,
+      "language_ok": true,
+      "length_ok": true,
+      "near_duplicates": [
+        "freedomhouse-ke-2024-fotn",
+        "freedomhouse-ke-2022-fotn"
+      ],
+      "word_count": 14312
+    },
+    "tier2_flags": [
+      "near-duplicate of: freedomhouse-ke-2024-fotn, freedomhouse-ke-2022-fotn"
+    ]
+  },
+  "freedomhouse-ke-2024-fotn": {
+    "org": "freedomhouse",
+    "tier1": {
+      "extraction_ok": true,
+      "integrity_ok": true
+    },
+    "tier1_passed": true,
+    "tier2": {
+      "content_drift": {
+        "actual": "4e081a1e0a838d1331351f94c3daf33737f0c32cb3750ea1dda8a11b0b2fe80b",
+        "drifted": false,
+        "expected": "4e081a1e0a838d1331351f94c3daf33737f0c32cb3750ea1dda8a11b0b2fe80b"
+      },
+      "language": "en",
+      "language_confidence": 1.0,
+      "language_ok": true,
+      "length_ok": true,
+      "near_duplicates": [
+        "freedomhouse-ke-2023-fotn"
+      ],
+      "word_count": 14084
+    },
+    "tier2_flags": [
+      "near-duplicate of: freedomhouse-ke-2023-fotn"
+    ]
+  },
+  "freedomhouse-ke-2025-fotn": {
+    "org": "freedomhouse",
+    "tier1": {
+      "extraction_ok": true,
+      "integrity_ok": true
+    },
+    "tier1_passed": true,
+    "tier2": {
+      "content_drift": {
+        "actual": "84c24add6e60befe7e87a9ea0e50641ba7a5e1261522dbedada2ce579d47a84d",
+        "drifted": false,
+        "expected": "84c24add6e60befe7e87a9ea0e50641ba7a5e1261522dbedada2ce579d47a84d"
+      },
+      "language": "en",
+      "language_confidence": 1.0,
+      "language_ok": true,
+      "length_ok": true,
+      "near_duplicates": [],
+      "word_count": 1906
+    },
+    "tier2_flags": []
+  },
+  "freedomhouse-rw-2022-fotn": {
+    "org": "freedomhouse",
+    "tier1": {
+      "extraction_ok": true,
+      "integrity_ok": true
+    },
+    "tier1_passed": true,
+    "tier2": {
+      "content_drift": {
+        "actual": "97a3d0073839ff30bd9b4089f9dae601709d742e649818e0bbe46802960fd810",
+        "drifted": false,
+        "expected": "97a3d0073839ff30bd9b4089f9dae601709d742e649818e0bbe46802960fd810"
+      },
+      "language": "en",
+      "language_confidence": 1.0,
+      "language_ok": true,
+      "length_ok": true,
+      "near_duplicates": [],
+      "word_count": 9220
+    },
+    "tier2_flags": []
+  },
+  "freedomhouse-rw-2023-fotn": {
+    "org": "freedomhouse",
+    "tier1": {
+      "extraction_ok": true,
+      "integrity_ok": true
+    },
+    "tier1_passed": true,
+    "tier2": {
+      "content_drift": {
+        "actual": "13a947930181d417672ad3e37c7e14eba4774ccab69448934c986107d94f10a5",
+        "drifted": false,
+        "expected": "13a947930181d417672ad3e37c7e14eba4774ccab69448934c986107d94f10a5"
+      },
+      "language": "en",
+      "language_confidence": 1.0,
+      "language_ok": true,
+      "length_ok": true,
+      "near_duplicates": [],
+      "word_count": 10128
+    },
+    "tier2_flags": []
+  },
+  "freedomhouse-rw-2024-fotn": {
+    "org": "freedomhouse",
+    "tier1": {
+      "extraction_ok": true,
+      "integrity_ok": true
+    },
+    "tier1_passed": true,
+    "tier2": {
+      "content_drift": {
+        "actual": "7bf83856a59a85fd70e67159fdfd4db526a9b565b6a8ac3efacaa5c45518b6f6",
+        "drifted": false,
+        "expected": "7bf83856a59a85fd70e67159fdfd4db526a9b565b6a8ac3efacaa5c45518b6f6"
+      },
+      "language": "en",
+      "language_confidence": 1.0,
+      "language_ok": true,
+      "length_ok": true,
+      "near_duplicates": [],
+      "word_count": 12058
+    },
+    "tier2_flags": []
+  },
+  "freedomhouse-rw-2025-fotn": {
+    "org": "freedomhouse",
+    "tier1": {
+      "extraction_ok": true,
+      "integrity_ok": true
+    },
+    "tier1_passed": true,
+    "tier2": {
+      "content_drift": {
+        "actual": "afc46f59990ca8b1d2b8eafe70ec5048007c7356703995b13bb82a0c59b78c16",
+        "drifted": false,
+        "expected": "afc46f59990ca8b1d2b8eafe70ec5048007c7356703995b13bb82a0c59b78c16"
+      },
+      "language": "en",
+      "language_confidence": 1.0,
+      "language_ok": true,
+      "length_ok": true,
+      "near_duplicates": [],
+      "word_count": 1220
+    },
+    "tier2_flags": []
+  },
+  "freedomhouse-ug-2022-fotn": {
+    "org": "freedomhouse",
+    "tier1": {
+      "extraction_ok": true,
+      "integrity_ok": true
+    },
+    "tier1_passed": true,
+    "tier2": {
+      "content_drift": {
+        "actual": "546250fb33f13bedb524a9051983f0d5544b6967992867baa0fa5f6944c399ab",
+        "drifted": false,
+        "expected": "546250fb33f13bedb524a9051983f0d5544b6967992867baa0fa5f6944c399ab"
+      },
+      "language": "en",
+      "language_confidence": 1.0,
+      "language_ok": true,
+      "length_ok": true,
+      "near_duplicates": [
+        "freedomhouse-ug-2024-fotn",
+        "freedomhouse-ug-2023-fotn"
+      ],
+      "word_count": 11589
+    },
+    "tier2_flags": [
+      "near-duplicate of: freedomhouse-ug-2024-fotn, freedomhouse-ug-2023-fotn"
+    ]
+  },
+  "freedomhouse-ug-2023-fotn": {
+    "org": "freedomhouse",
+    "tier1": {
+      "extraction_ok": true,
+      "integrity_ok": true
+    },
+    "tier1_passed": true,
+    "tier2": {
+      "content_drift": {
+        "actual": "102f993eff43567c2cc4676dbb32372da930d582b5a64be09d88ed03401d7d32",
+        "drifted": false,
+        "expected": "102f993eff43567c2cc4676dbb32372da930d582b5a64be09d88ed03401d7d32"
+      },
+      "language": "en",
+      "language_confidence": 1.0,
+      "language_ok": true,
+      "length_ok": true,
+      "near_duplicates": [
+        "freedomhouse-ug-2024-fotn",
+        "freedomhouse-ug-2022-fotn"
+      ],
+      "word_count": 13232
+    },
+    "tier2_flags": [
+      "near-duplicate of: freedomhouse-ug-2024-fotn, freedomhouse-ug-2022-fotn"
+    ]
+  },
+  "freedomhouse-ug-2024-fotn": {
+    "org": "freedomhouse",
+    "tier1": {
+      "extraction_ok": true,
+      "integrity_ok": true
+    },
+    "tier1_passed": true,
+    "tier2": {
+      "content_drift": {
+        "actual": "dfc41cfc9e6eb742d200d896fd217620410980d8e0e88ee2a0913f33968f319b",
+        "drifted": false,
+        "expected": "dfc41cfc9e6eb742d200d896fd217620410980d8e0e88ee2a0913f33968f319b"
+      },
+      "language": "en",
+      "language_confidence": 1.0,
+      "language_ok": true,
+      "length_ok": true,
+      "near_duplicates": [
+        "freedomhouse-ug-2023-fotn",
+        "freedomhouse-ug-2022-fotn"
+      ],
+      "word_count": 12564
+    },
+    "tier2_flags": [
+      "near-duplicate of: freedomhouse-ug-2023-fotn, freedomhouse-ug-2022-fotn"
+    ]
+  },
+  "freedomhouse-ug-2025-fotn": {
+    "org": "freedomhouse",
+    "tier1": {
+      "extraction_ok": true,
+      "integrity_ok": true
+    },
+    "tier1_passed": true,
+    "tier2": {
+      "content_drift": {
+        "actual": "7276bffd25db1760df6e082c4522333a46ada13bb1c38879a823948dd94e5c42",
+        "drifted": false,
+        "expected": "7276bffd25db1760df6e082c4522333a46ada13bb1c38879a823948dd94e5c42"
+      },
+      "language": "en",
+      "language_confidence": 1.0,
+      "language_ok": true,
+      "length_ok": true,
+      "near_duplicates": [],
+      "word_count": 1134
+    },
+    "tier2_flags": []
+  },
+  "ooni-et-2023-social-media-blocking": {
+    "org": "ooni",
+    "tier1": {
+      "extraction_ok": true,
+      "integrity_ok": true
+    },
+    "tier1_passed": true,
+    "tier2": {
+      "content_drift": null,
+      "language": "en",
+      "language_confidence": 1.0,
+      "language_ok": true,
+      "length_ok": true,
+      "near_duplicates": [],
+      "word_count": 991
+    },
+    "tier2_flags": []
+  },
+  "ooni-ke-2025-telegram-kcse-blocking": {
+    "org": "ooni",
+    "tier1": {
+      "extraction_ok": true,
+      "integrity_ok": true
+    },
+    "tier1_passed": true,
+    "tier2": {
+      "content_drift": null,
+      "language": "en",
+      "language_confidence": 1.0,
+      "language_ok": true,
+      "length_ok": true,
+      "near_duplicates": [],
+      "word_count": 8568
+    },
+    "tier2_flags": []
+  },
+  "ooni-tz-2024-lgbtiq-censorship": {
+    "org": "ooni",
+    "tier1": {
+      "extraction_ok": true,
+      "integrity_ok": true
+    },
+    "tier1_passed": true,
+    "tier2": {
+      "content_drift": null,
+      "language": "en",
+      "language_confidence": 1.0,
+      "language_ok": true,
+      "length_ok": true,
+      "near_duplicates": [],
+      "word_count": 7345
+    },
+    "tier2_flags": []
+  },
+  "ooni-tz-2024-twitter-x-blocking": {
+    "org": "ooni",
+    "tier1": {
+      "extraction_ok": true,
+      "integrity_ok": true
+    },
+    "tier1_passed": true,
+    "tier2": {
+      "content_drift": null,
+      "language": "en",
+      "language_confidence": 1.0,
+      "language_ok": true,
+      "length_ok": true,
+      "near_duplicates": [],
+      "word_count": 514
+    },
+    "tier2_flags": []
+  },
+  "ooni-tz-2025-x-platform-blocking": {
+    "org": "ooni",
+    "tier1": {
+      "extraction_ok": true,
+      "integrity_ok": true
+    },
+    "tier1_passed": true,
+    "tier2": {
+      "content_drift": null,
+      "language": "en",
+      "language_confidence": 1.0,
+      "language_ok": true,
+      "length_ok": true,
+      "near_duplicates": [],
+      "word_count": 4445
+    },
+    "tier2_flags": []
+  },
+  "ooni-ug-2026-election-shutdown-and-blocking": {
+    "org": "ooni",
+    "tier1": {
+      "extraction_ok": true,
+      "integrity_ok": true
+    },
+    "tier1_passed": true,
+    "tier2": {
+      "content_drift": null,
+      "language": "en",
+      "language_confidence": 1.0,
+      "language_ok": true,
+      "length_ok": true,
+      "near_duplicates": [],
+      "word_count": 1812
+    },
+    "tier2_flags": []
+  }
+}

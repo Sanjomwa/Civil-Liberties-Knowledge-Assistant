@@ -22,12 +22,26 @@ validation-routing.md):
       passed Tier 1 — with a one-document corpus this never fires, but it
       still runs, proving the branching logic actually executes rather
       than just existing on paper)
+    - content drift (ADR-0007, 2026-07-20): for orgs whose raw bytes
+      aren't stable (raw_bytes_stable: false), recompute content_sha256
+      over the current extracted text and compare against
+      corpus/derived-checksums/{org}.json. A mismatch here is the same
+      signal extract.py already logs to acquisition-log.md
+      (append_content_drift_flag) — surfaced *again* as a proper Tier 2
+      flag so it actually reaches the human-review path ADR-0005 always
+      said it should, instead of only ever being a stderr print that
+      nothing downstream consumed.
 
-Writes corpus/validation-report.md — one section per document, with a
-rough topic-keyword hint to help (not replace) the human semantic review
-described in docs/corpus-inclusion-rubric.md. The actual Included/Excluded
-call — topic relevance, coverage contribution — is Sam's judgment, logged
-by hand in corpus/acquisition-log.md, not automated here.
+Writes corpus/validation-report.md (human-readable) and
+corpus/validation-results.json (ADR-0007, 2026-07-20 — machine-readable:
+one entry per document, tier1/tier2 results in structured form) — the
+report is for a human to read; the JSON is what metadata.py now consumes
+instead of re-running language/word-count detection itself, so the two
+stages can never quietly disagree about the same fact.
+
+The actual Included/Excluded call — topic relevance, coverage
+contribution — is Sam's judgment, logged by hand in
+corpus/acquisition-log.md, not automated here.
 
 Usage:
     uv run python src/ingestion/validate.py
@@ -35,11 +49,22 @@ Usage:
 
 import csv
 import hashlib
+import json
 import sys
 from pathlib import Path
 
-from langdetect import LangDetectException, detect
+from langdetect import DetectorFactory, LangDetectException, detect_langs
 from simhash import Simhash
+
+# ADR-0007, finding 1: langdetect's detector is seeded from wall-clock time
+# by default, making detect() non-deterministic for short/ambiguous text —
+# the same document could flip language classification between runs with no
+# code or content change. Seeding makes every run reproducible.
+DetectorFactory.seed = 0
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from acquire import load_derived_checksums  # noqa: E402 — needs sys.path set first
+from extract import content_sha256_of, load_content_checksum_orgs  # noqa: E402
 
 # The simhash package's default `large_weight_cutoff` (50) routes any token
 # appearing more than 50 times through a code path
@@ -58,6 +83,7 @@ MANIFEST_PATH = PROJECT_ROOT / "corpus" / "manifest.csv"
 PROCESSED_DIR = PROJECT_ROOT / "data" / "processed"
 CHECKSUMS_PATH = PROJECT_ROOT / "corpus" / "checksums.sha256"
 REPORT_PATH = PROJECT_ROOT / "corpus" / "validation-report.md"
+RESULTS_PATH = PROJECT_ROOT / "corpus" / "validation-results.json"
 ACQUISITION_LOG_PATH = PROJECT_ROOT / "corpus" / "acquisition-log.md"
 
 MIN_WORD_COUNT = 500
@@ -107,15 +133,36 @@ def tier1_checks(row: dict) -> dict:
     return {"extraction_ok": extraction_ok, "integrity_ok": integrity_ok}
 
 
-def tier2_checks(text: str, other_simhashes: dict) -> dict:
+def content_drift_check(doc_id: str, org: str, text: str,
+                         content_checksum_orgs: set[str]) -> dict | None:
+    """ADR-0007, finding 3: re-surface a content_sha256 mismatch as a real
+    Tier 2 flag, not just extract.py's stderr print / acquisition-log
+    entry. Returns None for any org not tracked (content_checksum_orgs),
+    or if there's no recorded baseline yet to compare against (first run
+    — extract.py's own bootstrap step, nothing to flag)."""
+    if org not in content_checksum_orgs:
+        return None
+    derived = load_derived_checksums(org)
+    expected = derived.get(doc_id, {}).get("content_sha256")
+    if expected is None:
+        return None
+    actual = content_sha256_of(text)
+    return {"drifted": actual != expected, "expected": expected, "actual": actual}
+
+
+def tier2_checks(doc_id: str, org: str, text: str, other_simhashes: dict,
+                  content_checksum_orgs: set[str]) -> dict:
     """Automated, but every result here is a flag for human review, never
     an automatic exclusion."""
     word_count = len(text.split())
 
     try:
-        language = detect(text)
+        top = detect_langs(text)[0]
+        language = top.lang
+        language_confidence = round(top.prob, 4)
     except LangDetectException:
         language = "unknown"
+        language_confidence = 0.0
 
     this_hash = Simhash(text)
     near_duplicates = [
@@ -124,12 +171,16 @@ def tier2_checks(text: str, other_simhashes: dict) -> dict:
         if this_hash.distance(other_hash) <= NEAR_DUPLICATE_MAX_DISTANCE
     ]
 
+    drift = content_drift_check(doc_id, org, text, content_checksum_orgs)
+
     return {
         "word_count": word_count,
         "language": language,
+        "language_confidence": language_confidence,
         "language_ok": language == "en",
         "length_ok": word_count >= MIN_WORD_COUNT,
         "near_duplicates": near_duplicates,
+        "content_drift": drift,
     }
 
 
@@ -167,6 +218,8 @@ def main() -> None:
     survivors = []
     texts = {}
     report_sections = []
+    results = {}
+    content_checksum_orgs = load_content_checksum_orgs()
 
     for row in rows:
         doc_id = row["doc_id"]
@@ -185,6 +238,12 @@ def main() -> None:
                 f"## {doc_id}\n\n**Tier 1: FAILED** — {reason_str}. "
                 f"Excluded automatically.\n"
             )
+            results[doc_id] = {
+                "org": row["org"],
+                "tier1": t1,
+                "tier1_passed": False,
+                "tier2": None,
+            }
             continue
 
         processed_path = PROCESSED_DIR / row["org"] / f"{doc_id}.txt"
@@ -197,9 +256,10 @@ def main() -> None:
 
     for row in survivors:
         doc_id = row["doc_id"]
+        org = row["org"]
         text = texts[doc_id]
         others = {k: v for k, v in simhashes.items() if k != doc_id}
-        t2 = tier2_checks(text, others)
+        t2 = tier2_checks(doc_id, org, text, others, content_checksum_orgs)
         hint = topic_keyword_hint(text)
 
         flags = []
@@ -209,6 +269,13 @@ def main() -> None:
             flags.append(f"only {t2['word_count']} words (below the {MIN_WORD_COUNT} minimum)")
         if t2["near_duplicates"]:
             flags.append(f"near-duplicate of: {', '.join(t2['near_duplicates'])}")
+        if t2["content_drift"] and t2["content_drift"]["drifted"]:
+            flags.append(
+                f"content_sha256 drifted from recorded baseline "
+                f"(expected {t2['content_drift']['expected']}, got "
+                f"{t2['content_drift']['actual']}) — source content may "
+                f"have changed since acquisition (ADR-0005/ADR-0007)"
+            )
 
         status = "FLAGGED for human review" if flags else "clean"
         print(f"[{'flagged' if flags else 'ok'}] {doc_id} — Tier 1 passed, Tier 2: {status}")
@@ -232,6 +299,14 @@ def main() -> None:
         )
         report_sections.append("\n".join(section))
 
+        results[doc_id] = {
+            "org": org,
+            "tier1": {"extraction_ok": True, "integrity_ok": True},
+            "tier1_passed": True,
+            "tier2": t2,
+            "tier2_flags": flags,
+        }
+
     REPORT_PATH.parent.mkdir(parents=True, exist_ok=True)
     with open(REPORT_PATH, "w", encoding="utf-8") as f:
         f.write("# Validation Report\n\n")
@@ -245,6 +320,12 @@ def main() -> None:
         f.write("\n")
 
     print(f"\n[report] wrote {REPORT_PATH.relative_to(PROJECT_ROOT)}")
+
+    RESULTS_PATH.parent.mkdir(parents=True, exist_ok=True)
+    with open(RESULTS_PATH, "w", encoding="utf-8") as f:
+        json.dump(results, f, indent=2, sort_keys=True)
+        f.write("\n")
+    print(f"[results] wrote {RESULTS_PATH.relative_to(PROJECT_ROOT)}")
 
 
 if __name__ == "__main__":

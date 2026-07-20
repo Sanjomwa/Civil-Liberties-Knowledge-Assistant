@@ -363,16 +363,100 @@ auto-vs-manual question; scaling further is future work, see Section 7),
 
 ## 7. Open action items (don't lose track of these)
 
-- **PENDING ACQUISITION, 2026-07-20: two Tanzania OONI documents added
-  to `ooni.yaml` (sha256 REPLACE_ME) — a 2024 LGBTIQ-censorship blog
-  report and an August 2024 Twitter/X-blocking Findings incident, both
-  content-verified.** Rwanda's zero-OONI-coverage gap reconfirmed as
-  genuine (checked the full reports archive + all Findings incidents,
-  not just a search miss). A real Kenya candidate (June 2025
-  anti-government-protest Telegram block) was rejected for length
-  (~320 words, below this corpus's 500-word floor). Next step:
-  acquisition prompt to Claude Code — corpus would go from 33 to 35
-  documents once done. See `decisionlog.md`, 2026-07-20, for detail.
+- **NEW, 2026-07-20: end-of-ingestion-phase Opus+Fable review complete —
+  both recommend moving to the next phase after a short pre-flight fix
+  list, not a rebuild.** Six independently-converged findings (highest
+  priority first): (1) seed `langdetect` (`DetectorFactory.seed = 0`) —
+  currently non-deterministic on the code-switched text ADR-0002 treats
+  as normal; (2) `metadata.py` re-implements validation instead of
+  consuming `validate.py`'s output — two independent computations of the
+  same fact; (3) ADR-0005's stated content-drift-routes-to-Tier-2 design
+  isn't implemented — `extract.py`'s content_sha256 mismatch only prints
+  to stderr; (4) no reconciliation check across the four places corpus
+  state lives (source YAMLs, manifest, acquisition-log, metadata dir) —
+  a hand-edit typo in `INCLUDED_HEADING_RE`'s em-dash match, or a
+  transient acquire.py failure, can silently drop a document from one
+  list while it persists in another; (5) `write_yaml_field()`'s regex
+  YAML surgery is the most fragile code in the pipeline, solving a
+  problem that wouldn't exist if derived checksums lived in a separate
+  file instead of being written back into the declared source YAML; (6)
+  **most mission-relevant**: `extract_pdf_text()` discards page
+  boundaries, so no chunk can be cited back to a specific page —
+  cheap to fix now, expensive after chunking/embedding freezes. Also
+  flagged, one model each: `chunk.py` freezes `lifecycle.status` into
+  every chunk at chunk time, so a superseded document's chunks never
+  reflect that unless manually re-chunked (tension with ADR-0003's own
+  retrieval-time filter design); Freedom House's 46%-of-corpus
+  concentration compounds with it being the one org with unresolved
+  licensing; no stated policy for named individuals (activists/
+  journalists) appearing in report content. Full detail in
+  `decisionlog.md`, 2026-07-20. **Sam's call which of these to act on
+  before starting retrieval/embedding** — none are blocking per either
+  model's own bottom line, but (1), (3), and (6) are the cheapest-now/
+  most-expensive-later group.
+- **UPDATE, 2026-07-20: Sam's call was all six, before the next phase —
+  all six now implemented in `src/ingestion/*.py`, code complete and
+  smoke-tested, not yet run against the real 35-document corpus.**
+  ADR-0007 (findings 2, 3, 4, 5) and ADR-0008 (finding 6) written and
+  accepted first (both Opus-consulted); finding 1 (langdetect seeding)
+  needed no ADR, treated as a pure bug fix. Implementation, in order:
+  `acquire.py` (new `corpus/derived-checksums/{org}.json` storage +
+  `resolve_stable_baseline_sha256()` migration path for existing
+  Freedom House hashes), `extract.py` (`extract_pdf_text()` now returns
+  page breakpoints + writes `.pages.json` sidecars; content-drift now
+  also appends to `acquisition-log.md`; self-migrating re-extraction for
+  any pre-ADR-0008 `.txt` with no sidecar yet), `validate.py`
+  (`DetectorFactory.seed = 0`; new `corpus/validation-results.json`
+  machine-readable output; content-drift now a real Tier 2 flag),
+  `metadata.py` (`build_derived()` no longer calls `langdetect` at all —
+  reads `validate.py`'s results, fails loudly on a missing entry),
+  `chunk.py` (new `"pages"` field per chunk, resolved via
+  `src/ingestion/pages.py`), and a new standalone `reconcile.py`
+  (four cross-surface agreement checks, on-demand, not wired into
+  `pipeline.py`'s automatic stages).
+
+  **Verified via a synthetic-corpus smoke test** (Cowork sandbox,
+  monkeypatched path constants, a real 2-page PDF via `reportlab` with
+  a deliberately blank middle page, plus one HTML doc for a mocked
+  `raw_bytes_stable: false` org) before handing off for a real run —
+  confirmed: (a) the blank page is correctly excluded from breakpoints
+  and true PDF page numbers survive the skip (`[1, 3]`, not `[1, 2]`);
+  (b) a mutated HTML doc's `content_sha256` mismatch appends to
+  `acquisition-log.md` *and* shows up as a `validate.py` Tier 2 flag,
+  not just a stderr print; (c) `metadata.py`'s written
+  `validation_warnings` visibly carry the drift flag through from
+  `validate.py`'s own output, confirming the single-source-of-truth
+  fix; (d) chunk records get real `"pages": [1, 3]` for the PDF doc and
+  `"pages": null` for the HTML doc; (e) `reconcile.py` reports clean on
+  a consistent fixture, then correctly catches both an
+  included-vs-metadata and a metadata-vs-chunks disagreement after a
+  metadata file was deliberately deleted mid-test. Full driver script
+  not kept (temporary, `/tmp` only) — this paragraph is the record of
+  what it verified.
+
+  **Not yet done:** the real pipeline hasn't been re-run against the
+  actual 35-document corpus. Every PDF-sourced document needs
+  re-extraction (self-migrating — the existing skip logic forces it
+  automatically once it detects a missing `.pages.json`) and every
+  document needs re-validation/re-metadata/re-chunking to pick up the
+  new fields and confirm nothing regresses (chunk *counts* should be
+  identical — this is additive, not a re-chunking-parameter change).
+  Next step: hand off to Claude Code for that real run, then review
+  `reports.md` before declaring the ingestion phase clean.
+- **DONE, 2026-07-20: two Tanzania OONI documents acquired, validated,
+  Included, pipelined — corpus now at 35 documents / 3,783 chunks.**
+  Neither new document flagged as a near-duplicate of topically
+  overlapping existing entries (LGBTIQ report vs. platform-blocking TZ
+  entries; Aug 2024 Twitter/X block vs. the existing 2025 entry) —
+  confirms genuinely distinct content. One real find worth remembering:
+  the Twitter/X incident extracted to 514 words, notably lower than the
+  ~750 estimated during research — Claude Code checked the actual
+  extracted text (not just the number) and confirmed it's a complete,
+  non-truncated write-up, just a naturally short OONI Findings piece.
+  Per-org: Access Now 4 (668), CIPESA 9 (1,299), Freedom House 16
+  (1,595), OONI 6 (221). Rwanda's zero-OONI-coverage gap stands
+  confirmed as a real source gap, not pursued further. See
+  `decisionlog.md`, 2026-07-20, for detail.
 - **DONE, 2026-07-20: Kenya and Ethiopia CIPESA SIFA AI country reports
   acquired, validated, Included, pipelined — corpus now at 33
   documents / 3,711 chunks.** Both passed Tier 1/Tier 2 validation
