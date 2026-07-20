@@ -70,12 +70,13 @@ _Semantic review (topic relevance, coverage contribution) is a human judgment ca
 
 **Tier 1:** passed.
 
-**Tier 2:** clean
+**Tier 2:** FLAGGED for human review
+ — near-duplicate of: freedomhouse-ke-2023-fotn
 .
 
 - Word count: 14084
 - Language: en
-- Near-duplicates found: 0
+- Near-duplicates found: 1
 - Topic keyword hint (8 matched): censorship, internet shutdown, blocked, blocking, network interference, surveillance, digital rights, freedom of expression
 
 
@@ -86,12 +87,13 @@ _Semantic review (topic relevance, coverage contribution) is a human judgment ca
 
 **Tier 1:** passed.
 
-**Tier 2:** clean
+**Tier 2:** FLAGGED for human review
+ — near-duplicate of: freedomhouse-ug-2023-fotn, freedomhouse-ug-2022-fotn
 .
 
 - Word count: 12564
 - Language: en
-- Near-duplicates found: 0
+- Near-duplicates found: 2
 - Topic keyword hint (9 matched): censorship, internet shutdown, blocked, blocking, network interference, surveillance, digital rights, freedom of expression, vpn
 
 
@@ -125,6 +127,140 @@ _Semantic review (topic relevance, coverage contribution) is a human judgment ca
 - Language: en
 - Near-duplicates found: 0
 - Topic keyword hint (6 matched): censorship, blocked, blocking, network interference, surveillance, freedom of expression
+
+
+_Semantic review (topic relevance, coverage contribution) is a human judgment call per docs/corpus-inclusion-rubric.md — not automated here. Record the Included/Excluded decision by hand in corpus/acquisition-log.md._
+
+
+## freedomhouse-ke-2023-fotn
+
+**Tier 1:** passed.
+
+**Tier 2:** FLAGGED for human review
+ — near-duplicate of: freedomhouse-ke-2024-fotn, freedomhouse-ke-2022-fotn
+.
+
+- Word count: 14312
+- Language: en
+- Near-duplicates found: 2
+- Topic keyword hint (8 matched): censorship, internet shutdown, blocked, blocking, network interference, surveillance, digital rights, freedom of expression
+
+
+_Semantic review (topic relevance, coverage contribution) is a human judgment call per docs/corpus-inclusion-rubric.md — not automated here. Record the Included/Excluded decision by hand in corpus/acquisition-log.md._
+
+
+## freedomhouse-ke-2022-fotn
+
+**Tier 1:** passed.
+
+**Tier 2:** FLAGGED for human review
+ — near-duplicate of: freedomhouse-ke-2023-fotn
+.
+
+- Word count: 11865
+- Language: en
+- Near-duplicates found: 1
+- Topic keyword hint (8 matched): censorship, internet shutdown, blocked, blocking, network interference, surveillance, digital rights, freedom of expression
+
+
+_Semantic review (topic relevance, coverage contribution) is a human judgment call per docs/corpus-inclusion-rubric.md — not automated here. Record the Included/Excluded decision by hand in corpus/acquisition-log.md._
+
+
+## freedomhouse-ug-2023-fotn
+
+**Tier 1:** passed.
+
+**Tier 2:** FLAGGED for human review
+ — near-duplicate of: freedomhouse-ug-2024-fotn, freedomhouse-ug-2022-fotn
+.
+
+- Word count: 13232
+- Language: en
+- Near-duplicates found: 2
+- Topic keyword hint (9 matched): censorship, internet shutdown, blocked, blocking, network interference, surveillance, digital rights, freedom of expression, vpn
+
+
+_Semantic review (topic relevance, coverage contribution) is a human judgment call per docs/corpus-inclusion-rubric.md — not automated here. Record the Included/Excluded decision by hand in corpus/acquisition-log.md._
+
+
+## freedomhouse-ug-2022-fotn
+
+**Tier 1:** passed.
+
+**Tier 2:** FLAGGED for human review
+ — near-duplicate of: freedomhouse-ug-2024-fotn, freedomhouse-ug-2023-fotn
+.
+
+- Word count: 11589
+- Language: en
+- Near-duplicates found: 2
+- Topic keyword hint (9 matched): censorship, internet shutdown, blocked, blocking, network interference, surveillance, digital rights, freedom of expression, vpn
+
+
+_Semantic review (topic relevance, coverage contribution) is a human judgment call per docs/corpus-inclusion-rubric.md — not automated here. Record the Included/Excluded decision by hand in corpus/acquisition-log.md._
+
+
+## freedomhouse-et-2023-fotn
+
+**Tier 1:** passed.
+
+**Tier 2:** FLAGGED for human review
+ — near-duplicate of: freedomhouse-et-2022-fotn
+.
+
+- Word count: 12762
+- Language: en
+- Near-duplicates found: 1
+- Topic keyword hint (6 matched): censorship, internet shutdown, blocked, blocking, surveillance, freedom of expression
+
+
+_Semantic review (topic relevance, coverage contribution) is a human judgment call per docs/corpus-inclusion-rubric.md — not automated here. Record the Included/Excluded decision by hand in corpus/acquisition-log.md._
+
+
+## freedomhouse-et-2022-fotn
+
+**Tier 1:** passed.
+
+**Tier 2:** FLAGGED for human review
+ — near-duplicate of: freedomhouse-et-2023-fotn
+.
+
+- Word count: 11673
+- Language: en
+- Near-duplicates found: 1
+- Topic keyword hint (8 matched): censorship, internet shutdown, blocked, blocking, network interference, surveillance, freedom of expression, vpn
+
+
+_Semantic review (topic relevance, coverage contribution) is a human judgment call per docs/corpus-inclusion-rubric.md — not automated here. Record the Included/Excluded decision by hand in corpus/acquisition-log.md._
+
+
+## freedomhouse-rw-2023-fotn
+
+**Tier 1:** passed.
+
+**Tier 2:** clean
+.
+
+- Word count: 10128
+- Language: en
+- Near-duplicates found: 0
+- Topic keyword hint (6 matched): censorship, blocked, blocking, network interference, surveillance, freedom of expression
+
+
+_Semantic review (topic relevance, coverage contribution) is a human judgment call per docs/corpus-inclusion-rubric.md — not automated here. Record the Included/Excluded decision by hand in corpus/acquisition-log.md._
+
+
+## freedomhouse-rw-2022-fotn
+
+**Tier 1:** passed.
+
+**Tier 2:** clean
+.
+
+- Word count: 9220
+- Language: en
+- Near-duplicates found: 0
+- Topic keyword hint (5 matched): censorship, blocked, blocking, surveillance, freedom of expression
 
 
 _Semantic review (topic relevance, coverage contribution) is a human judgment call per docs/corpus-inclusion-rubric.md — not automated here. Record the Included/Excluded decision by hand in corpus/acquisition-log.md._

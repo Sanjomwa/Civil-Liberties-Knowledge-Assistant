@@ -1,0 +1,49 @@
+{
+  "doc_id": "freedomhouse-ug-2023-fotn",
+  "schema_version": "1.1",
+  "declared": {
+    "title": "Uganda: Freedom on the Net 2023 Country Report",
+    "organization": "Freedom House",
+    "countries": [
+      "UG"
+    ],
+    "publication_date": "2023-10-01",
+    "url": "https://freedomhouse.org/country/uganda/freedom-net/2023",
+    "doc_type": "country_report",
+    "source_format": "html",
+    "topics": [
+      "digital_rights",
+      "censorship",
+      "internet_freedom"
+    ],
+    "language": "en",
+    "selection_rationale": "URL pattern-verified (not individually fetched this pass -- see note above): follows the same live structure confirmed for Kenya's 2023 chapter and Uganda's own 2022 chapter. Coverage-contribution value: a second Uganda data point alongside the existing 2024 chapter, matching the same year-over-year reasoning as the Kenya additions above. Confirm actual content during semantic review before marking Included.",
+    "corpus_version": "v1.0"
+  },
+  "derived": {
+    "sha256": "8a9057a0fec650a663d80e84938cdba13b630664b1a4ef2dcc30d687e1e22f2e",
+    "file_size_bytes": 385503,
+    "extracted_word_count": 13232,
+    "extraction_method": "trafilatura",
+    "extraction_date": "2026-07-20",
+    "detected_language": "en",
+    "detected_language_confidence": 1.0,
+    "validation_status": "valid",
+    "validation_warnings": []
+  },
+  "lifecycle": {
+    "status": "active",
+    "superseded_by": null,
+    "supersedes": null,
+    "reason": null,
+    "effective_date": null
+  },
+  "chunking": {
+    "strategy": "fixed_overlap",
+    "chunk_size": 1500,
+    "chunk_step": 750,
+    "total_chunks": 140,
+    "chunking_date": "2026-07-20",
+    "corpus_version": "v1.0"
+  }
+}

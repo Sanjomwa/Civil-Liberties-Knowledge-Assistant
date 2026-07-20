@@ -17,8 +17,36 @@
 # it's set here as the org default rather than repeated per document. See
 # corpus/acquisition-log.md and decisionlog.md (2026-07-13) for the full
 # incident history (two false starts, Opus and Fable consults).
+#
+# RESOLVED, CONFIRMED 2026-07-20 — the root cause was Vercel's
+# bot-protection JS challenge, and the OONI team confirmed disabling it
+# site-wide in their public Slack (#ooni channel, "lavamind" report ->
+# Maja's fix, referenced by Sam, cross-checked directly): lavamind (Tor
+# Project) reported ooni.org returning 429s to their non-JS lychee
+# link-checker and to Tor Browser Safest mode; Maja (OONI) replied "We
+# indeed enabled bot protection provided by Vercel due to some suspicious
+# traffic... most likely fix is to disable the automatic bot protection
+# all together", then confirmed "I have disabled JS challenge, ooni.org
+# should be available for lychee checks and safest mode in Tor."
+#
+# Confirmed via the authoritative test, same day, by Claude Code in WSL
+# (real network, real requests.get()): a single reconnaissance GET using
+# acquire.py's own HEADERS against
+# https://ooni.org/post/2023-ethiopia-blocks-social-media/ — a URL never
+# previously fetched or cached by this project, so the download path
+# actually executed rather than hitting the idempotent [skip] path —
+# returned HTTP 200, 41184 bytes, real matching <title>, no challenge
+# phrase, and passed the ADR-0005 positive title-check too. This
+# supersedes the earlier browser-rendering-tool check (which used a
+# different client than acquire.py itself), and is the same client/header
+# set acquire.py uses in production. Flipped to `auto` on this basis.
+# Original `manual` incident history (2026-07-13, two false starts, Opus
+# and Fable consults) stays in corpus/acquisition-log.md and
+# decisionlog.md for record — this note is intentionally not deleted,
+# just marked resolved, so a future reader can see why `manual` was ever
+# the default and why it changed.
 
-default_acquisition: manual
+default_acquisition: auto
 
 documents:
   - doc_id: ooni-tz-2025-x-platform-blocking

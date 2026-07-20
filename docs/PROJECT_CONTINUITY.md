@@ -11,12 +11,14 @@ Last updated: 2026-07-13.
 
 ## 1. Current state (snapshot)
 
-**Implementation status: walking-skeleton milestone complete.** As of this
-update, all six ingestion modules exist in `src/ingestion/` — `acquire.py`,
-`extract.py`, `validate.py`, `metadata.py`, `chunk.py`, `pipeline.py` — and
-one real document (`ooni-tz-2025-x-platform-blocking`) has flowed through
-every stage successfully. See Section 6a for the full checklist and
-real-run results. Project folder now also contains:
+**Implementation status: walking-skeleton milestone AND the 10-document/
+4-org acquisition-method milestone are both complete.** All six ingestion
+modules exist in `src/ingestion/` — `acquire.py`, `extract.py`,
+`validate.py`, `metadata.py`, `chunk.py`, `pipeline.py` — and 10 real
+documents across all four v1 orgs have flowed through every stage
+successfully: 1671 chunks total. See Section 6a (walking skeleton, 1
+document) and Section 6b (10-document/4-org pass) for full detail. Project
+folder now also contains:
 - `docs/archituecture.md.docx` — frozen architecture, now **v1.4** (amended
   2026-07-11 via ADR-0001 through ADR-0004 — see Section 5).
 - `docs/ingestion-design.md` — pipeline reference, synthesizing the
@@ -37,16 +39,22 @@ real-run results. Project folder now also contains:
   `corpus/acquisition-log.md`, `corpus/manifest.csv`,
   `corpus/checksums.sha256`, `corpus/validation-report.md` — generated or
   hand-written artifacts from the real walking-skeleton run.
-- `data/raw/`, `data/processed/`, `data/metadata/`, `data/chunks/` — one
-  real document's worth of output at each stage (Sam's machine only —
+- `data/raw/`, `data/processed/`, `data/metadata/`, `data/chunks/` — 10
+  real documents' worth of output at each stage (Sam's machine only —
   these directories are gitignored and don't sync into the Cowork
   workspace mirror; see the repo's own `.gitignore`).
+- `corpus/sources/accessnow.yaml`, `cipesa.yaml`, `freedomhouse.yaml` —
+  three new source files, alongside the original `ooni.yaml` (now with a
+  second document). All four now use a top-level `default_acquisition`
+  field (`auto` for Access Now/CIPESA/Freedom House, `manual` for OONI) —
+  see Section 6b for how that was determined.
 
-Not yet started: acquiring the remaining ~40-59 documents to build out the
-full corpus (this milestone deliberately proved the pipeline shape on one
-document first, per Section 6a's own stated purpose), and `pipeline.py`'s
-sibling utility `check_drift.py` (correctly deferred — only meaningful once
-a corpus version change actually exists to detect drift against).
+Not yet started: acquiring the remaining ~30-49 documents to build out the
+full 40-60 document corpus (this pass deliberately tested 2-4 documents per
+org to determine auto-vs-manual acquisition, per Section 6b's stated
+purpose, not to complete the corpus), and `pipeline.py`'s sibling utility
+`check_drift.py` (correctly deferred — only meaningful once a corpus
+version change actually exists to detect drift against).
 
 **Two unrelated version numbers, don't conflate them:** the architecture
 document has its own revision version (`Document version`, now v1.4,
@@ -90,38 +98,56 @@ limitation. See `docs/ingestion-design.md` for the synthesized picture.
 
 ## 3. Data source re-acquisition
 
-One document acquired so far (the walking-skeleton milestone, Section 6a),
-not yet the full corpus — this section will grow into a real per-source
-table once acquisition scales past one document. Current precedent:
+10 documents acquired across all four v1 orgs as of 2026-07-13 (walking
+skeleton + the 10-document/4-org pass, Section 6b) — not yet the full
+40-60 document corpus, but enough to settle the auto-vs-manual question per
+org. Per-source table:
 
-- **OONI** — base URL `ooni.org`. Access method: **manual**, not
-  scripted — OONI's server sustained a 429 against repeated scripted
-  requests (including a proper User-Agent, no retry loop), and separately,
-  two different URLs on the site turned out to sit behind bot-challenge
-  pages under automated access. `corpus/sources/ooni.yaml` marks this
-  org's documents `acquisition: manual` accordingly; `acquire.py` only
-  verifies checksums for them, never fetches. Real document:
-  `ooni-tz-2025-x-platform-blocking`, sha256
-  `17109f2a365e5959c4d218c412cf6e851e3d51e49cc070e2ff26bda72a90a44f`,
-  acquired via a real browser save (Save As → Webpage, HTML Only), not
-  curl or `requests`. `CORPUS_VERSION` at acquisition: `v1.0`.
-- Access Now, CIPESA, Freedom House — no documents acquired yet. Don't
-  assume OONI's manual-acquisition requirement generalizes to these; each
-  org's server behavior needs its own real test before deciding auto vs.
-  manual (see the decisionlog.md 2026-07-13 entry answering Sam's question
-  on exactly this point).
+- **OONI** — base URL `ooni.org`. Access method: **manual**, confirmed
+  twice on two different URLs (both returned HTTP 429 to a single
+  reconnaissance GET with browser-like headers, no retry loop). 2
+  documents: `ooni-tz-2025-x-platform-blocking` (sha256
+  `17109f2a...a44f`) and `ooni-ke-2025-telegram-kcse-blocking` (sha256
+  `7769f47a...c320e`), both acquired via real browser save (Save As →
+  Webpage, HTML Only), never curl or `requests`.
+- **Access Now** — base URL `accessnow.org`. Access method: **auto** —
+  single reconnaissance GET returned clean HTTP 200 + valid PDF content for
+  both documents tested. 2 documents: `accessnow-africa-2023-keepiton-
+  shutdowns`, `accessnow-africa-2024-keepiton-shutdowns`.
+- **CIPESA** — base URL `cipesa.org`. Access method: **auto** — same clean
+  result as Access Now. 2 documents: `cipesa-africa-2024-sifa-elections`,
+  `cipesa-africa-2025-sifa-ai`. Note: CIPESA's PDF filenames/URLs don't
+  reliably carry a year — a URL a search engine associated with their 2023
+  report now serves the 2025 report instead. Always verify a CIPESA PDF's
+  own title page before trusting a year from its URL or a search result.
+- **Freedom House** — base URL `freedomhouse.org`. Access method: **auto**
+  — clean HTTP 200 + real HTML (no bot-challenge phrases) for all four
+  documents tested. 4 documents, one per country except Tanzania (see
+  Section 6b — Freedom House has no "Freedom on the Net" chapter for
+  Tanzania at all, a real scope finding, not an oversight).
+
+`corpus/sources/*.yaml` now resolve acquisition mode as: the document's own
+`acquisition` field if present, else the YAML's top-level
+`default_acquisition`, else `"auto"` — added specifically because this
+pass showed acquisition mode is a server/org property, not a per-document
+one (see `src/ingestion/acquire.py`'s own docstring, and the Opus consult
+in `decisionlog.md`, 2026-07-13).
 
 ## 4. Attribution and licensing status
 
-One document's worth of precedent (OONI, see Section 3) — full per-source
-table still pending until acquisition scales past the walking-skeleton
-milestone. OONI's measurement *data* license (CC BY-NC-SA 4.0) is
+All four v1 orgs now have at least one real document in the corpus (see
+Section 3). OONI's measurement *data* license (CC BY-NC-SA 4.0) is
 confirmed in `docs/licensing.md`; the exact license variant for OONI's
 *content* (reports, as opposed to raw measurements) is still an open
-action item — see Section 7. Each of the five v1 sources (OONI, Access Now,
-CIPESA, Freedom House, +2 deferred) has its own data licensing terms; these
-must be recorded here before any content derived from them is published or
-redistributed.
+action item — see Section 7. Freedom House content is permission-gated,
+not Creative Commons — permission requested 2026-07-13, still awaiting
+response (Section 7); the four Freedom House documents acquired in
+Section 6b are for internal course-project use only, not any CLIO-facing
+redistribution, until that permission is confirmed. Access Now and CIPESA
+licensing terms not yet independently re-verified against the specific
+documents acquired this pass — `docs/licensing.md`'s original per-org
+findings should be checked against these specific URLs before any
+redistribution, not assumed to carry over automatically.
 
 ## 5. Decision records
 
@@ -252,13 +278,123 @@ the full corpus, cross-document near-duplicate detection actually firing
 meaningful across a corpus version change), anything retrieval/
 embedding-related (already out of scope for the whole pipeline).
 
+## 6b. Second implementation milestone (10-document / 4-org acquisition pass)
+
+Defined and completed same-day, 2026-07-13, at Sam's explicit request right
+after Section 6a finished — Opus-consulted first (see decisionlog.md) on
+what to change before scaling past one org.
+
+**Status: COMPLETE.** All 10 documents flowed through all six stages;
+1671 total chunks written.
+
+**Purpose:** the walking skeleton (Section 6a) proved the pipeline's shape
+on one document from one org. This pass's specific goal, per Sam's own
+framing, was to settle **which orgs can use scripted `acquisition: auto`
+and which need `acquisition: manual`** — a real operational question before
+committing to acquiring the full 40-60 document corpus, where a wrong
+guess here could mean many documents needing slow manual handling.
+
+**Method:** a single reconnaissance request per document (browser-like
+headers, no retry loop — the same discipline `acquire.py` itself now
+follows) rather than looping or guessing. Result, per org (full detail in
+Section 3):
+- OONI: manual (429 on two different URLs, confirmed twice).
+- Access Now: auto (clean 200 + valid PDF, both documents tested).
+- CIPESA: auto (clean 200 + valid PDF, both documents tested).
+- Freedom House: auto (clean 200 + valid HTML, all four documents tested).
+
+**Design changes this pass motivated** (Opus-consulted, see decisionlog.md):
+- `acquire.py`: added a per-org `default_acquisition` field (YAML
+  top-level), with the existing per-document `acquisition` field now
+  acting as an override rather than the only mechanism — acquisition mode
+  turned out to be a server property, not a per-document one.
+- `acquire.py`: a single document's acquisition failure no longer stops the
+  whole run (previously `sys.exit(1)` on the first exception) — now logs
+  the failure with a specific reason to `corpus/acquisition-log.md` and
+  continues with the rest. At one document this didn't matter; at 4 orgs
+  it would have meant one bad OONI document blocking every other org's
+  documents in the same run.
+- `looks_like_declared_format()` now returns *why* a format check failed
+  (specific challenge phrase matched, or bad magic bytes), not just a bare
+  boolean — makes the acquisition log a real empirical record instead of a
+  silent gate.
+
+**Real bug found and fixed:** `validate.py` crashed (`OverflowError`) the
+first time it ran against real multi-thousand-word documents with more
+than one document to compare — the `simhash` library's default
+`large_weight_cutoff` (50) routes any token appearing more than 50 times
+through a code path that overflows under modern numpy. Never surfaced on
+the single walking-skeleton document (4,445 words, never exercised the
+multi-document near-duplicate comparison at all). Fixed by raising
+`Simhash.large_weight_cutoff` to a value no real document will ever reach.
+Full detail in decisionlog.md, 2026-07-13.
+
+**Other real findings, not bugs, just things learned:**
+- Freedom House has no "Freedom on the Net" chapter for Tanzania — a
+  genuine gap in the architecture's original assumption of "one FOTN
+  chapter per target country, all five." Resolved by using FOTN chapters
+  for the four countries that have them, not by substituting a
+  differently-scoped Freedom House product for Tanzania.
+- CIPESA's report PDFs don't reliably keep a year in their own filename or
+  URL — a URL a search engine associated with CIPESA's 2023 report
+  currently serves their 2025 report instead. Resolved by fetching and
+  reading each candidate PDF's own title page before trusting a
+  search-reported year, same discipline established during the OONI
+  incident in Section 6a.
+- Extraction was clean across every document and format this pass —
+  including the two ~30,000-word CIPESA PDFs, which were a specific worry
+  going in. No OCR/garbled-text issues surfaced.
+- Near-duplicate detection did not false-flag any pair despite real
+  topical overlap between Access Now's and CIPESA's 2024 reports (both
+  document African shutdowns from the same general period) — correctly
+  distinguishes genuine near-duplication from two orgs' different accounts
+  of an overlapping period.
+
+**Explicitly out of scope for this pass:** completing the full 40-60
+document corpus (2-4 documents per org was enough to answer the
+auto-vs-manual question; scaling further is future work, see Section 7),
+`check_drift.py` (still no corpus version change to detect drift against).
+
 ## 7. Open action items (don't lose track of these)
 
-- **Next: scale ingestion past the walking-skeleton milestone.** Section 6a
-  is complete — the six-stage pipeline works end to end on one document.
-  The next real step is acquiring and running the remaining ~40-59
-  documents across the four v1 sources, not further pipeline development
-  (`check_drift.py` excepted, see below).
+- **Next: scale ingestion to the full 40-60 document corpus.** Both
+  Section 6a (pipeline shape) and Section 6b (per-org auto-vs-manual) are
+  complete. Access Now/CIPESA/Freedom House can be acquired via
+  `acquisition: auto` with minimal manual effort; OONI documents need
+  manual browser-save acquisition each time, per Section 3 — budget for
+  that when planning how many more OONI documents to include. Not further
+  pipeline development (`check_drift.py` excepted, see below).
+- **DONE, 2026-07-20: ADR-0005 implemented, all 8 new Freedom House
+  documents acquired/extracted/validated.** `docs/adr/
+  0005-content-checksum-for-cdn-served-html.md` (splits the checksum
+  into a raw-bytes local-integrity hash + a new `content_sha256` over
+  canonicalized extracted text; `raw_bytes_stable: false` +
+  trust-on-first-use bootstrap for Freedom House; positive
+  title-presence check in `acquire.py`) implemented by Claude Code in
+  WSL, first real test of the `sync.sh`-based workflow. `acquire.py`/
+  `extract.py`/`validate.py` all ran clean. All 12 Freedom House
+  documents (4 existing 2024 + 8 new 2022/2023) now have real `sha256`
+  and `content_sha256` values, no `REPLACE_ME` left. The 4 existing
+  documents passed the new positive title-check as a side effect of
+  their skip-path re-run. `validate.py`'s Tier 2 near-duplicate check
+  flagged 8 of the 12 (all but the three Rwanda entries and Ethiopia
+  2024) for human review — expected, same-country year-over-year FOTN
+  chapters share template boilerplate; not resolved automatically, per
+  ADR-0002. Full run output in `decisionlog.md`, 2026-07-20.
+- **Next, not yet started: semantic review (rubric Section 4) for all 8
+  new Freedom House documents**, the 6 flagged ones especially — same
+  real-overlap-vs-coverage-value judgment call already applied once this
+  session to the Access Now/CIPESA 2024 pair. None of the 8 are marked
+  Included/Excluded in `corpus/acquisition-log.md` yet. Access Now,
+  CIPESA, and OONI batches are the next research passes after this one
+  lands.
+- **DONE, 2026-07-20: OONI `default_acquisition` confirmed and flipped
+  to `auto`.** Root cause (Vercel bot-protection JS challenge) confirmed
+  fixed by the OONI team via their public Slack; verified via the
+  authoritative test — a real `requests.get()` with `acquire.py`'s own
+  headers against a never-before-fetched OONI URL, HTTP 200, real
+  content, no challenge markers. See `corpus/sources/ooni.yaml` and
+  `decisionlog.md`, 2026-07-20, for the full evidence trail.
 - **Freedom House permission request — sent 2026-07-13** (drafted
   2026-07-11, sent by Sam directly from Gmail — no send capability was
   available to Claude, only draft creation, so this was Sam's own action).

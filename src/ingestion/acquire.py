@@ -43,12 +43,31 @@ same run. Failures are still loud (printed to stderr, and logged to
 corpus/acquisition-log.md with the specific reason) and the script's exit
 code reflects whether anything failed — just not via crashing mid-loop.
 
+Checksum design (ADR-0005, 2026-07-20): the `sha256` field this module
+reads and verifies only ever proves the local copy in data/raw/ hasn't
+rotted on disk since it was saved — it does NOT prove, and never did,
+that the local copy still matches whatever the live source currently
+serves. Re-fetching and re-comparing against the same recorded hash on
+every run was never live-source verification; it was always local-disk
+integrity checking with an incidental extra property (that most sources
+happen to serve byte-stable content, so the two checks were
+indistinguishable in practice) which broke down the moment a CDN-injected,
+per-request-randomized source (Freedom House) was added. For sources
+declared `raw_bytes_stable: false` in their YAML, `sha256` is trust-on-
+first-use — recorded from whatever the first real download returns, never
+gated against a pre-declared value, since no correct value could ever be
+pre-declared for bytes that are never the same twice. Live-source content
+fidelity, where it matters, is `extract.py`'s `content_sha256` job instead
+(computed over canonicalized extracted text, immune to markup-level
+randomness) — see ADR-0005 for the full reasoning.
+
 Usage:
     uv run python src/ingestion/acquire.py
 """
 
 import csv
 import hashlib
+import re
 import sys
 from datetime import date
 from pathlib import Path
@@ -93,7 +112,12 @@ CHALLENGE_PHRASES = [
 
 
 def sha256_of(path: Path) -> str:
-    """Compute the SHA-256 hex digest of a file, reading in chunks (safe for large PDFs)."""
+    """Compute the SHA-256 hex digest of a file, reading in chunks (safe for
+    large PDFs). Used both to bootstrap a new baseline and to check a local
+    file against a previously-recorded one — always a local-disk integrity
+    check (has this file rotted/changed since we saved it?), never a check
+    against the live source (see ADR-0005; ADR-0005 note also applies
+    everywhere this function's result is compared against `doc["sha256"]`)."""
     digest = hashlib.sha256()
     with open(path, "rb") as f:
         for chunk in iter(lambda: f.read(8192), b""):
@@ -101,16 +125,46 @@ def sha256_of(path: Path) -> str:
     return digest.hexdigest()
 
 
-def looks_like_declared_format(path: Path, source_format: str):
+_STOPWORDS = {"the", "on", "of", "and", "a", "an", "in", "to", "for", "is", "at"}
+
+
+def _normalize_for_match(text: str) -> str:
+    """Lowercase, strip punctuation, collapse whitespace — used on both a
+    declared title and fetched content so a substring check between them
+    isn't defeated by case, punctuation, or incidental whitespace
+    differences."""
+    text = text.lower()
+    text = re.sub(r"[^a-z0-9\s]", " ", text)
+    return re.sub(r"\s+", " ", text).strip()
+
+
+def _title_key_words(title: str) -> list[str]:
+    """Words from a declared title worth requiring in fetched content: drop
+    short filler and common stopwords, keep everything else (including
+    years and other short-but-meaningful tokens like country names)."""
+    words = _normalize_for_match(title).split()
+    return [w for w in words if len(w) > 2 and w not in _STOPWORDS]
+
+
+def looks_like_declared_format(path: Path, source_format: str, title: str = ""):
     """
-    Cheap sanity check independent of the checksum: does the file's magic
-    number actually match what it claims to be? A checksum only proves
-    "these are the bytes we expected" — it says nothing about whether those
-    bytes are actually a valid file of the declared format. Added after a
-    real incident (2026-07-13): a bot-challenge HTML page (Vercel Security
-    Checkpoint) got saved as a .pdf by curl, with a 200 status and no error,
-    and its checksum then matched itself consistently across every later
-    check.
+    Sanity checks independent of the checksum — a checksum only proves
+    "these are the bytes we expected," never that those bytes are actually a
+    valid, real document of the declared format and content. Two checks,
+    added at different times for different threats:
+
+    - Negative (PDF magic bytes; HTML known challenge phrases): added after
+      a real incident (2026-07-13) where a bot-challenge HTML page (Vercel
+      Security Checkpoint) got saved as a .pdf by curl, 200 status, no
+      error, and its checksum then matched itself consistently forever
+      after.
+    - Positive (HTML only, `title` presence): added per ADR-0005
+      (2026-07-20) — the negative check alone only rules out *known*
+      challenge phrasings; it asserts nothing positive about the content
+      being the real, declared document. Checks that the declared title's
+      key words (normalized, punctuation-stripped, fuzzy/substring — not an
+      exact match, since HTML entity decoding or minor formatting shouldn't
+      cause a false failure) actually appear in the fetched content.
 
     Returns (ok: bool, reason: str | None) — the reason is None when ok is
     True, and a specific human-readable explanation when it's False. Returning
@@ -128,11 +182,26 @@ def looks_like_declared_format(path: Path, source_format: str):
     if source_format == "html":
         # There's no magic-number equivalent for HTML — a bot-challenge page
         # and a real article are both structurally valid HTML. The only
-        # signal available is content: check for known challenge phrases.
-        text = path.read_text(encoding="utf-8", errors="replace").lower()
+        # signal available is content: check for known challenge phrases
+        # (negative), then that the declared title's key words actually
+        # showed up (positive).
+        text = path.read_text(encoding="utf-8", errors="replace")
+        lower_text = text.lower()
         for phrase in CHALLENGE_PHRASES:
-            if phrase in text:
+            if phrase in lower_text:
                 return False, f"matched known bot-challenge phrase: '{phrase}'"
+
+        key_words = _title_key_words(title) if title else []
+        if key_words:
+            normalized_content = _normalize_for_match(text)
+            missing = [w for w in key_words if w not in normalized_content]
+            if missing:
+                return False, (
+                    f"declared title {title!r} not found in fetched content "
+                    f"(missing key word(s): {', '.join(missing)}) — likely a "
+                    f"blocked-request or bot-challenge page, not the real "
+                    f"document"
+                )
         return True, None
 
     return True, None
@@ -146,16 +215,59 @@ def load_sources():
     """Yield (org, document_dict) for every document declared across
     corpus/sources/*.yaml, with each document's effective acquisition mode
     already resolved (document field, else the YAML's own
-    `default_acquisition`, else "auto") and stored under `_acquisition`."""
+    `default_acquisition`, else "auto") and stored under `_acquisition`, and
+    its raw-bytes stability (the YAML's top-level `raw_bytes_stable`, else
+    `True` — every org except Freedom House has no such field at all, and
+    `True` is the correct default for all of them) stored under
+    `_raw_bytes_stable` (ADR-0005). No per-document override for
+    `raw_bytes_stable` exists — per the ADR this is a server-wide property
+    of a source, same reasoning as `default_acquisition`."""
     for yaml_path in sorted(SOURCES_DIR.glob("*.yaml")):
         org = yaml_path.stem
         with open(yaml_path) as f:
             data = yaml.safe_load(f) or {}
         org_default = data.get("default_acquisition", "auto")
+        org_raw_bytes_stable = data.get("raw_bytes_stable", True)
         for doc in data.get("documents", []):
             doc = dict(doc)
             doc["_acquisition"] = resolve_acquisition_mode(org_default, doc)
+            doc["_raw_bytes_stable"] = org_raw_bytes_stable
             yield org, doc
+
+
+def write_yaml_field(org: str, doc_id: str, field: str, value: str) -> None:
+    """Surgically replace one field's value for one document's block in
+    corpus/sources/{org}.yaml, in place, preserving every comment and the
+    rest of the file's formatting exactly. These files are hand-maintained
+    prose-plus-YAML (long dated comments, `selection_rationale` blocks) —
+    a full yaml.safe_load/yaml.dump round-trip would silently discard all
+    of that, so this edits the text directly instead of going back through
+    PyYAML.
+
+    Assumes `field` appears as `{field}: <value>` on its own line somewhere
+    inside the named document's block (from its own `- doc_id:` line up to
+    the next one, or end of file) — true for every field this project
+    writes back (`sha256`, `content_sha256`). Any trailing same-line
+    comment on that field's line is preserved unchanged.
+    """
+    path = SOURCES_DIR / f"{org}.yaml"
+    text = path.read_text(encoding="utf-8")
+
+    block_re = re.compile(
+        rf"(?ms)^  - doc_id: {re.escape(doc_id)}\n.*?(?=^  - doc_id:|\Z)"
+    )
+    match = block_re.search(text)
+    if match is None:
+        raise ValueError(f"doc_id {doc_id!r} not found in {path}")
+    block = match.group(0)
+
+    field_re = re.compile(rf'(?m)^(\s*{re.escape(field)}:\s*)(?:"[^"]*"|\S+)(.*)$')
+    new_block, count = field_re.subn(rf'\g<1>"{value}"\g<2>', block, count=1)
+    if count == 0:
+        raise ValueError(f"field {field!r} not found in {doc_id!r}'s block in {path}")
+
+    text = text[: match.start()] + new_block + text[match.end() :]
+    path.write_text(text, encoding="utf-8")
 
 
 def append_acquisition_log_failure(doc_id: str, reason: str) -> None:
@@ -183,6 +295,27 @@ class AcquisitionFailure(Exception):
     main() so one bad document doesn't stop the rest of the run."""
 
 
+def _fetch_once(doc_id: str, url: str) -> bytes | None:
+    """Single GET, no retry loop (a tight retry against a 429 tends to make
+    things worse, not better — see module docstring). Returns the response
+    body on success, or None if the request itself failed (logged to
+    stderr; caller decides whether that's fatal for this run)."""
+    print(f"[download] {doc_id} <- {url}")
+    try:
+        response = requests.get(url, headers=HEADERS, timeout=30)
+        response.raise_for_status()
+    except requests.exceptions.RequestException as e:
+        print(
+            f"[fail] {doc_id} — {e}. Not retrying in a loop (that tends to "
+            f"make rate-limiting worse, not better) — re-run the whole "
+            f"script later, or mark this document (or its whole org, via "
+            f"`default_acquisition`) as `manual` and place the file by hand.",
+            file=sys.stderr,
+        )
+        return None
+    return response.content
+
+
 def acquire_document(org: str, doc: dict):
     """
     Handle one document. Returns a manifest row (dict) on success, or None
@@ -190,28 +323,123 @@ def acquire_document(org: str, doc: dict):
     hasn't been placed yet) — neither of those is an AcquisitionFailure.
     Raises AcquisitionFailure only for a genuine integrity problem: a
     present file whose checksum or format doesn't match what's declared.
+
+    Checksum handling branches on `_raw_bytes_stable` (ADR-0005): for the
+    overwhelming majority of sources (stable raw bytes), a placeholder
+    `sha256` is refused outright and a real download is gated on matching
+    the pre-declared value — that's the `else` branch below, unchanged.
+    For a source declared `raw_bytes_stable: false` (Freedom House only,
+    currently) with no baseline recorded yet, there is no correct value
+    that could have been pre-declared, so the first acquisition can't be
+    gated on one — it downloads once and *records* whatever hash it
+    actually got as the new baseline, trust-on-first-use. Once that
+    baseline exists, later runs verify against it exactly like any other
+    source (local-disk rot check only, never live-source fidelity — see
+    module docstring and ADR-0005).
     """
     doc_id = doc["doc_id"]
     expected_sha256 = doc["sha256"]
     url = doc["url"]
     ext = "pdf" if doc["source_format"] == "pdf" else "html"
     mode = doc["_acquisition"]
-
-    if expected_sha256.startswith("REPLACE_ME"):
-        raise AcquisitionFailure(
-            f"corpus/sources/{org}.yaml still has a placeholder sha256. "
-            f"Get the real file once by hand, compute its checksum, and "
-            f"put that in the YAML before running this script."
-        )
+    raw_bytes_stable = doc["_raw_bytes_stable"]
+    title = doc.get("title", "")
+    is_placeholder = expected_sha256.startswith("REPLACE_ME")
 
     org_dir = RAW_DIR / org
     org_dir.mkdir(parents=True, exist_ok=True)
     dest = org_dir / f"{doc_id}.{ext}"
 
+    if raw_bytes_stable:
+        if is_placeholder:
+            raise AcquisitionFailure(
+                f"corpus/sources/{org}.yaml still has a placeholder sha256. "
+                f"Get the real file once by hand, compute its checksum, and "
+                f"put that in the YAML before running this script."
+            )
+    elif is_placeholder or not dest.exists():
+        # Trust-on-first-use bootstrap (ADR-0005 decision #1, corrected):
+        # raw bytes are declared volatile, so there's no baseline to gate
+        # against yet. Get a real file onto disk one way or another, then
+        # record its hash as the new baseline instead of verifying it
+        # against anything.
+        if dest.exists():
+            # A file is already present (e.g. placed by hand) but no
+            # baseline is recorded yet — bootstrap from it directly, don't
+            # re-download.
+            ok, reason = looks_like_declared_format(dest, doc["source_format"], title)
+            if not ok:
+                raise AcquisitionFailure(
+                    f"existing file doesn't look like a real "
+                    f"{doc['source_format']} ({reason}) — can't bootstrap a "
+                    f"baseline checksum from it. Replace it with the real "
+                    f"file before re-running."
+                )
+            actual_sha256 = sha256_of(dest)
+            write_yaml_field(org, doc_id, "sha256", actual_sha256)
+            print(
+                f"[bootstrap] {doc_id} — raw_bytes_stable: false; recorded "
+                f"baseline checksum {actual_sha256} from the existing local "
+                f"file (not verified against a live fetch — see ADR-0005)"
+            )
+            return {
+                **doc,
+                "org": org,
+                "sha256": actual_sha256,
+                "local_path": str(dest.relative_to(PROJECT_ROOT)),
+            }
+
+        if mode == "manual":
+            print(
+                f"[pending] {doc_id} — manual acquisition, not yet placed. "
+                f"Download {url} by hand and save it to "
+                f"{dest.relative_to(PROJECT_ROOT)}, then re-run this script."
+            )
+            return None
+
+        content = _fetch_once(doc_id, url)
+        if content is None:
+            return None
+
+        tmp_path = dest.with_suffix(dest.suffix + ".tmp")
+        tmp_path.write_bytes(content)
+
+        ok, reason = looks_like_declared_format(tmp_path, doc["source_format"], title)
+        if not ok:
+            tmp_path.unlink()
+            raise AcquisitionFailure(
+                f"downloaded content doesn't look like a real "
+                f"{doc['source_format']} ({reason}) — likely a blocked-"
+                f"request or bot-challenge page served with a 200 status "
+                f"instead of the real file. Not writing to data/raw/."
+            )
+
+        actual_sha256 = sha256_of(tmp_path)
+        tmp_path.rename(dest)
+        write_yaml_field(org, doc_id, "sha256", actual_sha256)
+        print(
+            f"[ok] {doc_id} — downloaded and verified ({len(content)} bytes); "
+            f"raw_bytes_stable: false, so {actual_sha256} is recorded as a "
+            f"new local-rot baseline, not verified against a pre-declared "
+            f"value (see ADR-0005)"
+        )
+        return {
+            **doc,
+            "org": org,
+            "sha256": actual_sha256,
+            "local_path": str(dest.relative_to(PROJECT_ROOT)),
+        }
+
+    # Existing behavior, unchanged: stable-bytes sources always take this
+    # path; volatile-bytes sources (raw_bytes_stable: false) take it too
+    # once a baseline has already been recorded above. Either way this only
+    # ever checks the local file against its own previously-recorded hash —
+    # local-disk integrity, never live-source fidelity (see module
+    # docstring, ADR-0005).
     if dest.exists():
         actual = sha256_of(dest)
         if actual == expected_sha256:
-            ok, reason = looks_like_declared_format(dest, doc["source_format"])
+            ok, reason = looks_like_declared_format(dest, doc["source_format"], title)
             if not ok:
                 raise AcquisitionFailure(
                     f"checksum matches, but the file doesn't look like a "
@@ -240,22 +468,12 @@ def acquire_document(org: str, doc: dict):
         )
         return None
 
-    print(f"[download] {doc_id} <- {url}")
-    try:
-        response = requests.get(url, headers=HEADERS, timeout=30)
-        response.raise_for_status()
-    except requests.exceptions.RequestException as e:
-        print(
-            f"[fail] {doc_id} — {e}. Not retrying in a loop (that tends to "
-            f"make rate-limiting worse, not better) — re-run the whole "
-            f"script later, or mark this document (or its whole org, via "
-            f"`default_acquisition`) as `manual` and place the file by hand.",
-            file=sys.stderr,
-        )
+    content = _fetch_once(doc_id, url)
+    if content is None:
         return None
 
     tmp_path = dest.with_suffix(dest.suffix + ".tmp")
-    tmp_path.write_bytes(response.content)
+    tmp_path.write_bytes(content)
 
     actual_sha256 = sha256_of(tmp_path)
     if actual_sha256 != expected_sha256:
@@ -266,7 +484,7 @@ def acquire_document(org: str, doc: dict):
             f"was selected, or the download was corrupted. Not writing to "
             f"data/raw/ — investigate before re-running."
         )
-    ok, reason = looks_like_declared_format(tmp_path, doc["source_format"])
+    ok, reason = looks_like_declared_format(tmp_path, doc["source_format"], title)
     if not ok:
         tmp_path.unlink()
         raise AcquisitionFailure(
@@ -277,7 +495,7 @@ def acquire_document(org: str, doc: dict):
         )
 
     tmp_path.rename(dest)
-    print(f"[ok] {doc_id} — downloaded and verified ({len(response.content)} bytes)")
+    print(f"[ok] {doc_id} — downloaded and verified ({len(content)} bytes)")
     return {**doc, "org": org, "local_path": str(dest.relative_to(PROJECT_ROOT))}
 
 

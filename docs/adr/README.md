@@ -80,9 +80,12 @@ observable condition, not just a feeling that something isn't working.
 
 ## Status
 
-Four ADRs exist as of 2026-07-11 (architecture doc now at v1.4):
+Five ADRs exist as of 2026-07-20 (architecture doc now at v1.5):
 `0001-english-only-corpus-disclosure.md`,
 `0002-tiered-validation-routing.md`,
 `0003-provenance-lifecycle-metadata.md`,
-`0004-editorial-corrections.md`. All written during architecture review,
-before implementation started.
+`0004-editorial-corrections.md`, all written during architecture review,
+before implementation started, plus
+`0005-content-checksum-for-cdn-served-html.md`, written during
+implementation (2026-07-20) — the first ADR prompted by a real
+acquisition-time finding rather than architecture review.

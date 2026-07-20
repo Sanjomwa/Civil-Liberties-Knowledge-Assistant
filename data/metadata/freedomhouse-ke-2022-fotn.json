@@ -1,0 +1,49 @@
+{
+  "doc_id": "freedomhouse-ke-2022-fotn",
+  "schema_version": "1.1",
+  "declared": {
+    "title": "Kenya: Freedom on the Net 2022 Country Report",
+    "organization": "Freedom House",
+    "countries": [
+      "KE"
+    ],
+    "publication_date": "2022-10-01",
+    "url": "https://freedomhouse.org/country/kenya/freedom-net/2022",
+    "doc_type": "country_report",
+    "source_format": "html",
+    "topics": [
+      "digital_rights",
+      "censorship",
+      "internet_freedom"
+    ],
+    "language": "en",
+    "selection_rationale": "Confirmed live via direct fetch, 2026-07-20 (real page title matched: \"Kenya: Freedom on the Net 2022 Country Report\"). Gives Kenya a third data point (2022/2023/2024) for year-over-year trajectory -- the earliest year in this corpus's 2022-2025 window, useful as a baseline against the later chapters. Full content not yet read in detail; specific findings to be logged at semantic review.",
+    "corpus_version": "v1.0"
+  },
+  "derived": {
+    "sha256": "2637d7e2cef6803b3dc9e791de338bb55aee8479649f62f67dcde596e4252b44",
+    "file_size_bytes": 348783,
+    "extracted_word_count": 11865,
+    "extraction_method": "trafilatura",
+    "extraction_date": "2026-07-20",
+    "detected_language": "en",
+    "detected_language_confidence": 1.0,
+    "validation_status": "valid",
+    "validation_warnings": []
+  },
+  "lifecycle": {
+    "status": "active",
+    "superseded_by": null,
+    "supersedes": null,
+    "reason": null,
+    "effective_date": null
+  },
+  "chunking": {
+    "strategy": "fixed_overlap",
+    "chunk_size": 1500,
+    "chunk_step": 750,
+    "total_chunks": 123,
+    "chunking_date": "2026-07-20",
+    "corpus_version": "v1.0"
+  }
+}

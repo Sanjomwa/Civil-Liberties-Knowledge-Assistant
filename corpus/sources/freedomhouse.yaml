@@ -30,6 +30,14 @@
 
 default_acquisition: auto
 
+# raw_bytes_stable: false (2026-07-20, ADR-0005) -- freedomhouse.org
+# (Cloudflare-fronted) injects randomized per-response content (email-
+# obfuscation encoding, a challenge-platform verification token) into
+# otherwise-identical HTML. acquire.py's raw-bytes checksum can never be
+# pre-declared and verified against for this source -- see ADR-0005 for
+# the full finding and the trust-on-first-use design this flag triggers.
+raw_bytes_stable: false
+
 documents:
   - doc_id: freedomhouse-ke-2024-fotn
     title: "Kenya: Freedom on the Net 2024 Country Report"
@@ -50,6 +58,7 @@ documents:
       confirmed from the page itself.
     corpus_version: v1.0
     sha256: "62439f4b82730d16b833a7d886895756b9f2928d05388f312e0a629dc8f6baa2"
+    content_sha256: "4e081a1e0a838d1331351f94c3daf33737f0c32cb3750ea1dda8a11b0b2fe80b"  # ADR-0005 -- bootstrapped by extract.py 2026-07-20
 
   - doc_id: freedomhouse-ug-2024-fotn
     title: "Uganda: Freedom on the Net 2024 Country Report"
@@ -71,6 +80,7 @@ documents:
       own reasoning on cross-org value. Publication month approximate.
     corpus_version: v1.0
     sha256: "3a2c15f45a3cd5abb0ceb00570593334d4c43a7d3faf1af4867b44ede288e656"
+    content_sha256: "dfc41cfc9e6eb742d200d896fd217620410980d8e0e88ee2a0913f33968f319b"  # ADR-0005 -- bootstrapped by extract.py 2026-07-20
 
   - doc_id: freedomhouse-et-2024-fotn
     title: "Ethiopia: Freedom on the Net 2024 Country Report"
@@ -91,6 +101,7 @@ documents:
       approximate.
     corpus_version: v1.0
     sha256: "d77bcf20e23859f4d386b827c0263e092fd2f0c67bc7e3d3b676191f01ebf1ac"
+    content_sha256: "3afc8524b8e1c217ce3c5822d5b7f7fd42ddf6f0c43762a6c79d29e911ba4efc"  # ADR-0005 -- bootstrapped by extract.py 2026-07-20
 
   - doc_id: freedomhouse-rw-2024-fotn
     title: "Rwanda: Freedom on the Net 2024 Country Report"
@@ -109,3 +120,203 @@ documents:
       Publication month approximate.
     corpus_version: v1.0
     sha256: "0a2546ee89489cccfbe8f0079bdda58f5d9a519601479c957dd9b93dd79d3016"
+    content_sha256: "7bf83856a59a85fd70e67159fdfd4db526a9b565b6a8ac3efacaa5c45518b6f6"  # ADR-0005 -- bootstrapped by extract.py 2026-07-20
+
+  # --- 2026-07-20 addition: 2022 and 2023 editions for the same four
+  # countries, to give real year-over-year trajectory rather than a single
+  # snapshot year per country. URL pattern (freedomhouse.org/country/
+  # {country}/freedom-net/{year}) directly confirmed live for Kenya (both
+  # 2022 and 2023) and Uganda (2022) via direct fetch -- real page titles
+  # matched ("Kenya: Freedom on the Net 2023/2022 Country Report", "Uganda:
+  # Freedom on the Net 2022 Country Report"). The remaining four entries
+  # below (Uganda 2023, Ethiopia 2022/2023, Rwanda 2022/2023) follow the
+  # identical URL pattern and are inferred live from that same annual-batch
+  # release structure (FOTN editions release all covered countries at once
+  # each year), but were NOT individually fetched and read this pass --
+  # confirm each one's actual content during the real semantic-review read
+  # (corpus-inclusion-rubric.md Section 4, step 1) before marking Included,
+  # same as any other candidate.
+  #
+  # ACQUIRED 2026-07-20 via Claude Code in WSL (acquire.py/extract.py/
+  # validate.py, ADR-0005 implementation) -- all 8 have real sha256 and
+  # content_sha256 values now, no REPLACE_ME left. validate.py's Tier 2
+  # near-duplicate check flagged 6 of these 8 (all except the two Rwanda
+  # entries) for human review against their same-country sibling years --
+  # a real, expected signal (year-over-year FOTN chapters share template
+  # boilerplate), not a bug. Semantic review (rubric Section 4) for all 8
+  # has NOT happened yet -- none are marked Included/Excluded in
+  # corpus/acquisition-log.md. See decisionlog.md and PROJECT_CONTINUITY.md
+  # Section 7, 2026-07-20, for the full run report.
+
+  - doc_id: freedomhouse-ke-2023-fotn
+    title: "Kenya: Freedom on the Net 2023 Country Report"
+    organization: Freedom House
+    countries: ["KE"]
+    publication_date: "2023-10-01"
+    url: "https://freedomhouse.org/country/kenya/freedom-net/2023"
+    doc_type: country_report
+    source_format: html
+    topics: ["digital_rights", "censorship", "internet_freedom"]
+    language: en
+    selection_rationale: >
+      Confirmed live via direct fetch, 2026-07-20 (title and coverage
+      period verified: "Key Developments, June 1, 2022 - May 31, 2023").
+      Coverage-contribution value: gives Kenya a second year in the
+      corpus alongside the existing 2024 chapter, enabling real
+      year-over-year comparison rather than a single snapshot -- directly
+      useful for the assistant's own research-question angle on how
+      conditions changed over time. Full content not yet read in detail
+      beyond the coverage-period confirmation; specific findings to be
+      logged at semantic review.
+    corpus_version: v1.0
+    sha256: "1e651ecd422db31262ab2d72595b5eba77a4cd491f88d7e44fea40d64e2d1a99"  # ADR-0005 -- bootstrapped by acquire.py 2026-07-20 (raw_bytes_stable: false, trust-on-first-use)
+    content_sha256: "3165febdd5ad07191e1bbd20b16b828853549d27a08907316358f5c249a4a3af"  # ADR-0005 -- bootstrapped by extract.py 2026-07-20
+
+  - doc_id: freedomhouse-ke-2022-fotn
+    title: "Kenya: Freedom on the Net 2022 Country Report"
+    organization: Freedom House
+    countries: ["KE"]
+    publication_date: "2022-10-01"
+    url: "https://freedomhouse.org/country/kenya/freedom-net/2022"
+    doc_type: country_report
+    source_format: html
+    topics: ["digital_rights", "censorship", "internet_freedom"]
+    language: en
+    selection_rationale: >
+      Confirmed live via direct fetch, 2026-07-20 (real page title
+      matched: "Kenya: Freedom on the Net 2022 Country Report"). Gives
+      Kenya a third data point (2022/2023/2024) for year-over-year
+      trajectory -- the earliest year in this corpus's 2022-2025 window,
+      useful as a baseline against the later chapters. Full content not
+      yet read in detail; specific findings to be logged at semantic
+      review.
+    corpus_version: v1.0
+    sha256: "2637d7e2cef6803b3dc9e791de338bb55aee8479649f62f67dcde596e4252b44"  # ADR-0005 -- bootstrapped by acquire.py 2026-07-20 (raw_bytes_stable: false, trust-on-first-use)
+    content_sha256: "dd24642315eac4059abdea35e10782abf4dbed1547ff31ceba741ccbcb6bf651"  # ADR-0005 -- bootstrapped by extract.py 2026-07-20
+
+  - doc_id: freedomhouse-ug-2023-fotn
+    title: "Uganda: Freedom on the Net 2023 Country Report"
+    organization: Freedom House
+    countries: ["UG"]
+    publication_date: "2023-10-01"
+    url: "https://freedomhouse.org/country/uganda/freedom-net/2023"
+    doc_type: country_report
+    source_format: html
+    topics: ["digital_rights", "censorship", "internet_freedom"]
+    language: en
+    selection_rationale: >
+      URL pattern-verified (not individually fetched this pass -- see
+      note above): follows the same live structure confirmed for Kenya's
+      2023 chapter and Uganda's own 2022 chapter. Coverage-contribution
+      value: a second Uganda data point alongside the existing 2024
+      chapter, matching the same year-over-year reasoning as the Kenya
+      additions above. Confirm actual content during semantic review
+      before marking Included.
+    corpus_version: v1.0
+    sha256: "8a9057a0fec650a663d80e84938cdba13b630664b1a4ef2dcc30d687e1e22f2e"  # ADR-0005 -- bootstrapped by acquire.py 2026-07-20 (raw_bytes_stable: false, trust-on-first-use)
+    content_sha256: "102f993eff43567c2cc4676dbb32372da930d582b5a64be09d88ed03401d7d32"  # ADR-0005 -- bootstrapped by extract.py 2026-07-20
+
+  - doc_id: freedomhouse-ug-2022-fotn
+    title: "Uganda: Freedom on the Net 2022 Country Report"
+    organization: Freedom House
+    countries: ["UG"]
+    publication_date: "2022-10-01"
+    url: "https://freedomhouse.org/country/uganda/freedom-net/2022"
+    doc_type: country_report
+    source_format: html
+    topics: ["digital_rights", "censorship", "internet_freedom"]
+    language: en
+    selection_rationale: >
+      Confirmed live via direct fetch, 2026-07-20 (real page title
+      matched: "Uganda: Freedom on the Net 2022 Country Report"). Gives
+      Uganda a third data point (2022/2023/2024), earliest year in the
+      corpus window, same baseline reasoning as Kenya's 2022 entry above.
+      Full content not yet read in detail; specific findings to be logged
+      at semantic review.
+    corpus_version: v1.0
+    sha256: "dc01bc8e9e76f01118ec29f7b97abc4411dee13d12a14137a4a3ca14acc52546"  # ADR-0005 -- bootstrapped by acquire.py 2026-07-20 (raw_bytes_stable: false, trust-on-first-use)
+    content_sha256: "546250fb33f13bedb524a9051983f0d5544b6967992867baa0fa5f6944c399ab"  # ADR-0005 -- bootstrapped by extract.py 2026-07-20
+
+  - doc_id: freedomhouse-et-2023-fotn
+    title: "Ethiopia: Freedom on the Net 2023 Country Report"
+    organization: Freedom House
+    countries: ["ET"]
+    publication_date: "2023-10-01"
+    url: "https://freedomhouse.org/country/ethiopia/freedom-net/2023"
+    doc_type: country_report
+    source_format: html
+    topics: ["digital_rights", "censorship", "internet_freedom", "network_interference"]
+    language: en
+    selection_rationale: >
+      URL pattern-verified, not individually fetched this pass (see note
+      above). Coverage-contribution value: a second Ethiopia data point
+      alongside the existing 2024 chapter -- particularly relevant given
+      Ethiopia is this corpus's lowest-scored/"Not Free" country in the
+      2024 edition, so an earlier year's chapter may capture how
+      conflict-related connectivity disruption evolved rather than a
+      single snapshot. Confirm actual content during semantic review
+      before marking Included.
+    corpus_version: v1.0
+    sha256: "2efc92bd5daad6d95e7794f827e85e22f4a817061e6e937f50e40db331c7f223"  # ADR-0005 -- bootstrapped by acquire.py 2026-07-20 (raw_bytes_stable: false, trust-on-first-use)
+    content_sha256: "e378c3a2da95d87b87f95ce10cbfc840bd0b80bf8726ff1d7912aabdd3130cfa"  # ADR-0005 -- bootstrapped by extract.py 2026-07-20
+
+  - doc_id: freedomhouse-et-2022-fotn
+    title: "Ethiopia: Freedom on the Net 2022 Country Report"
+    organization: Freedom House
+    countries: ["ET"]
+    publication_date: "2022-10-01"
+    url: "https://freedomhouse.org/country/ethiopia/freedom-net/2022"
+    doc_type: country_report
+    source_format: html
+    topics: ["digital_rights", "censorship", "internet_freedom", "network_interference"]
+    language: en
+    selection_rationale: >
+      URL pattern-verified, not individually fetched this pass (see note
+      above). Third Ethiopia data point (2022/2023/2024), earliest year in
+      the corpus window -- same baseline reasoning as Kenya/Uganda's 2022
+      entries. Confirm actual content during semantic review before
+      marking Included.
+    corpus_version: v1.0
+    sha256: "d6a9e1ab8ebd069871ed564c78c14d25315c59c35d4135cd8c7c4dd429027f86"  # ADR-0005 -- bootstrapped by acquire.py 2026-07-20 (raw_bytes_stable: false, trust-on-first-use)
+    content_sha256: "1e077cde34be8140af71e216af711076cf5d6c917c2c2bff73625586cb960b4c"  # ADR-0005 -- bootstrapped by extract.py 2026-07-20
+
+  - doc_id: freedomhouse-rw-2023-fotn
+    title: "Rwanda: Freedom on the Net 2023 Country Report"
+    organization: Freedom House
+    countries: ["RW"]
+    publication_date: "2023-10-01"
+    url: "https://freedomhouse.org/country/rwanda/freedom-net/2023"
+    doc_type: country_report
+    source_format: html
+    topics: ["digital_rights", "censorship", "internet_freedom"]
+    language: en
+    selection_rationale: >
+      URL pattern-verified, not individually fetched this pass (see note
+      above). Coverage-contribution value: a second Rwanda data point
+      alongside the existing 2024 chapter, which covers the runup to
+      Rwanda's July 2024 election -- an earlier year gives useful
+      before/after context for that same trajectory. Confirm actual
+      content during semantic review before marking Included.
+    corpus_version: v1.0
+    sha256: "ab104c21ec31d8d7dc2c1d269a99e6f3bc04960c42d64feabd46571b932af961"  # ADR-0005 -- bootstrapped by acquire.py 2026-07-20 (raw_bytes_stable: false, trust-on-first-use)
+    content_sha256: "13a947930181d417672ad3e37c7e14eba4774ccab69448934c986107d94f10a5"  # ADR-0005 -- bootstrapped by extract.py 2026-07-20
+
+  - doc_id: freedomhouse-rw-2022-fotn
+    title: "Rwanda: Freedom on the Net 2022 Country Report"
+    organization: Freedom House
+    countries: ["RW"]
+    publication_date: "2022-10-01"
+    url: "https://freedomhouse.org/country/rwanda/freedom-net/2022"
+    doc_type: country_report
+    source_format: html
+    topics: ["digital_rights", "censorship", "internet_freedom"]
+    language: en
+    selection_rationale: >
+      URL pattern-verified, not individually fetched this pass (see note
+      above). Third Rwanda data point (2022/2023/2024), earliest year in
+      the corpus window -- same baseline reasoning as the other three
+      countries' 2022 entries. Confirm actual content during semantic
+      review before marking Included.
+    corpus_version: v1.0
+    sha256: "ecaad8dcf3e40cc2159e526bd8a33087b66f471077afb0cbe2886faf0fd9e732"  # ADR-0005 -- bootstrapped by acquire.py 2026-07-20 (raw_bytes_stable: false, trust-on-first-use)
+    content_sha256: "97a3d0073839ff30bd9b4089f9dae601709d742e649818e0bbe46802960fd810"  # ADR-0005 -- bootstrapped by extract.py 2026-07-20

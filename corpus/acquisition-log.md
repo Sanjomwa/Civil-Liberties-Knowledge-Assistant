@@ -145,3 +145,107 @@ design.
 **Coverage contribution:** Second OONI document in the corpus. Topically distinct from the existing Tanzania document (exam-integrity-motivated app blocking vs. platform blocking during civil unrest) and from Kenya's other corpus entries (Access Now/Freedom House cover Kenya's protest-related shutdown, not the exam-blocking incident) — genuine new ground, not a near-duplicate (confirmed by SimHash).
 
 **Decision: Included.**
+- **freedomhouse-ke-2023-fotn** — acquire.py failure (2026-07-20): checksum mismatch: expected be52eeacf46c5f784fcb730c02fd9a3560e04c2f19a42cabd775211fa00735de, got 4eb32e60b79411b004b65ae7ba0bafd4eee405d774b9f4efe0b5eeb9853c9d9b. The source file may have changed since it was selected, or the download was corrupted. Not writing to data/raw/ — investigate before re-running.
+- **freedomhouse-ke-2022-fotn** — acquire.py failure (2026-07-20): checksum mismatch: expected 595b66bbf50b2da15d8349148b70b9832a3f907b1c9c7c31ad73459e16385bd6, got 83ed59c7ef30cf239507934002e1e8056a2346545eb49ed3cab17d888f617431. The source file may have changed since it was selected, or the download was corrupted. Not writing to data/raw/ — investigate before re-running.
+- **freedomhouse-ug-2023-fotn** — acquire.py failure (2026-07-20): checksum mismatch: expected 3bee8696e130217f3a183574168cffcb8e364b2e8634985c74e7d7ea4295dad2, got d4a3a10410b6544afde96a7b6c9ece3dd08828ed6c7fe23878284e39d5caa199. The source file may have changed since it was selected, or the download was corrupted. Not writing to data/raw/ — investigate before re-running.
+- **freedomhouse-ug-2022-fotn** — acquire.py failure (2026-07-20): checksum mismatch: expected 7a7bf49fa33531503750d36b8c02a056b70498fbf517625eb6c182b062a890a2, got fbf673013605409cdc52a7a650d24d7f6f11d55271337e3e5b441c1d978ed596. The source file may have changed since it was selected, or the download was corrupted. Not writing to data/raw/ — investigate before re-running.
+- **freedomhouse-et-2023-fotn** — acquire.py failure (2026-07-20): checksum mismatch: expected 74f636956abe8930fc3329d92b6250168d68f96d5ffbe6614f73ce1887972190, got 78f87b9c7677c453ec8fb53414fddbb4957e15676a4a5c7e02505fb9ef276c38. The source file may have changed since it was selected, or the download was corrupted. Not writing to data/raw/ — investigate before re-running.
+- **freedomhouse-et-2022-fotn** — acquire.py failure (2026-07-20): checksum mismatch: expected 02a882b0c1a230ce335032ffc7bca6505e2624ed6ed051541849b3481d0a7bb0, got 38f8814ed196754e4c3b42e0d8b90c02bec66fda5c9e71468ccc4e8781054928. The source file may have changed since it was selected, or the download was corrupted. Not writing to data/raw/ — investigate before re-running.
+- **freedomhouse-rw-2023-fotn** — acquire.py failure (2026-07-20): checksum mismatch: expected 4c373683ae46e3fc5f64209e68e6e4ac6b9c3df71a43375a2443edcbe28feb6b, got 9dd05c77b8138c2b5142ab9248755bdec77958cf93dbdd226104045f6e876f56. The source file may have changed since it was selected, or the download was corrupted. Not writing to data/raw/ — investigate before re-running.
+- **freedomhouse-rw-2022-fotn** — acquire.py failure (2026-07-20): checksum mismatch: expected ecbf62d307b792e7a459592c03de837e34b975d65ef53496ebbdcd06ecf3a3c9, got d4163f4a657803b49bf07c30bb064e83dd8937f53efff87ac34850b6ed32f723. The source file may have changed since it was selected, or the download was corrupted. Not writing to data/raw/ — investigate before re-running.
+
+## freedomhouse-ke-2023-fotn — Included
+
+**Reviewed:** 2026-07-20. **Automated checks:** Tier 1 passed. Tier 2 FLAGGED for human review (English, 14,312 words, near-duplicate of freedomhouse-ke-2024-fotn and freedomhouse-ke-2022-fotn).
+
+**Topic relevance:** Clean include. Country-specific Freedom on the Net chapter, coverage period June 2022-May 2023 — internet freedom/digital rights in Kenya is its entire subject, squarely within window.
+
+**Coverage contribution:** New country/year combination not yet in the corpus. The Tier 2 near-duplicate flag against the other Kenya-year chapters reflects shared FOTN template structure, not substantive overlap — this chapter's actual findings (Telkom's nationalization, a Netflix agreement restricting LGBT+ content, election-period disinformation on TikTok/Facebook tied to an Israeli hacking firm's forged documents, a Supreme Court ruling permitting the Device Management System telecom surveillance system, and a separate Chinese state-linked breach of 8 government ministries) don't overlap with the existing Kenya 2024 entry's findings (speech-related arrests/detentions, an abduction/killing of a commentator) — genuine coverage contribution, not the same-organization near-duplicate exclusion case the rubric describes.
+
+**Rights/licensing note:** Freedom House content, permission-gated per docs/licensing.md — internal course-project use only, pending permission response (see docs/PROJECT_CONTINUITY.md Section 7).
+
+**Decision: Included.**
+
+## freedomhouse-ke-2022-fotn — Included
+
+**Reviewed:** 2026-07-20. **Automated checks:** Tier 1 passed. Tier 2 FLAGGED for human review (English, 11,865 words, near-duplicate of freedomhouse-ke-2023-fotn).
+
+**Topic relevance:** Clean include. Country-specific Freedom on the Net chapter, coverage period June 2021-May 2022.
+
+**Coverage contribution:** Third Kenya year in the corpus (2022/2023/2024), the earliest baseline. Tier 2's near-duplicate flag against the 2023 chapter is template similarity, not content overlap — this chapter documents a Facebook-suspension threat ahead of the 2022 election, TikTok election misinformation, a Supreme Court ruling on judicial independence (striking down a constitutional-review push), and a SIM re-registration crackdown with fine/imprisonment threats, all distinct from both the 2023 and 2024 findings.
+
+**Rights/licensing note:** Same as above — permission pending, internal use only.
+
+**Decision: Included.**
+
+## freedomhouse-ug-2023-fotn — Included
+
+**Reviewed:** 2026-07-20. **Automated checks:** Tier 1 passed. Tier 2 FLAGGED for human review (English, 13,232 words, near-duplicate of freedomhouse-ug-2024-fotn and freedomhouse-ug-2022-fotn).
+
+**Topic relevance:** Clean include. Country-specific Freedom on the Net chapter, coverage period June 2022-May 2023.
+
+**Coverage contribution:** New Uganda year not yet in the corpus. Near-duplicate flag against the other Uganda-year chapters is structural (shared template), not substantive — this chapter documents the Anti-Homosexuality Act's online-content penalties (signed May 2023), a Constitutional Court ruling striking the "offensive communication" provision, a new Computer Misuse Amendment Act (up to 7 years for vaguely-defined "unsolicited"/"malicious" information sharing, 10 for unauthorized data access), a dismissed cyberstalking case against journalists, and a reported police purchase of Cellebrite's UFED phone-hacking tool — legislative/surveillance content distinct from the existing 2024 entry.
+
+**Rights/licensing note:** Same as above — permission pending, internal use only.
+
+**Decision: Included.**
+
+## freedomhouse-ug-2022-fotn — Included
+
+**Reviewed:** 2026-07-20. **Automated checks:** Tier 1 passed. Tier 2 FLAGGED for human review (English, 11,589 words, near-duplicate of freedomhouse-ug-2024-fotn and freedomhouse-ug-2023-fotn).
+
+**Topic relevance:** Clean include. Country-specific Freedom on the Net chapter, coverage period June 2021-May 2022.
+
+**Coverage contribution:** Third Uganda year in the corpus, the earliest baseline. Near-duplicate flag reflects template similarity with the other two Uganda-year chapters, not overlap — this chapter documents a new internet-data tax replacing the prior OTT tax, the continued Facebook block (a persistent baseline fact worth having across editions), ongoing arrests/violence against critical journalists, and Pegasus spyware (NSO Group) used against journalists and an opposition leader — distinct from both 2023 and 2024.
+
+**Rights/licensing note:** Same as above — permission pending, internal use only.
+
+**Decision: Included.**
+
+## freedomhouse-et-2023-fotn — Included
+
+**Reviewed:** 2026-07-20. **Automated checks:** Tier 1 passed. Tier 2 FLAGGED for human review (English, 12,762 words, near-duplicate of freedomhouse-et-2022-fotn).
+
+**Topic relevance:** Clean include. Country-specific Freedom on the Net chapter, coverage period June 2022-May 2023 — this corpus's most active live-conflict censorship story.
+
+**Coverage contribution:** New Ethiopia year not yet in the corpus. Near-duplicate flag against the 2022 chapter is structural, not substantive — this chapter documents the Tigray internet shutdown beginning to lift after the November 2022 peace agreement, new communications blackouts opening in Oromia (Kellem Wollega, July 2022) and Amhara (mobile data cut, April 2023), and a nationwide block of TikTok/Facebook/Telegram/YouTube (Feb-May 2023) tied to Ethiopian Orthodox Church-organized protests — a genuinely new platform-wide block not present in the 2022 chapter.
+
+**Rights/licensing note:** Same as above — permission pending, internal use only.
+
+**Decision: Included.**
+
+## freedomhouse-et-2022-fotn — Included
+
+**Reviewed:** 2026-07-20. **Automated checks:** Tier 1 passed. Tier 2 FLAGGED for human review (English, 11,673 words, near-duplicate of freedomhouse-et-2023-fotn).
+
+**Topic relevance:** Clean include. Country-specific Freedom on the Net chapter, coverage period June 2021-May 2022.
+
+**Coverage contribution:** Third Ethiopia year in the corpus, the earliest baseline. Near-duplicate flag against the 2023 chapter is template similarity, not overlap — this chapter documents the Tigray shutdown still fully in effect pre-peace-deal (the "before" state that the 2023 chapter shows lifting), international outlets' press licenses threatened/revoked, and a journalist forcibly disappeared — distinct from both 2023 and 2024.
+
+**Rights/licensing note:** Same as above — permission pending, internal use only.
+
+**Decision: Included.**
+
+## freedomhouse-rw-2023-fotn — Included
+
+**Reviewed:** 2026-07-20. **Automated checks:** Tier 1 passed, Tier 2 clean (English, 10,128 words, no near-duplicates).
+
+**Topic relevance:** Clean include. Country-specific Freedom on the Net chapter, coverage period June 2022-May 2023.
+
+**Coverage contribution:** New Rwanda year not yet in the corpus. Documents a RURA telecom licensing change, 3 imprisoned YouTube journalists acquitted and released (Oct 2022), a Citizen Lab report confirming Pegasus targeting of a government critic's relative, and the death of prominent investigative journalist John Ntwali in a suspicious car accident (Jan 2023) — distinct from both the 2022 and 2024 findings.
+
+**Rights/licensing note:** Same as above — permission pending, internal use only.
+
+**Decision: Included.**
+
+## freedomhouse-rw-2022-fotn — Included
+
+**Reviewed:** 2026-07-20. **Automated checks:** Tier 1 passed, Tier 2 clean (English, 9,220 words, no near-duplicates).
+
+**Topic relevance:** Clean include. Country-specific Freedom on the Net chapter, coverage period June 2021-May 2022.
+
+**Coverage contribution:** Third Rwanda year in the corpus, the earliest baseline. Documents the blocking of 15 exile-run outlets, prison sentences of 15 and 7 years for YouTube critics, Pegasus targeting of non-Rwandan journalists, and a new data-privacy law with in-country data-storage requirements — distinct from both 2023 and 2024.
+
+**Rights/licensing note:** Same as above — permission pending, internal use only.
+
+**Decision: Included.**

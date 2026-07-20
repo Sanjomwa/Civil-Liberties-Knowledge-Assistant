@@ -222,3 +222,10 @@ data/raw/
 data/processed/
 data/chunks/
 data/index/
+
+# Local-only orchestration files (Cowork <-> Claude Code in WSL workflow,
+# established 2026-07-20) — never committed, never authored from the
+# Cowork side, so also excluded from the Cowork-to-WSL rsync direction
+# (see decisionlog.md, 2026-07-20).
+CLAUDE.md
+reports.md
