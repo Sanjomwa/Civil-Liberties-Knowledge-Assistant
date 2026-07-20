@@ -287,6 +287,12 @@ what to change before scaling past one org.
 **Status: COMPLETE.** All 10 documents flowed through all six stages;
 1671 total chunks written.
 
+**Superseded by Section 7's 2026-07-20 entry below — corpus is now 18
+documents / 2661 chunks**, not 10/1671. Left here as the original
+milestone record rather than edited in place, since it's still the
+correct description of what the walking-skeleton-to-10-doc pass itself
+proved (auto-vs-manual acquisition method per org).
+
 **Purpose:** the walking skeleton (Section 6a) proved the pipeline's shape
 on one document from one org. This pass's specific goal, per Sam's own
 framing, was to settle **which orgs can use scripted `acquisition: auto`
@@ -395,6 +401,46 @@ auto-vs-manual question; scaling further is future work, see Section 7),
   headers against a never-before-fetched OONI URL, HTTP 200, real
   content, no challenge markers. See `corpus/sources/ooni.yaml` and
   `decisionlog.md`, 2026-07-20, for the full evidence trail.
+- **DONE, 2026-07-20: full pipeline completed for the 8 new Freedom
+  House documents — corpus is now 18 documents / 2661 chunks.**
+  `metadata.py` and `chunk.py` run for all 18 Included documents
+  (idempotent full pass, not scoped to just the new 8). All 8 new
+  documents: `validation_status: "valid"`, no warnings, populated
+  `chunking` blocks (990 chunks total, 95-149 per document, scaling
+  with word count as expected). The 10 pre-existing documents'
+  chunk counts were byte-for-byte unchanged (1671, matching the
+  original 10-document milestone exactly) — confirms the full-pass
+  re-run didn't alter anything it wasn't supposed to. Corpus
+  breakdown by org: Freedom House 12 (4 original + 8 new), Access Now
+  2, CIPESA 2, OONI 2 — 18 total, 2661 chunks. Full verbatim run
+  output in `reports.md`/`decisionlog.md`, 2026-07-20.
+- **In progress, 2026-07-20: Access Now (2 new: 2022, 2025 annual
+  reports) and OONI (1 new: Ethiopia 2023) candidates researched,
+  semantic-reviewed, and added to their source YAMLs — not yet
+  acquired.** Corpus/sources/accessnow.yaml now has 4 documents
+  (2022-2025, one flagship annual report per year); corpus/sources/
+  ooni.yaml now has 3 (adds this org's first Ethiopia entry, a direct
+  cross-org account of the same Feb-May 2023 platform block already in
+  Freedom House's et-2023-fotn entry). Acquisition prompt handed to
+  Claude Code; not yet run as of this update.
+- **DONE, 2026-07-20: ADR-0006 — corpus date window extended 2022-2025
+  → 2022-2026.** Static, one-time, event-motivated bump (Opus-consulted;
+  not a rolling window — see the ADR for why), triggered by a real OONI
+  document on Uganda's January 2026 election shutdown that was otherwise
+  in-scope. `docs/corpus-inclusion-rubric.md` and `archituecture.md.docx`
+  (now v1.6) both updated. Also fixed in the same pass: `archituecture.md.docx`
+  had silently drifted from ADR-0005's own declared v1.5 bump (never
+  actually applied) — both version bumps corrected together.
+- **Next: continue scaling toward the 40-60 document target (18/40-60,
+  heading to 21).** Per the Opus consult behind ADR-0006: the bigger
+  lever here is under-sampling within the existing window, not the
+  window itself — most orgs still hold only 1-4 documents when
+  substantially more real in-window material exists per org. CIPESA is
+  the org least touched this round (still 2 documents) — a good next
+  research target, same shape as this pass (research here in Cowork,
+  semantic review, then hand Claude Code the acquisition prompt). The
+  Uganda January 2026 OONI document ADR-0006 makes newly eligible is
+  also worth picking up in a future pass.
 - **Freedom House permission request — sent 2026-07-13** (drafted
   2026-07-11, sent by Sam directly from Gmail — no send capability was
   available to Claude, only draft creation, so this was Sam's own action).

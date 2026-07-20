@@ -13,9 +13,11 @@ exclusion decision made during actual corpus building should get logged in
 ambiguous cases that come up should get added back here as new precedent
 examples — see Section 4.
 
-Last updated: 2026-07-11 (written pre-implementation, before corpus
-building has started — the examples below are illustrative, not yet drawn
-from real review decisions).
+Last updated: 2026-07-20 (window extended 2022–2025 → 2022–2026 via
+ADR-0006; examples below are now drawn from real review decisions —
+Access Now/CIPESA 2024 cross-org pair, the Freedom House 2022/2023
+near-duplicate-flag reviews — not just illustrative as originally
+written 2026-07-11).
 
 ---
 
@@ -24,7 +26,9 @@ from real review decisions).
 **Definition:** a document is topically relevant if it primarily concerns
 internet censorship, network interference, internet shutdowns, or digital
 rights in at least one of the five target countries (Kenya, Uganda,
-Tanzania, Ethiopia, Rwanda), within the 2022–2025 window.
+Tanzania, Ethiopia, Rwanda), within the 2022–2026 window (extended from
+2022–2025 via ADR-0006, 2026-07-20 — a static, one-time, event-motivated
+bump, not an automatically-current window; see the ADR for why).
 
 "Primarily concerns" means the document's core subject is one of those
 topics — not that every paragraph is on-topic. A 40-page country report on
@@ -48,7 +52,7 @@ and the rest is context a citation-grounded answer may legitimately need.
   focused on West Africa).
 - The document's connection to the topic is incidental — e.g., a general
   press-freedom report that mentions internet access in one sentence.
-- The document falls outside 2022–2025, even if otherwise perfectly on
+- The document falls outside 2022–2026, even if otherwise perfectly on
   topic (older reports may still be useful background reading while
   designing the corpus, but they don't get ingested).
 

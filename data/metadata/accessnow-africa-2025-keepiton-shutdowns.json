@@ -1,0 +1,53 @@
+{
+  "doc_id": "accessnow-africa-2025-keepiton-shutdowns",
+  "schema_version": "1.1",
+  "declared": {
+    "title": "Rising Repression Meets Global Resistance: Internet Shutdowns in 2025",
+    "organization": "Access Now",
+    "countries": [
+      "KE",
+      "UG",
+      "TZ",
+      "ET",
+      "RW"
+    ],
+    "publication_date": "2026-03-01",
+    "url": "https://www.accessnow.org/wp-content/uploads/2026/03/KeepItOn-Internet-Shutdowns-2025-Annual-Report.pdf",
+    "doc_type": "annual_report",
+    "source_format": "pdf",
+    "topics": [
+      "internet_shutdown",
+      "censorship",
+      "network_interference"
+    ],
+    "language": "en",
+    "selection_rationale": "Access Now's #KeepItOn annual shutdown report for 2025, the most recent complete year in this corpus's 2022-2025 window. Confirmed live via direct fetch, 2026-07-20 — documents Tanzania heavily (8 shutdowns, the most of any target country that year, tied to the December 2025 election-related protest crackdown with reported unlawful use of lethal force), and notes Kenya's Telegram block during national exams happening \"for the third year in a row\" — a direct cross-reference to this corpus's existing OONI entry (ooni-ke-2025-telegram-kcse-blocking), the same event corroborated from a second organization's tracking methodology. Publication date (2026-03) follows the same lag pattern as every other annual report already in this corpus (each publishes several months after the calendar year it covers) — the document's actual subject matter is squarely inside the 2022-2025 window, only its publication date exceeds it, consistent with how the existing 2023/2024 reports are already treated.",
+    "corpus_version": "v1.0"
+  },
+  "derived": {
+    "sha256": "3e650c3ca82d49b264a178423d0be1d38fee788248d7d6f1df2da5077178626d",
+    "file_size_bytes": 4624811,
+    "extracted_word_count": 13949,
+    "extraction_method": "pdfplumber",
+    "extraction_date": "2026-07-20",
+    "detected_language": "en",
+    "detected_language_confidence": 1.0,
+    "validation_status": "valid",
+    "validation_warnings": []
+  },
+  "lifecycle": {
+    "status": "active",
+    "superseded_by": null,
+    "supersedes": null,
+    "reason": null,
+    "effective_date": null
+  },
+  "chunking": {
+    "strategy": "fixed_overlap",
+    "chunk_size": 1500,
+    "chunk_step": 750,
+    "total_chunks": 147,
+    "chunking_date": "2026-07-20",
+    "corpus_version": "v1.0"
+  }
+}

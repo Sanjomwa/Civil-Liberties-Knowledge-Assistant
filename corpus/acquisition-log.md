@@ -249,3 +249,36 @@ design.
 **Rights/licensing note:** Same as above — permission pending, internal use only.
 
 **Decision: Included.**
+- **accessnow-africa-2022-keepiton-shutdowns** — acquire.py failure (2026-07-20): corpus/sources/accessnow.yaml still has a placeholder sha256. Get the real file once by hand, compute its checksum, and put that in the YAML before running this script.
+- **accessnow-africa-2025-keepiton-shutdowns** — acquire.py failure (2026-07-20): corpus/sources/accessnow.yaml still has a placeholder sha256. Get the real file once by hand, compute its checksum, and put that in the YAML before running this script.
+- **ooni-et-2023-social-media-blocking** — acquire.py failure (2026-07-20): corpus/sources/ooni.yaml still has a placeholder sha256. Get the real file once by hand, compute its checksum, and put that in the YAML before running this script.
+
+## accessnow-africa-2022-keepiton-shutdowns — Included
+
+**Reviewed:** 2026-07-20. **Automated checks:** Tier 1 passed, Tier 2 clean (16,439 words, no near-duplicates, including against the other 3 Access Now documents now in the corpus).
+
+**Topic relevance:** Clean include. Access Now's #KeepItOn annual shutdown report for 2022, core subject squarely on internet shutdowns, explicitly covering all five target countries within the 2022-2026 window (per ADR-0006).
+
+**Coverage contribution:** Extends this org's trajectory back to 2022 (alongside the existing 2023/2024/2025 reports) — documents Ethiopia's Tigray shutdown reaching 787+ days by end of 2022, Uganda's Facebook block persisting past its 2021 election, and Kenya maintaining internet access throughout its August 2022 election despite a pre-election platform-blocking warning. Genuinely distinct year, not a template repeat (confirmed by SimHash: 0 near-duplicates across all 4 Access Now documents).
+
+**Decision: Included.**
+
+## accessnow-africa-2025-keepiton-shutdowns — Included
+
+**Reviewed:** 2026-07-20. **Automated checks:** Tier 1 passed, Tier 2 clean (13,949 words, no near-duplicates).
+
+**Topic relevance:** Clean include. Access Now's #KeepItOn annual report for 2025, the most recent complete year in the corpus's 2022-2026 window.
+
+**Coverage contribution:** Documents Tanzania heavily (8 shutdowns, tied to the December 2025 election-protest crackdown), and notes Kenya's Telegram exam-period block happening "for the third year in a row" — a direct cross-reference to this corpus's existing OONI entry (ooni-ke-2025-telegram-kcse-blocking), the same event corroborated by a second organization's tracking methodology, exactly the kind of cross-org comparison the architecture's research questions call for.
+
+**Decision: Included.**
+
+## ooni-et-2023-social-media-blocking — Included
+
+**Reviewed:** 2026-07-20. **Automated checks:** Tier 1 passed, Tier 2 clean (991 words, clears the 500-word minimum with room to spare, no near-duplicates).
+
+**Topic relevance:** Clean include. OONI's investigation into Ethiopia's nationwide block of Facebook/Telegram/YouTube/TikTok starting February 2023, in-scope country and window.
+
+**Coverage contribution:** This org's first Ethiopia entry, and documents the exact same event already in this corpus's Freedom House freedomhouse-et-2023-fotn entry (which cites the same platform block as one of its own Key Developments) — a genuine cross-organization account of a shared event via a different tracking methodology (network measurement vs. narrative country survey), coverage contribution per the rubric's own definition (Section 2), not duplication.
+
+**Decision: Included.**

@@ -34,6 +34,38 @@ _Semantic review (topic relevance, coverage contribution) is a human judgment ca
 _Semantic review (topic relevance, coverage contribution) is a human judgment call per docs/corpus-inclusion-rubric.md — not automated here. Record the Included/Excluded decision by hand in corpus/acquisition-log.md._
 
 
+## accessnow-africa-2022-keepiton-shutdowns
+
+**Tier 1:** passed.
+
+**Tier 2:** clean
+.
+
+- Word count: 16439
+- Language: en
+- Near-duplicates found: 0
+- Topic keyword hint (10 matched): censorship, internet shutdown, blocked, blocking, network interference, surveillance, digital rights, freedom of expression, vpn, throttl
+
+
+_Semantic review (topic relevance, coverage contribution) is a human judgment call per docs/corpus-inclusion-rubric.md — not automated here. Record the Included/Excluded decision by hand in corpus/acquisition-log.md._
+
+
+## accessnow-africa-2025-keepiton-shutdowns
+
+**Tier 1:** passed.
+
+**Tier 2:** clean
+.
+
+- Word count: 13949
+- Language: en
+- Near-duplicates found: 0
+- Topic keyword hint (10 matched): censorship, internet shutdown, blocked, blocking, network interference, surveillance, digital rights, freedom of expression, vpn, throttl
+
+
+_Semantic review (topic relevance, coverage contribution) is a human judgment call per docs/corpus-inclusion-rubric.md — not automated here. Record the Included/Excluded decision by hand in corpus/acquisition-log.md._
+
+
 ## cipesa-africa-2024-sifa-elections
 
 **Tier 1:** passed.
@@ -293,6 +325,22 @@ _Semantic review (topic relevance, coverage contribution) is a human judgment ca
 - Language: en
 - Near-duplicates found: 0
 - Topic keyword hint (7 matched): censorship, internet shutdown, blocked, blocking, network interference, digital rights, freedom of expression
+
+
+_Semantic review (topic relevance, coverage contribution) is a human judgment call per docs/corpus-inclusion-rubric.md — not automated here. Record the Included/Excluded decision by hand in corpus/acquisition-log.md._
+
+
+## ooni-et-2023-social-media-blocking
+
+**Tier 1:** passed.
+
+**Tier 2:** clean
+.
+
+- Word count: 991
+- Language: en
+- Near-duplicates found: 0
+- Topic keyword hint (3 matched): blocked, blocking, freedom of expression
 
 
 _Semantic review (topic relevance, coverage contribution) is a human judgment call per docs/corpus-inclusion-rubric.md — not automated here. Record the Included/Excluded decision by hand in corpus/acquisition-log.md._

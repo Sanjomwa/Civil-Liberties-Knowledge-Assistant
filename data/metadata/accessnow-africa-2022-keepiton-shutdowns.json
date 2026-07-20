@@ -1,0 +1,53 @@
+{
+  "doc_id": "accessnow-africa-2022-keepiton-shutdowns",
+  "schema_version": "1.1",
+  "declared": {
+    "title": "Weapons of Control, Shields of Impunity: Internet Shutdowns in 2022",
+    "organization": "Access Now",
+    "countries": [
+      "KE",
+      "UG",
+      "TZ",
+      "ET",
+      "RW"
+    ],
+    "publication_date": "2023-02-28",
+    "url": "https://www.accessnow.org/wp-content/uploads/2023/05/2022-KIO-Report-final.pdf",
+    "doc_type": "annual_report",
+    "source_format": "pdf",
+    "topics": [
+      "internet_shutdown",
+      "censorship",
+      "network_interference"
+    ],
+    "language": "en",
+    "selection_rationale": "Access Now's #KeepItOn annual shutdown report for 2022 (187+ shutdowns across 35 countries, the highest number of countries ever recorded in a single year). Confirmed live via direct fetch, 2026-07-20 — documents Ethiopia's Tigray shutdown reaching 787+ days by end of 2022 (2+ years continuous), Uganda's Facebook block persisting past its 2021 election into the full 2022 coverage year, and Kenya as a positive counter-example — maintained internet access throughout its August 2022 general election despite a pre-election #KeepItOn warning about platform-blocking risk. Coverage-contribution value: extends this org's trajectory back to 2022, matching the same three-years-of-data reasoning already applied to the Freedom House Kenya/Uganda/Ethiopia/Rwanda 2022-2024 entries, and gives Kenya a genuine before/after pair (2022's clean election vs. later years' disruptions noted in the 2023/2024 reports already in this corpus).",
+    "corpus_version": "v1.0"
+  },
+  "derived": {
+    "sha256": "5f126c12aa88372559530799a2ecf62b7a46bbc70e8bf565441c9ce0006f6ad0",
+    "file_size_bytes": 2463064,
+    "extracted_word_count": 16439,
+    "extraction_method": "pdfplumber",
+    "extraction_date": "2026-07-20",
+    "detected_language": "en",
+    "detected_language_confidence": 1.0,
+    "validation_status": "valid",
+    "validation_warnings": []
+  },
+  "lifecycle": {
+    "status": "active",
+    "superseded_by": null,
+    "supersedes": null,
+    "reason": null,
+    "effective_date": null
+  },
+  "chunking": {
+    "strategy": "fixed_overlap",
+    "chunk_size": 1500,
+    "chunk_step": 750,
+    "total_chunks": 161,
+    "chunking_date": "2026-07-20",
+    "corpus_version": "v1.0"
+  }
+}

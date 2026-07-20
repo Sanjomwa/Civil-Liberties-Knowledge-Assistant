@@ -101,3 +101,39 @@ documents:
       confirmed.
     corpus_version: v1.0
     sha256: "7769f47ad56b383c25986d2310058d158beca830c4829d8dae6a25708c7c320e"
+
+  # --- 2026-07-20 addition: Ethiopia, this org's first entry for that
+  # country. Confirmed live via direct fetch, 2026-07-20 (this was the
+  # same URL used as the OONI reconnaissance test earlier the same day,
+  # per decisionlog.md -- real content, no challenge markers, positive
+  # title-check would pass).
+
+  - doc_id: ooni-et-2023-social-media-blocking
+    title: "Ethiopia: Ongoing blocking of social media"
+    organization: OONI
+    countries: ["ET"]
+    publication_date: "2023-02-15"
+    url: "https://ooni.org/post/2023-ethiopia-blocks-social-media/"
+    doc_type: country_report
+    source_format: html
+    topics: ["censorship", "network_interference", "social_media_blocking"]
+    language: en
+    selection_rationale: >
+      OONI's investigation into Ethiopia's nationwide block of Facebook,
+      Telegram, YouTube, and TikTok starting 9-10 February 2023
+      (TLS-level interference, corroborated by Google's own traffic
+      data), imposed after the Ethiopian Orthodox Tewahedo Church (EOTC)
+      organized protests over the government's recognition of a
+      breakaway synod. Coverage contribution: documents the exact same
+      event already in this corpus's Freedom House
+      freedomhouse-et-2023-fotn entry (which cites the same nationwide
+      platform block as one of its own Key Developments) -- a genuine
+      cross-organization account of a shared event via a different
+      tracking methodology (OONI's network measurements vs. Freedom
+      House's narrative country survey), which is coverage contribution
+      by the rubric's own definition (Section 2), not duplication. Also
+      this org's first Ethiopia entry -- the corpus's most active
+      live-conflict censorship story (per PROJECT_CONTINUITY.md) now has
+      three organizations' independent accounts of overlapping events.
+    corpus_version: v1.0
+    sha256: "955b962129e0a72265b3f9c89a9a1abf7f3c0b10037cdb2d6e1311602ed0a2e9"
