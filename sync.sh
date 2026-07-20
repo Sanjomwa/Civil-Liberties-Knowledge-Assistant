@@ -38,6 +38,23 @@
 # exits non-zero with a clear message rather than silently no-op'ing (rsync
 # against a missing source directory can otherwise look like "nothing to
 # do" instead of "something is wrong").
+#
+# Post-sync summary + dotfile sanity scan (added 2026-07-20, after a
+# retrospective on three separate incidents this same day -- an
+# incomplete-exclude-list bug hit three times in a row: push missing a
+# YAML directory, push missing src/*.py, then both pull and push missing
+# .git/). The generalizable lesson (Opus-consulted): the exclude list is
+# a MODEL of what matters, and every incident was that model silently
+# drifting from reality without anything ever checking. Adding yet
+# another named exclude only patches the specific instance already
+# found -- it doesn't catch the next unanticipated category. So instead
+# of only trusting the exclude list, every run now prints (a) rsync's
+# own transfer stats, so an unexpectedly large/small transfer is visible
+# at a glance instead of assumed correct, and (b) a scan for top-level
+# dotfiles/dirs in the destination that aren't explicitly expected --
+# this catches a FUTURE .git-shaped surprise (or anything else) even if
+# nobody thought to add an exclude for it yet, which is the actual
+# structural fix, not one more named exclude.
 
 set -euo pipefail
 
@@ -52,6 +69,25 @@ if [ ! -d "$COWORK_MIRROR" ]; then
   echo "path changed. Do not proceed with the task -- fix this first." >&2
   exit 1
 fi
+
+# Prints rsync's own transfer count/size, plus a dotfile/dir sanity scan
+# of $1 (the sync destination) so an unanticipated category of file
+# (like the .git/ incident) is visible immediately, not discovered by
+# accident later. Not a substitute for correct excludes -- a
+# complementary check that doesn't depend on anyone having anticipated
+# the specific thing that went wrong.
+print_sync_summary() {
+  local dest="$1"
+  local stats_file="$2"
+  echo ""
+  echo "[sync.sh] Transfer summary:"
+  grep -E "Number of (regular files transferred|created files|deleted files)|Total transferred file size" "$stats_file" | sed 's/^/  /'
+  echo ""
+  echo "[sync.sh] Top-level dotfiles/dirs at $dest (sanity scan -- expect only"
+  echo "  known entries like .gitignore; anything unfamiliar here is worth a"
+  echo "  second look, especially anything that looks like .git/):"
+  find "$dest" -maxdepth 1 -name '.*' -not -name '.' -not -name '..' -exec basename {} \; | sed 's/^/  /'
+}
 
 case "$MODE" in
   pull)
@@ -75,13 +111,16 @@ case "$MODE" in
     # .git happened to originate from this same repo's history (a no-op
     # overlay) -- verified via git status/log/fsck all clean. Won't rely
     # on that coincidence again.
-    rsync -av \
+    stats_file="$(mktemp)"
+    rsync -av --stats \
       --exclude='.venv' --exclude='__pycache__' --exclude='data/' \
       --exclude='reports.md' --exclude='CLAUDE.md' --exclude='.git/' \
       --exclude='corpus/acquisition-log.md' --exclude='corpus/manifest.csv' \
       --exclude='corpus/checksums.sha256' --exclude='corpus/validation-report.md' \
       "$COWORK_MIRROR/" \
-      "$WSL_REPO/"
+      "$WSL_REPO/" | tee "$stats_file"
+    print_sync_summary "$WSL_REPO" "$stats_file"
+    rm -f "$stats_file"
     echo "[sync.sh] Pull complete."
     ;;
   push)
@@ -93,12 +132,17 @@ case "$MODE" in
     fi
     echo "[sync.sh] WSL -> Cowork (push) starting..."
     # Full mirror, WSL -> Cowork, same exclude philosophy as pull but only
-    # two exclusions: .venv/__pycache__/data/ (never worth the payload --
+    # three exclusions: .venv/__pycache__/data/ (never worth the payload --
     # data/ especially can be large, and the Cowork session doesn't need
-    # raw downloaded documents to do curation), and CLAUDE.md (WSL-local
+    # raw downloaded documents to do curation), CLAUDE.md (WSL-local
     # execution-layer conventions, deliberately never synced into Cowork's
     # copy -- the canonical reference for that content is
-    # claude-code-wsl-CLAUDE.md, a separate file, on purpose).
+    # claude-code-wsl-CLAUDE.md), and claude-code-wsl-CLAUDE.md itself
+    # (Cowork-authored, one-directional Cowork -> WSL only via pull;
+    # excluded from push so a stale WSL copy can never overwrite Cowork's
+    # canonical one -- moved into repo/ 2026-07-20, see its own revision
+    # history v4, after living outside repo/ made it unreachable by pull
+    # and blocked a real task).
     #
     # Everything else -- src/, corpus/sources/*.yaml, corpus/
     # acquisition-log.md, corpus/manifest.csv, corpus/checksums.sha256,
@@ -112,11 +156,14 @@ case "$MODE" in
     # forget an entry on. No --delete/--delete-excluded here either, same
     # reasoning as pull: this must only add/update on the Cowork side,
     # never remove something Cowork itself added since the last push.
-    rsync -av \
+    stats_file="$(mktemp)"
+    rsync -av --stats \
       --exclude='.venv' --exclude='__pycache__' --exclude='data/' \
-      --exclude='CLAUDE.md' --exclude='.git/' \
+      --exclude='CLAUDE.md' --exclude='.git/' --exclude='claude-code-wsl-CLAUDE.md' \
       "$WSL_REPO/" \
-      "$COWORK_MIRROR/"
+      "$COWORK_MIRROR/" | tee "$stats_file"
+    print_sync_summary "$COWORK_MIRROR" "$stats_file"
+    rm -f "$stats_file"
     echo "[sync.sh] Push complete."
     ;;
   *)

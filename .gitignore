@@ -229,3 +229,11 @@ data/index/
 # (see decisionlog.md, 2026-07-20).
 CLAUDE.md
 reports.md
+
+# claude-code-wsl-CLAUDE.md is different from the two above: it IS
+# Cowork-authored (canonical source for what CLAUDE.md above should
+# contain) and DOES need to sync Cowork -> WSL, so it's excluded from
+# git only, not from sync.sh pull. Moved here from outside repo/ on
+# 2026-07-20 after that location made it unreachable by sync.sh pull —
+# see claude-code-wsl-CLAUDE.md's own revision history (v4).
+claude-code-wsl-CLAUDE.md

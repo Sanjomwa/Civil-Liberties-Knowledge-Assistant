@@ -363,6 +363,21 @@ auto-vs-manual question; scaling further is future work, see Section 7),
 
 ## 7. Open action items (don't lose track of these)
 
+- **DONE, 2026-07-20: `claude-code-wsl-CLAUDE.md` relocated into
+  `repo/`; Research Questions docx drift fixed.** The retrospective's
+  own v3 update (previous entry, below) hit a real blocker the same
+  day: the file lived outside `repo/`, unreachable by `sync.sh pull`,
+  so Claude Code correctly reported it couldn't find v3 rather than
+  guessing at its content. Moved the canonical copy to
+  `repo/claude-code-wsl-CLAUDE.md` (gitignored, excluded from `push`
+  too so a stale WSL copy can't overwrite it), left a pointer stub at
+  the old location, updated `.gitignore`, `sync.sh`'s comments, and
+  project `CLAUDE.md` Section 9. Also fixed, from the same task's ADR-
+  vs-reality audit: `docs/archituecture.md.docx`'s "Research
+  Questions" section still said "between 2022 and 2025" after
+  ADR-0006's window extension — updated to 2026, validated (307→307
+  paragraphs, all checks PASSED), visually confirmed. See
+  `decisionlog.md`, 2026-07-20, for the full incident.
 - **Next: scale ingestion to the full 40-60 document corpus.** Both
   Section 6a (pipeline shape) and Section 6b (per-org auto-vs-manual) are
   complete. Access Now/CIPESA/Freedom House can be acquired via
@@ -414,15 +429,21 @@ auto-vs-manual question; scaling further is future work, see Section 7),
   breakdown by org: Freedom House 12 (4 original + 8 new), Access Now
   2, CIPESA 2, OONI 2 — 18 total, 2661 chunks. Full verbatim run
   output in `reports.md`/`decisionlog.md`, 2026-07-20.
-- **In progress, 2026-07-20: Access Now (2 new: 2022, 2025 annual
-  reports) and OONI (1 new: Ethiopia 2023) candidates researched,
-  semantic-reviewed, and added to their source YAMLs — not yet
-  acquired.** Corpus/sources/accessnow.yaml now has 4 documents
-  (2022-2025, one flagship annual report per year); corpus/sources/
-  ooni.yaml now has 3 (adds this org's first Ethiopia entry, a direct
-  cross-org account of the same Feb-May 2023 platform block already in
-  Freedom House's et-2023-fotn entry). Acquisition prompt handed to
-  Claude Code; not yet run as of this update.
+- **DONE, 2026-07-20: Access Now (2 new: 2022, 2025 annual reports) and
+  OONI (1 new: Ethiopia 2023) fully through the pipeline — corpus now
+  21 documents / 2977 chunks.** `corpus/sources/accessnow.yaml` now has
+  4 documents (2022-2025, one flagship annual report per year);
+  `corpus/sources/ooni.yaml` now has 3 (this org's first Ethiopia entry,
+  a direct cross-org account of the same Feb-May 2023 platform block
+  already in Freedom House's `et-2023-fotn` entry). All 3 acquired
+  against the standard pre-declared-hash gate (neither org needed
+  ADR-0005's trust-on-first-use treatment — confirmed via a double-fetch
+  stability check on the OONI HTML document, not assumed). All 3 logged
+  Included in `corpus/acquisition-log.md`, `validation_status: "valid"`
+  with no warnings, 316 new chunks (161+147+8), 18 pre-existing
+  documents' chunk counts unchanged (2661, confirming idempotency).
+  316+2661=2977 matches `chunk.py`'s own total exactly. Full run output
+  in `decisionlog.md`, 2026-07-20.
 - **DONE, 2026-07-20: ADR-0006 — corpus date window extended 2022-2025
   → 2022-2026.** Static, one-time, event-motivated bump (Opus-consulted;
   not a rolling window — see the ADR for why), triggered by a real OONI
