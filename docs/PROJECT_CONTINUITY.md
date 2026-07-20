@@ -363,6 +363,16 @@ auto-vs-manual question; scaling further is future work, see Section 7),
 
 ## 7. Open action items (don't lose track of these)
 
+- **DONE, 2026-07-20: Freedom House 2025 batch (4 docs) reviewed,
+  Included, pipelined — corpus now at 28 documents / 3336 chunks.**
+  Real finding along the way: Freedom House abridged the entire 2025
+  FOTN series for budget reasons (1,134-1,906 words vs. 9,220-14,312
+  in 2022-2024) — reviewed anyway rather than assumed-fine or
+  assumed-disqualified; all 4 contain genuine, specific, dated,
+  footnoted findings not already in the corpus (confirmed with Sam).
+  Per-org: Access Now 4 (668 chunks), CIPESA 4 (924), Freedom House 16
+  (1,595), OONI 4 (149). See `decisionlog.md`, 2026-07-20, for the
+  full review.
 - **DONE, 2026-07-20: `acquire.py`/`extract.py`/`metadata.py` all
   support a third `source_format`: `json` — corpus now at 24
   documents, 3283 chunks, all fully pipelined.** Needed for OONI's

@@ -1,0 +1,49 @@
+{
+  "doc_id": "cipesa-rw-2025-upr-submission",
+  "schema_version": "1.1",
+  "declared": {
+    "title": "Human Rights in the Digital Context: Rwanda (UPR Info Pre-Sessions 51)",
+    "organization": "CIPESA",
+    "countries": [
+      "RW"
+    ],
+    "publication_date": "2025-11-01",
+    "url": "https://cipesa.org/wp-content/files/documents/UPR_Info_Pre_-Sessions_51_Human_Rights_in_the_Digital_Context_-_Rwanda.pdf",
+    "doc_type": "upr_submission",
+    "source_format": "pdf",
+    "topics": [
+      "surveillance",
+      "digital_rights",
+      "data_privacy"
+    ],
+    "language": "en",
+    "selection_rationale": "Joint CIPESA/APC (Association for Progressive Communications) submission to Rwanda's 4th UPR cycle -- explicitly co-authored per the document's own sources section, unlike the Tanzania entry above. Confirmed by fetching and reading the full PDF: documents state use of Pegasus spyware against 3,500+ activists, journalists, and diaspora members; the 2018 Penal Code and Cybercrime Law's speech-criminalizing provisions; technology-facilitated gender-based violence targeting women in public life (citing the 2024 campaign against opposition leader Victoire Ingabire Umuhoza); and data-localization requirements under the 2021 data protection law. Coverage-contribution value: a legal-advocacy/ UN-mechanism angle on Rwanda distinct from every other Rwanda entry in this corpus (Freedom House's narrative country survey, Access Now's shutdown tracking) -- explicitly cites Rwanda's own 2024 Freedom House score (36/100, Not Free) as part of its own argument, a direct cross-reference to this corpus's existing freedomhouse-rw-2024-fotn entry. Publication date: document's own header states \"November 2025\".",
+    "corpus_version": "v1.0"
+  },
+  "derived": {
+    "sha256": "19b018dcea0772fb47e19e85586ef712c98b3a9ffae2d99997db8633fa159ea5",
+    "file_size_bytes": 13024786,
+    "extracted_word_count": 1216,
+    "extraction_method": "pdfplumber",
+    "extraction_date": "2026-07-20",
+    "detected_language": "en",
+    "detected_language_confidence": 1.0,
+    "validation_status": "valid",
+    "validation_warnings": []
+  },
+  "lifecycle": {
+    "status": "active",
+    "superseded_by": null,
+    "supersedes": null,
+    "reason": null,
+    "effective_date": null
+  },
+  "chunking": {
+    "strategy": "fixed_overlap",
+    "chunk_size": 1500,
+    "chunk_step": 750,
+    "total_chunks": 11,
+    "chunking_date": "2026-07-20",
+    "corpus_version": "v1.0"
+  }
+}

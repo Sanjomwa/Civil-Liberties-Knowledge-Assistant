@@ -1,0 +1,50 @@
+{
+  "doc_id": "cipesa-tz-2026-upr-submission",
+  "schema_version": "1.1",
+  "declared": {
+    "title": "Joint Stakeholder Submission to the Fourth Cycle of the Universal Periodic Review of Tanzania",
+    "organization": "CIPESA",
+    "countries": [
+      "TZ"
+    ],
+    "publication_date": "2026-04-01",
+    "url": "https://cipesa.org/wp-content/files/JSS-4UPR_Tanzania_.pdf",
+    "doc_type": "upr_submission",
+    "source_format": "pdf",
+    "topics": [
+      "internet_shutdown",
+      "censorship",
+      "digital_rights",
+      "network_interference"
+    ],
+    "language": "en",
+    "selection_rationale": "By far the highest-value single addition available from CIPESA's catalog: Tanzania is this corpus's weakest-covered country overall (zero Freedom House chapters exist for it at all -- confirmed 2026-07-13, a real methodology gap, not an oversight -- and only passing continent-report mentions from CIPESA/Access Now otherwise). This submission is packed with specific, dated, footnoted Tanzania-only findings absent everywhere else in the corpus: a five-day nationwide internet shutdown during the October 29-November 3, 2025 general election; JamiiForums' 90-day TCRA suspension that in practice lasted over six months; opposition leader Tundu Lissu's non-bailable treason arrest over an election-boycott social media post; the October 2023 mandatory VPN-registration directive (with imprisonment as a penalty for noncompliance); YouTube/Facebook blocked during a dissident former ambassador's press conference; and a High Court case over an alleged (and judicially unproven) Clubhouse block. Confirmed by fetching and reading the full PDF, not the resources-page summary alone -- genuinely substantive, heavily sourced (40+ footnotes to primary reporting, court filings, and government notices), not a short advocacy leaflet. Titled a \"joint stakeholder submission\" on CIPESA's own resources page, same as the Rwanda entry below, but the document's own footer identifies only CIPESA -- co-signing organizations, if any, not independently confirmed. Publication date: the resources page describes this as prepared for the \"4th Cycle - 53rd session of the UPR - APRIL 2026\"; the document's own citations extend into April 2026, consistent with that dating.",
+    "corpus_version": "v1.0"
+  },
+  "derived": {
+    "sha256": "121a8cda4eed4014ab0a7a0dab8fe78eb00260176fb03184a65a094581c88ec3",
+    "file_size_bytes": 1234945,
+    "extracted_word_count": 4852,
+    "extraction_method": "pdfplumber",
+    "extraction_date": "2026-07-20",
+    "detected_language": "en",
+    "detected_language_confidence": 1.0,
+    "validation_status": "valid",
+    "validation_warnings": []
+  },
+  "lifecycle": {
+    "status": "active",
+    "superseded_by": null,
+    "supersedes": null,
+    "reason": null,
+    "effective_date": null
+  },
+  "chunking": {
+    "strategy": "fixed_overlap",
+    "chunk_size": 1500,
+    "chunk_step": 750,
+    "total_chunks": 51,
+    "chunking_date": "2026-07-20",
+    "corpus_version": "v1.0"
+  }
+}

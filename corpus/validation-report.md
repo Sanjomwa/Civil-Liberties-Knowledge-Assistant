@@ -130,6 +130,54 @@ _Semantic review (topic relevance, coverage contribution) is a human judgment ca
 _Semantic review (topic relevance, coverage contribution) is a human judgment call per docs/corpus-inclusion-rubric.md — not automated here. Record the Included/Excluded decision by hand in corpus/acquisition-log.md._
 
 
+## cipesa-tz-2026-upr-submission
+
+**Tier 1:** passed.
+
+**Tier 2:** clean
+.
+
+- Word count: 4852
+- Language: en
+- Near-duplicates found: 0
+- Topic keyword hint (9 matched): censorship, internet shutdown, blocked, blocking, network interference, surveillance, digital rights, freedom of expression, vpn
+
+
+_Semantic review (topic relevance, coverage contribution) is a human judgment call per docs/corpus-inclusion-rubric.md — not automated here. Record the Included/Excluded decision by hand in corpus/acquisition-log.md._
+
+
+## cipesa-rw-2025-upr-submission
+
+**Tier 1:** passed.
+
+**Tier 2:** clean
+.
+
+- Word count: 1216
+- Language: en
+- Near-duplicates found: 0
+- Topic keyword hint (4 matched): censorship, surveillance, digital rights, freedom of expression
+
+
+_Semantic review (topic relevance, coverage contribution) is a human judgment call per docs/corpus-inclusion-rubric.md — not automated here. Record the Included/Excluded decision by hand in corpus/acquisition-log.md._
+
+
+## cipesa-ug-2025-sifa-ai-country
+
+**Tier 1:** passed.
+
+**Tier 2:** clean
+.
+
+- Word count: 9320
+- Language: en
+- Near-duplicates found: 0
+- Topic keyword hint (6 matched): censorship, internet shutdown, blocked, surveillance, digital rights, freedom of expression
+
+
+_Semantic review (topic relevance, coverage contribution) is a human judgment call per docs/corpus-inclusion-rubric.md — not automated here. Record the Included/Excluded decision by hand in corpus/acquisition-log.md._
+
+
 ## freedomhouse-ke-2024-fotn
 
 **Tier 1:** passed.

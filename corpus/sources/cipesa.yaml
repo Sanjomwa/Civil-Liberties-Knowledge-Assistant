@@ -153,3 +153,115 @@ documents:
       discrepancy.
     corpus_version: v1.0
     sha256: "f789bf34348f6a0ee4b07f8ca415510df22123639423b223cb0b9b210e647005"
+
+  # --- 2026-07-20 addition: three documents from CIPESA's broader
+  # publication catalog (cipesa.org/resources), beyond the annual SIFA
+  # series this file otherwise draws from -- confirmed real via direct
+  # fetch of each PDF's actual text, not the resources-page listing
+  # alone. Two are UPR (Universal Periodic Review) advocacy submissions
+  # -- a document type new to this file, doc_type: upr_submission --
+  # and one is a country-specific companion report to the continent-wide
+  # 2025 SIFA report already in this corpus (cipesa-africa-2025-sifa-ai),
+  # not a duplicate of it.
+
+  - doc_id: cipesa-tz-2026-upr-submission
+    title: "Joint Stakeholder Submission to the Fourth Cycle of the Universal Periodic Review of Tanzania"
+    organization: CIPESA
+    countries: ["TZ"]
+    publication_date: "2026-04-01"
+    url: "https://cipesa.org/wp-content/files/JSS-4UPR_Tanzania_.pdf"
+    doc_type: upr_submission
+    source_format: pdf
+    topics: ["internet_shutdown", "censorship", "digital_rights", "network_interference"]
+    language: en
+    selection_rationale: >
+      By far the highest-value single addition available from CIPESA's
+      catalog: Tanzania is this corpus's weakest-covered country overall
+      (zero Freedom House chapters exist for it at all -- confirmed
+      2026-07-13, a real methodology gap, not an oversight -- and only
+      passing continent-report mentions from CIPESA/Access Now
+      otherwise). This submission is packed with specific, dated,
+      footnoted Tanzania-only findings absent everywhere else in the
+      corpus: a five-day nationwide internet shutdown during the
+      October 29-November 3, 2025 general election; JamiiForums'
+      90-day TCRA suspension that in practice lasted over six months;
+      opposition leader Tundu Lissu's non-bailable treason arrest over
+      an election-boycott social media post; the October 2023 mandatory
+      VPN-registration directive (with imprisonment as a penalty for
+      noncompliance); YouTube/Facebook blocked during a dissident former
+      ambassador's press conference; and a High Court case over an
+      alleged (and judicially unproven) Clubhouse block. Confirmed by
+      fetching and reading the full PDF, not the resources-page summary
+      alone -- genuinely substantive, heavily sourced (40+ footnotes to
+      primary reporting, court filings, and government notices), not a
+      short advocacy leaflet. Titled a "joint stakeholder submission" on
+      CIPESA's own resources page, same as the Rwanda entry below, but
+      the document's own footer identifies only CIPESA -- co-signing
+      organizations, if any, not independently confirmed. Publication
+      date: the resources page describes this as prepared for the
+      "4th Cycle - 53rd session of the UPR - APRIL 2026"; the document's
+      own citations extend into April 2026, consistent with that dating.
+    corpus_version: v1.0
+    sha256: "121a8cda4eed4014ab0a7a0dab8fe78eb00260176fb03184a65a094581c88ec3"
+
+  - doc_id: cipesa-rw-2025-upr-submission
+    title: "Human Rights in the Digital Context: Rwanda (UPR Info Pre-Sessions 51)"
+    organization: CIPESA
+    countries: ["RW"]
+    publication_date: "2025-11-01"
+    url: "https://cipesa.org/wp-content/files/documents/UPR_Info_Pre_-Sessions_51_Human_Rights_in_the_Digital_Context_-_Rwanda.pdf"
+    doc_type: upr_submission
+    source_format: pdf
+    topics: ["surveillance", "digital_rights", "data_privacy"]
+    language: en
+    selection_rationale: >
+      Joint CIPESA/APC (Association for Progressive Communications)
+      submission to Rwanda's 4th UPR cycle -- explicitly co-authored per
+      the document's own sources section, unlike the Tanzania entry
+      above. Confirmed by fetching and reading the full PDF: documents
+      state use of Pegasus spyware against 3,500+ activists, journalists,
+      and diaspora members; the 2018 Penal Code and Cybercrime Law's
+      speech-criminalizing provisions; technology-facilitated
+      gender-based violence targeting women in public life (citing the
+      2024 campaign against opposition leader Victoire Ingabire
+      Umuhoza); and data-localization requirements under the 2021 data
+      protection law. Coverage-contribution value: a legal-advocacy/
+      UN-mechanism angle on Rwanda distinct from every other Rwanda
+      entry in this corpus (Freedom House's narrative country survey,
+      Access Now's shutdown tracking) -- explicitly cites Rwanda's own
+      2024 Freedom House score (36/100, Not Free) as part of its own
+      argument, a direct cross-reference to this corpus's existing
+      freedomhouse-rw-2024-fotn entry. Publication date: document's own
+      header states "November 2025".
+    corpus_version: v1.0
+    sha256: "19b018dcea0772fb47e19e85586ef712c98b3a9ffae2d99997db8633fa159ea5"
+
+  - doc_id: cipesa-ug-2025-sifa-ai-country
+    title: "State of Internet Freedom in Africa 2025: Navigating the Implications of AI on Digital Democracy in Uganda"
+    organization: CIPESA
+    countries: ["UG"]
+    publication_date: "2025-09-01"
+    url: "https://cipesa.org/wp-content/files/reports/State_of_Internet_Freedom_in_Africa_2025__Navigating_the_Implications_of_AI_on_Digital_Democracy_in_Uganda_.pdf"
+    doc_type: annual_report
+    source_format: pdf
+    topics: ["censorship", "digital_rights", "artificial_intelligence", "disinformation"]
+    language: en
+    selection_rationale: >
+      Single-country companion report to the continent-wide 2025 SIFA
+      report already in this corpus (cipesa-africa-2025-sifa-ai) -- not
+      a duplicate of it. Confirmed by fetching the PDF directly: full
+      structured report (Executive Summary, Country Context, Research
+      Methodology, Study Findings, Discussion, Conclusion/
+      Recommendations), written by Edrine Wanyama, published September
+      2025. Coverage-contribution value: the continent report's Uganda
+      material is necessarily compressed across many countries; this
+      gives Uganda-specific depth on AI's civic-space risks (covered at
+      the section level: value of AI to civic space, risks to digital
+      rights, state of AI regulation, human-rights-centred governance
+      recommendations) that the continent edition can't provide at the
+      same depth. Kenya and Ethiopia have equivalent country-specific
+      2025 SIFA AI reports in the same catalog series, confirmed to
+      exist but not yet individually verified -- candidates for a
+      follow-up pass, not added this round.
+    corpus_version: v1.0
+    sha256: "debdc444fd9bb84bb4760e45c0c53afca272936dd32353cbfc5edf3d49240434"

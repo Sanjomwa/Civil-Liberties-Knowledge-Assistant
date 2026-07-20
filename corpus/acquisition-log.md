@@ -365,3 +365,36 @@ design.
 **Rights/licensing note:** Same as above — permission pending, internal use only.
 
 **Decision: Included.**
+- **cipesa-tz-2026-upr-submission** — acquire.py failure (2026-07-20): corpus/sources/cipesa.yaml still has a placeholder sha256. Get the real file once by hand, compute its checksum, and put that in the YAML before running this script.
+- **cipesa-rw-2025-upr-submission** — acquire.py failure (2026-07-20): corpus/sources/cipesa.yaml still has a placeholder sha256. Get the real file once by hand, compute its checksum, and put that in the YAML before running this script.
+- **cipesa-ug-2025-sifa-ai-country** — acquire.py failure (2026-07-20): corpus/sources/cipesa.yaml still has a placeholder sha256. Get the real file once by hand, compute its checksum, and put that in the YAML before running this script.
+
+## cipesa-tz-2026-upr-submission — Included
+
+**Reviewed:** 2026-07-20. **Automated checks:** Tier 1 passed, Tier 2 clean (4,852 words, no near-duplicates).
+
+**Topic relevance:** Clean include. CIPESA's Joint Stakeholder Submission to the Fourth Cycle of the Universal Periodic Review of Tanzania, in-scope country and window.
+
+**Coverage contribution:** Fills this corpus's biggest country-coverage gap — Tanzania has zero Freedom House chapters (FOTN doesn't cover the country at all). Documents the October 29-November 3, 2025 nationwide election shutdown, JamiiForums' 90-day-turned-6-month TCRA suspension, Tundu Lissu's treason arrest, and the 2023 VPN-registration mandate — substantial, specific, dated findings unique to this entry.
+
+**Decision: Included.**
+
+## cipesa-rw-2025-upr-submission — Included
+
+**Reviewed:** 2026-07-20. **Automated checks:** Tier 1 passed, Tier 2 clean (1,216 words, no near-duplicates).
+
+**Topic relevance:** Clean include. Joint CIPESA/APC submission to Rwanda's UPR Info Pre-Sessions 51, in-scope country and window.
+
+**Coverage contribution:** Documents Pegasus spyware use against 3,500+ activists, journalists, and diaspora members — a legal-advocacy/UN-mechanism angle on Rwanda distinct from this corpus's other Rwanda entries (Freedom House's narrative country survey, Access Now's shutdown tracking).
+
+**Decision: Included.**
+
+## cipesa-ug-2025-sifa-ai-country — Included
+
+**Reviewed:** 2026-07-20. **Automated checks:** Tier 1 passed, Tier 2 clean (9,320 words, no near-duplicates).
+
+**Topic relevance:** Clean include. Single-country companion to the continent-wide 2025 SIFA report already in the corpus (cipesa-africa-2025-sifa-ai), covering AI's implications for digital democracy specifically in Uganda.
+
+**Coverage contribution:** Not a duplicate of the continent-wide edition — gives Uganda-specific depth on AI's civic-space risks (value of AI to civic space, risks to digital rights, state of AI regulation, governance recommendations) that the continent report's necessarily-compressed per-country treatment can't provide.
+
+**Decision: Included.**

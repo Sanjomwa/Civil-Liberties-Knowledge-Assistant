@@ -1,0 +1,50 @@
+{
+  "doc_id": "cipesa-ug-2025-sifa-ai-country",
+  "schema_version": "1.1",
+  "declared": {
+    "title": "State of Internet Freedom in Africa 2025: Navigating the Implications of AI on Digital Democracy in Uganda",
+    "organization": "CIPESA",
+    "countries": [
+      "UG"
+    ],
+    "publication_date": "2025-09-01",
+    "url": "https://cipesa.org/wp-content/files/reports/State_of_Internet_Freedom_in_Africa_2025__Navigating_the_Implications_of_AI_on_Digital_Democracy_in_Uganda_.pdf",
+    "doc_type": "annual_report",
+    "source_format": "pdf",
+    "topics": [
+      "censorship",
+      "digital_rights",
+      "artificial_intelligence",
+      "disinformation"
+    ],
+    "language": "en",
+    "selection_rationale": "Single-country companion report to the continent-wide 2025 SIFA report already in this corpus (cipesa-africa-2025-sifa-ai) -- not a duplicate of it. Confirmed by fetching the PDF directly: full structured report (Executive Summary, Country Context, Research Methodology, Study Findings, Discussion, Conclusion/ Recommendations), written by Edrine Wanyama, published September 2025. Coverage-contribution value: the continent report's Uganda material is necessarily compressed across many countries; this gives Uganda-specific depth on AI's civic-space risks (covered at the section level: value of AI to civic space, risks to digital rights, state of AI regulation, human-rights-centred governance recommendations) that the continent edition can't provide at the same depth. Kenya and Ethiopia have equivalent country-specific 2025 SIFA AI reports in the same catalog series, confirmed to exist but not yet individually verified -- candidates for a follow-up pass, not added this round.",
+    "corpus_version": "v1.0"
+  },
+  "derived": {
+    "sha256": "debdc444fd9bb84bb4760e45c0c53afca272936dd32353cbfc5edf3d49240434",
+    "file_size_bytes": 3919994,
+    "extracted_word_count": 9320,
+    "extraction_method": "pdfplumber",
+    "extraction_date": "2026-07-20",
+    "detected_language": "en",
+    "detected_language_confidence": 1.0,
+    "validation_status": "valid",
+    "validation_warnings": []
+  },
+  "lifecycle": {
+    "status": "active",
+    "superseded_by": null,
+    "supersedes": null,
+    "reason": null,
+    "effective_date": null
+  },
+  "chunking": {
+    "strategy": "fixed_overlap",
+    "chunk_size": 1500,
+    "chunk_step": 750,
+    "total_chunks": 90,
+    "chunking_date": "2026-07-20",
+    "corpus_version": "v1.0"
+  }
+}
