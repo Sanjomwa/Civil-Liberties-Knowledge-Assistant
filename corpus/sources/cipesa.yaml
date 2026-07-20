@@ -265,3 +265,81 @@ documents:
       follow-up pass, not added this round.
     corpus_version: v1.0
     sha256: "debdc444fd9bb84bb4760e45c0c53afca272936dd32353cbfc5edf3d49240434"
+
+  # --- 2026-07-20 addition: Kenya and Ethiopia country-specific SIFA AI
+  # companion reports, the two candidates flagged but deliberately not
+  # added in the prior entry above. Both independently downloaded and
+  # text-extracted (pdfplumber, same method as extract.py) as a dedicated
+  # content-verification pass before adding here -- neither is abridged
+  # or truncated, both are full-length structured reports with specific
+  # dated findings not duplicated elsewhere in this corpus. See
+  # decisionlog.md, 2026-07-20, for the full verification detail.
+
+  - doc_id: cipesa-ke-2025-sifa-ai-country
+    title: "State of Internet Freedom in Africa 2025: Navigating the Implications of AI on Digital Democracy in Kenya"
+    organization: CIPESA
+    countries: ["KE"]
+    publication_date: "2025-09-01"
+    url: "https://cipesa.org/download/reports/State_of_Internet_Freedom_in_Africa_2025____Navigating_the_Implications_of_AI_on_Digital_Democracy_in_Kenya__.pdf"
+    doc_type: annual_report
+    source_format: pdf
+    topics: ["censorship", "digital_rights", "artificial_intelligence", "disinformation", "surveillance"]
+    language: en
+    selection_rationale: >
+      Single-country companion report to the continent-wide 2025 SIFA
+      report already in this corpus (cipesa-africa-2025-sifa-ai) -- not
+      a duplicate, same pattern already confirmed for the Uganda
+      companion. Confirmed by downloading and extracting the full PDF
+      (32 pages, 12,322 words, all pages text-bearing, no abridgment
+      language found): by Francis Monyango, published September 2025.
+      Coverage-contribution value: specific, dated findings absent
+      elsewhere in this corpus's Kenya entries -- the June 25, 2024
+      nationwide internet disruption during the #RejectFinanceBill2024
+      protests (Cloudflare/NetBlocks traffic analysis, spillover into
+      Uganda/Rwanda/Burundi); KNCHR's December 26, 2024 statement
+      documenting 82 enforced disappearances June-December 2024
+      targeting online activists and AI-meme creators; the 2025
+      Worldcoin biometric-iris-scan controversy later ruled unlawful by
+      Kenya's High Court; the March 6, 2026 Court of Appeal ruling
+      striking down the 2018 Computer Misuse and Cybercrimes Act's
+      false-publication provisions as unconstitutional; and named
+      surveillance infrastructure (the National Police Service's ICCS
+      with NeoFace Watch facial recognition across Nairobi/Mombasa).
+      Meaningfully deeper than the continent report's compressed
+      per-country Kenya treatment.
+    corpus_version: v1.0
+    sha256: "95e3bc50b48933f984f79084c9d431d5a17a700a339ae140d4359792faeec3a1"
+
+  - doc_id: cipesa-et-2025-sifa-ai-country
+    title: "State of Internet Freedom in Africa 2025: Navigating the Implications of AI on Digital Democracy in Ethiopia"
+    organization: CIPESA
+    countries: ["ET"]
+    publication_date: "2025-09-01"
+    url: "https://cipesa.org/download/reports/State_of_Internet_Freedom_in_Africa_2025__NAVIGATING_THE_IMPLICATIONS_OF_AI_ON_DIGITAL_DEMOCRACY_IN_ETHIOPIA___.pdf"
+    doc_type: annual_report
+    source_format: pdf
+    topics: ["censorship", "digital_rights", "artificial_intelligence", "disinformation", "surveillance"]
+    language: en
+    selection_rationale: >
+      Single-country companion report to the continent-wide 2025 SIFA
+      report already in this corpus (cipesa-africa-2025-sifa-ai) -- not
+      a duplicate. Confirmed by downloading and extracting the full PDF
+      (28 pages, 9,417 words, all pages text-bearing, no abridgment
+      language found): by Abel Wabella, published September 2025.
+      Coverage-contribution value: specific, dated findings absent
+      elsewhere in this corpus's existing Ethiopia entries (Freedom
+      House FOTN chapters, OONI's 2023 social-media-blocking document)
+      -- the July 2024 deregistration of 1,514 CSOs; Ethiopia's National
+      AI Policy (approved 27 June 2024) identifying defence/security as
+      a priority sector with no ethical standards or oversight, paired
+      with a documented reliance on Pegasus spyware and Chinese facial
+      recognition tech per Citizen Lab's reporting; AI-assisted drone
+      warfare sourcing (Mohajer-6, TB2, Wing Loong) used in the Tigray
+      conflict per the European Council on Foreign Relations' "Deadly
+      Skies" report; and the Personal Data Protection Proclamation No.
+      1321/2024 relevant to the Fayda digital ID system. Somewhat
+      shorter than the Kenya/Uganda companions but still substantially
+      deeper than the continent report's compressed per-country
+      treatment.
+    corpus_version: v1.0
+    sha256: "9062490e8b539f7fd123240a2675c1fa9323dd9faf5e7fabaf624d37d9b590e1"

@@ -363,6 +363,28 @@ auto-vs-manual question; scaling further is future work, see Section 7),
 
 ## 7. Open action items (don't lose track of these)
 
+- **PENDING ACQUISITION, 2026-07-20: Kenya and Ethiopia CIPESA SIFA AI
+  country reports added to `cipesa.yaml` (sha256 REPLACE_ME), content
+  verified but not yet downloaded through the real pipeline.** Both
+  confirmed genuine, full-length, non-abridged via a Claude Code
+  research-only pass (Cowork's own tools couldn't extract text from
+  either ~27MB PDF). Next step: acquisition prompt to Claude Code
+  (download, log Included, run metadata.py/chunk.py) — corpus would go
+  from 31 to 33 documents once done. See `decisionlog.md`, 2026-07-20,
+  for the full verification detail.
+- **DONE, 2026-07-20: 3 new CIPESA catalog documents (Tanzania UPR,
+  Rwanda UPR, Uganda SIFA AI country report) through the pipeline —
+  corpus now at 31 documents / 3,488 chunks.** Sam ran the acquisition
+  prompt twice by accident; Claude Code caught it on the second run
+  (checked for `REPLACE_ME`/existing `Included` entries first, found
+  none pending, declined to re-append or re-run `metadata.py`/
+  `chunk.py`) — confirmed via a fresh `acquire.py` run that all 31 docs
+  hit `[skip]`, 0 downloads, 0 failures, no duplicate log entries. Final
+  per-org: Access Now 4 (668), CIPESA 7 (1,076), Freedom House 16
+  (1,595), OONI 4 (149). Kenya/Ethiopia's equivalent CIPESA 2025 SIFA AI
+  country reports are the next candidate (Kenya's PDF fetch returned
+  empty on first try, not yet resolved). See `decisionlog.md`,
+  2026-07-20, for the full detail.
 - **DONE, 2026-07-20: Freedom House 2025 batch (4 docs) reviewed,
   Included, pipelined — corpus now at 28 documents / 3336 chunks.**
   Real finding along the way: Freedom House abridged the entire 2025

@@ -142,7 +142,12 @@ case "$MODE" in
     # excluded from push so a stale WSL copy can never overwrite Cowork's
     # canonical one -- moved into repo/ 2026-07-20, see its own revision
     # history v4, after living outside repo/ made it unreachable by pull
-    # and blocked a real task).
+    # and blocked a real task). Also excludes .claude/ (added 2026-07-20,
+    # caught by the dotfile sanity scan itself): Claude Code's own
+    # harness-internal session lock dir (.claude/scheduled_tasks.lock --
+    # session ID, PID, timestamps only, no project content), regenerated
+    # locally every run, already gitignored via .git/info/exclude. Never
+    # worth syncing, same reasoning as .venv/__pycache__.
     #
     # Everything else -- src/, corpus/sources/*.yaml, corpus/
     # acquisition-log.md, corpus/manifest.csv, corpus/checksums.sha256,
@@ -160,6 +165,7 @@ case "$MODE" in
     rsync -av --stats \
       --exclude='.venv' --exclude='__pycache__' --exclude='data/' \
       --exclude='CLAUDE.md' --exclude='.git/' --exclude='claude-code-wsl-CLAUDE.md' \
+      --exclude='.claude/' \
       "$WSL_REPO/" \
       "$COWORK_MIRROR/" | tee "$stats_file"
     print_sync_summary "$COWORK_MIRROR" "$stats_file"

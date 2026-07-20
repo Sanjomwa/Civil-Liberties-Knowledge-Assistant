@@ -1,0 +1,51 @@
+{
+  "doc_id": "cipesa-et-2025-sifa-ai-country",
+  "schema_version": "1.1",
+  "declared": {
+    "title": "State of Internet Freedom in Africa 2025: Navigating the Implications of AI on Digital Democracy in Ethiopia",
+    "organization": "CIPESA",
+    "countries": [
+      "ET"
+    ],
+    "publication_date": "2025-09-01",
+    "url": "https://cipesa.org/download/reports/State_of_Internet_Freedom_in_Africa_2025__NAVIGATING_THE_IMPLICATIONS_OF_AI_ON_DIGITAL_DEMOCRACY_IN_ETHIOPIA___.pdf",
+    "doc_type": "annual_report",
+    "source_format": "pdf",
+    "topics": [
+      "censorship",
+      "digital_rights",
+      "artificial_intelligence",
+      "disinformation",
+      "surveillance"
+    ],
+    "language": "en",
+    "selection_rationale": "Single-country companion report to the continent-wide 2025 SIFA report already in this corpus (cipesa-africa-2025-sifa-ai) -- not a duplicate. Confirmed by downloading and extracting the full PDF (28 pages, 9,417 words, all pages text-bearing, no abridgment language found): by Abel Wabella, published September 2025. Coverage-contribution value: specific, dated findings absent elsewhere in this corpus's existing Ethiopia entries (Freedom House FOTN chapters, OONI's 2023 social-media-blocking document) -- the July 2024 deregistration of 1,514 CSOs; Ethiopia's National AI Policy (approved 27 June 2024) identifying defence/security as a priority sector with no ethical standards or oversight, paired with a documented reliance on Pegasus spyware and Chinese facial recognition tech per Citizen Lab's reporting; AI-assisted drone warfare sourcing (Mohajer-6, TB2, Wing Loong) used in the Tigray conflict per the European Council on Foreign Relations' \"Deadly Skies\" report; and the Personal Data Protection Proclamation No. 1321/2024 relevant to the Fayda digital ID system. Somewhat shorter than the Kenya/Uganda companions but still substantially deeper than the continent report's compressed per-country treatment.",
+    "corpus_version": "v1.0"
+  },
+  "derived": {
+    "sha256": "9062490e8b539f7fd123240a2675c1fa9323dd9faf5e7fabaf624d37d9b590e1",
+    "file_size_bytes": 27037527,
+    "extracted_word_count": 9417,
+    "extraction_method": "pdfplumber",
+    "extraction_date": "2026-07-20",
+    "detected_language": "en",
+    "detected_language_confidence": 1.0,
+    "validation_status": "valid",
+    "validation_warnings": []
+  },
+  "lifecycle": {
+    "status": "active",
+    "superseded_by": null,
+    "supersedes": null,
+    "reason": null,
+    "effective_date": null
+  },
+  "chunking": {
+    "strategy": "fixed_overlap",
+    "chunk_size": 1500,
+    "chunk_step": 750,
+    "total_chunks": 98,
+    "chunking_date": "2026-07-20",
+    "corpus_version": "v1.0"
+  }
+}

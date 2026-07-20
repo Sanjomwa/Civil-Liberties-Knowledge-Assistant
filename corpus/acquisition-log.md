@@ -398,3 +398,25 @@ design.
 **Coverage contribution:** Not a duplicate of the continent-wide edition — gives Uganda-specific depth on AI's civic-space risks (value of AI to civic space, risks to digital rights, state of AI regulation, governance recommendations) that the continent report's necessarily-compressed per-country treatment can't provide.
 
 **Decision: Included.**
+- **cipesa-ke-2025-sifa-ai-country** — acquire.py failure (2026-07-20): corpus/sources/cipesa.yaml still has a placeholder sha256. Get the real file once by hand, compute its checksum, and put that in the YAML before running this script.
+- **cipesa-et-2025-sifa-ai-country** — acquire.py failure (2026-07-20): corpus/sources/cipesa.yaml still has a placeholder sha256. Get the real file once by hand, compute its checksum, and put that in the YAML before running this script.
+
+## cipesa-ke-2025-sifa-ai-country — Included
+
+**Reviewed:** 2026-07-20. **Automated checks:** Tier 1 passed, Tier 2 clean (12,322 words, no near-duplicates).
+
+**Topic relevance:** Clean include. Kenya SIFA AI country report (Francis Monyango, September 2025), in-scope country and window.
+
+**Coverage contribution:** Country-specific depth beyond the existing continent-wide 2025 SIFA report (cipesa-africa-2025-sifa-ai). Documents the June 25, 2024 #RejectFinanceBill2024 nationwide internet disruption, KNCHR's December 2024 finding of 82 enforced disappearances targeting online activists, the Worldcoin biometric-scan controversy, and the March 2026 Court of Appeal ruling on the Computer Misuse Act.
+
+**Decision: Included.**
+
+## cipesa-et-2025-sifa-ai-country — Included
+
+**Reviewed:** 2026-07-20. **Automated checks:** Tier 1 passed, Tier 2 clean (9,417 words, no near-duplicates).
+
+**Topic relevance:** Clean include. Ethiopia SIFA AI country report (Abel Wabella, September 2025), in-scope country and window.
+
+**Coverage contribution:** Same as above, for Ethiopia. Documents the July 2024 deregistration of 1,514 CSOs, Ethiopia's National AI Policy (security-first, no ethical oversight) paired with Pegasus/Chinese surveillance tech reliance, and AI-assisted drone warfare sourcing in the Tigray conflict.
+
+**Decision: Included.**

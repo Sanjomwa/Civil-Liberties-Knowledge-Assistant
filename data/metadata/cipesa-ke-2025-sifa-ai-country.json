@@ -1,0 +1,51 @@
+{
+  "doc_id": "cipesa-ke-2025-sifa-ai-country",
+  "schema_version": "1.1",
+  "declared": {
+    "title": "State of Internet Freedom in Africa 2025: Navigating the Implications of AI on Digital Democracy in Kenya",
+    "organization": "CIPESA",
+    "countries": [
+      "KE"
+    ],
+    "publication_date": "2025-09-01",
+    "url": "https://cipesa.org/download/reports/State_of_Internet_Freedom_in_Africa_2025____Navigating_the_Implications_of_AI_on_Digital_Democracy_in_Kenya__.pdf",
+    "doc_type": "annual_report",
+    "source_format": "pdf",
+    "topics": [
+      "censorship",
+      "digital_rights",
+      "artificial_intelligence",
+      "disinformation",
+      "surveillance"
+    ],
+    "language": "en",
+    "selection_rationale": "Single-country companion report to the continent-wide 2025 SIFA report already in this corpus (cipesa-africa-2025-sifa-ai) -- not a duplicate, same pattern already confirmed for the Uganda companion. Confirmed by downloading and extracting the full PDF (32 pages, 12,322 words, all pages text-bearing, no abridgment language found): by Francis Monyango, published September 2025. Coverage-contribution value: specific, dated findings absent elsewhere in this corpus's Kenya entries -- the June 25, 2024 nationwide internet disruption during the #RejectFinanceBill2024 protests (Cloudflare/NetBlocks traffic analysis, spillover into Uganda/Rwanda/Burundi); KNCHR's December 26, 2024 statement documenting 82 enforced disappearances June-December 2024 targeting online activists and AI-meme creators; the 2025 Worldcoin biometric-iris-scan controversy later ruled unlawful by Kenya's High Court; the March 6, 2026 Court of Appeal ruling striking down the 2018 Computer Misuse and Cybercrimes Act's false-publication provisions as unconstitutional; and named surveillance infrastructure (the National Police Service's ICCS with NeoFace Watch facial recognition across Nairobi/Mombasa). Meaningfully deeper than the continent report's compressed per-country Kenya treatment.",
+    "corpus_version": "v1.0"
+  },
+  "derived": {
+    "sha256": "95e3bc50b48933f984f79084c9d431d5a17a700a339ae140d4359792faeec3a1",
+    "file_size_bytes": 27898015,
+    "extracted_word_count": 12322,
+    "extraction_method": "pdfplumber",
+    "extraction_date": "2026-07-20",
+    "detected_language": "en",
+    "detected_language_confidence": 1.0,
+    "validation_status": "valid",
+    "validation_warnings": []
+  },
+  "lifecycle": {
+    "status": "active",
+    "superseded_by": null,
+    "supersedes": null,
+    "reason": null,
+    "effective_date": null
+  },
+  "chunking": {
+    "strategy": "fixed_overlap",
+    "chunk_size": 1500,
+    "chunk_step": 750,
+    "total_chunks": 125,
+    "chunking_date": "2026-07-20",
+    "corpus_version": "v1.0"
+  }
+}
