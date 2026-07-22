@@ -55,6 +55,31 @@ REPORT_PATH = EVAL_DIR / "filter_report.md"
 
 N_GRAM = 4
 
+# Fixed 2026-07-22 (Fable review, verified against this file's own logic):
+# the original is_exempt_ngram() required EVERY token in the window to be
+# capitalized-or-digit, which meant a multi-word proper name or domain term
+# of art containing a lowercase function word -- "Freedom on the Net" ("on"/
+# "the" lowercase), "Web Connectivity Test" (a real OONI methodology term,
+# if written lowercase in body text as "web connectivity test") -- was never
+# exempt. A legitimate question about OONI's own methodology cannot avoid
+# saying "web connectivity test"; the filter was treating the domain's own
+# fixed vocabulary as circularity. This is the most likely real cause of
+# ooni_methodology losing 10 of its 20 questions (far more than its share)
+# in the first filter run -- not because half were actually circular, but
+# because methodology questions must reuse methodology terms. Fix: allow
+# short lowercase function words to break the capitalization run without
+# disqualifying the whole n-gram, plus an explicit whitelist of known terms
+# of art (the same vocabulary ground_truth.py's own OONI_METHODOLOGY_KEYWORDS
+# targets, plus a couple of report/org names that recur across the corpus).
+FUNCTION_WORDS = {
+    "a", "an", "the", "of", "in", "on", "for", "to", "and", "or", "at", "by",
+}
+TERMS_OF_ART = {
+    "web connectivity test", "control measurement", "freedom on the net",
+    "test helper", "confirmed anomaly", "false positive", "false negative",
+    "ooni probe", "keepiton",
+}
+
 
 def load_chunk_text(doc_id: str, chunk_id: str) -> str | None:
     chunk_path = CHUNKS_DIR / doc_id / f"{chunk_id}.json"
@@ -69,11 +94,21 @@ def tokenize(text: str) -> list[str]:
 
 
 def is_exempt_ngram(tokens: tuple[str, ...]) -> bool:
-    """A run made entirely of capitalized tokens (proper nouns) and/or
-    digits (dates, counts) is allowed to overlap -- only a descriptive
-    phrase shared verbatim should be flagged, per the prompt's own
-    stated exception."""
-    return all(t[0].isupper() or t.isdigit() for t in tokens)
+    """A proper noun / date / domain term-of-art is allowed to overlap --
+    only a descriptive phrase shared verbatim should be flagged. A window
+    is exempt if: (a) it's a known term of art (case-insensitive), or (b)
+    every non-function-word token is capitalized or a digit -- short
+    lowercase connectors ("on", "the", "of") don't disqualify an otherwise
+    proper-noun-or-term-of-art phrase."""
+    phrase_lower = " ".join(t.lower() for t in tokens)
+    if phrase_lower in TERMS_OF_ART:
+        return True
+    for t in tokens:
+        if t.lower() in FUNCTION_WORDS:
+            continue
+        if not (t[0].isupper() or t.isdigit()):
+            return False
+    return True
 
 
 def shared_descriptive_ngram(question: str, chunk_text: str, n: int = N_GRAM) -> str | None:

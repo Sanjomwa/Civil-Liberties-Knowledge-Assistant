@@ -796,6 +796,122 @@ auto-vs-manual question; scaling further is future work, see Section 7),
   decision are all done, pending the mechanical `--set-default` command
   recording it to `data/eval/default_method.json`. Next real phase after
   that: generation (citation-grounded answer synthesis), not started.
+- **UPDATE, 2026-07-22, later same day: `default_method.json` confirmed
+  written and verified — retrieval phase is fully closed.** Claude Code
+  read the file back directly (not assumed from the command's success
+  message): `{"method": "hybrid", "rrf_k": 10}`, exact match. Nothing
+  else pending on retrieval implementation/evaluation/decision-making.
+  **Open item, flagged not started:** Sam asked why aggregate MRR is
+  low (~0.275 best case); working hypothesis is that most of the loss
+  comes from the ~35% total-miss rate (not poor ranking among actual
+  hits), plausibly caused by 50%-overlapping chunking scored against a
+  strict single-correct-chunk-id ground truth — a retrieved neighbor
+  chunk covering the same passage would count as a full miss. Also
+  named: today's own circularity-hardening made the eval set genuinely
+  harder by design, plus the deliberate small-local-embedder and
+  no-reranker tradeoffs from the design phase. Diagnostic script to
+  test the overlap hypothesis not yet built — Sam wants to hold off and
+  revisit explicitly, not proceed unprompted. Full detail in
+  `decisionlog.md`.
+- **UPDATE, 2026-07-22, later same day: full Opus consult on the
+  retrieval phase done — verdict "honest, not alarming," concrete
+  prioritized fixes proposed, none started yet.** Opus pushed back on
+  the "low ceiling" framing: the ~0.66 aggregate Hit Rate looks low
+  only against soft/circular ground truth, and this project
+  specifically hardened its GT against that shortcut this session — a
+  lower number on a harder test isn't evidence of worse retrieval.
+  Confirmed the HR/MRR-gap math: ranking-among-hits is fine (rank ~2-3
+  when found), the real problem is the ~35% miss rate (recall, not
+  ranking). My overlap-chunking hypothesis judged plausible but
+  probably not dominant (~1/3 to 1/2 of misses at most) — explicit
+  instruction to measure via a neighbor-aware relaxed Hit Rate (credit
+  a hit if the gold chunk or its same-doc ±1 neighbor appears in
+  results) rather than argue it further. Ranked other suspects:
+  minsearch's plain-TF-IDF text backend (real, moderate drag, not
+  BM25), the ground-truth filter's own ~35%-drop false-positive rate
+  (now itself adding eval noise, shrank `ooni_methodology` to n=11),
+  embedding model choice (ranked LOW — bge-small is "near the top of
+  MTEB for its size class," not the bottleneck). `multi_country`'s
+  favor-text/worse-with-higher-k pattern judged a genuinely distinct,
+  mechanistically-explained problem (entity-dense proper-noun matching
+  where TF-IDF has a real edge over dense embeddings) — fix isn't a
+  different k, it's using the `countries` metadata already on every
+  chunk to filter/boost the candidate pool at query time (not yet
+  built — only `lifecycle_status` is filtered today). Prioritized,
+  effort-ranked fixes proposed: P0 neighbor-aware Hit Rate (~1hr, do
+  first), P1 country-metadata query filtering, P2 swap minsearch's text
+  backend for real BM25, P3 optional bge-base upgrade, P4 manually
+  rescue the filter's false-positive drops. Explicitly recommended
+  AGAINST re-chunking, reranking, and HyDE for now — none earn their
+  risk/effort before the Aug 10 deadline, and Opus's read is that
+  reopening ingestion (which Sam had explicitly authorized considering)
+  isn't actually where the leverage is. Recorded default (hybrid,
+  k=10) unchanged — Opus said keep it pending P1. Full write-up in
+  `decisionlog.md`. **Not yet decided: which of P0-P4 to actually
+  build, if any — Sam's call, nothing started.**
+- **UPDATE, 2026-07-22, later same day: Fable consult (phase-boundary
+  spend) built on Opus's findings and found two real, code-verified
+  bugs — both fixed same session.** Fable actually read `search.py`/
+  `evaluate.py`/`filter_ground_truth.py` rather than reasoning from the
+  brief alone. (1) The ground-truth filter's proper-noun exemption
+  required every token in a 4-gram to be capitalized, so multi-word
+  terms with lowercase connectors ("Freedom on the Net", "web
+  connectivity test") were never exempt — likely the real cause of
+  `ooni_methodology` losing half its questions to the filter, since
+  methodology questions structurally can't avoid that vocabulary. Fixed
+  in `filter_ground_truth.py` (function-word-aware exemption + a terms-
+  of-art whitelist), smoke-tested against 4 known cases. (2)
+  `search.py`'s `DEFAULT_RRF_K=60` constant silently disagreed with the
+  actually-recorded decision (hybrid k=10) — any future caller not
+  passing `rrf_k` explicitly would get the wrong default. Fixed:
+  `search()` now reads `data/eval/default_method.json` at call time
+  (same pattern as the existing corpus-freshness check), falling back
+  to a renamed `FALLBACK_RRF_K` only pre-evaluation. Also expanded
+  `evaluate.py` with neighbor-aware relaxed Hit Rate, HR@3/HR@5,
+  bootstrap 95% CIs, and a new source-diversity@10 metric (ties
+  evaluation to the project's own citation/thin-evidence-flagging
+  priority, which single-gold Hit Rate is silent on). All new logic
+  smoke-tested standalone; all three files compile clean. **Not yet run
+  against the real corpus.** Declined re-chunking again (sharper
+  argument: ground truth is keyed to `correct_chunk_id`, so re-chunking
+  invalidates the whole eval harness, not just risks regressions).
+  Merged priority order and full reasoning in `decisionlog.md`. Next:
+  hand off to Claude Code — re-run the repaired filter against the
+  original 150 questions, then re-run the expanded `evaluate.py`.
+- **UPDATE, 2026-07-22, later same day: real corpus re-run in — the
+  specific `ooni_methodology` hypothesis was tested and falsified; two
+  genuinely new findings surfaced instead.** Claude Code diffed old vs.
+  new dropped-question lists precisely rather than trusting the count:
+  **all 10 `ooni_methodology` drops are identical before and after the
+  exemption fix** — none were ever flagged on a proper-noun/term-of-art
+  phrase, their flagged phrases are generic event/date descriptions
+  ("2024 kcse exam period" etc.), a different failure mode the fix
+  doesn't touch. The fix itself is correct and did rescue 4 unrelated
+  genuine false positives (Anti-Terrorism Act, COVID-19, a film title, a
+  report title) — just not the stratum it was hypothesized to fix. A
+  residual gap also found: the Kenya "Freedom on the Net" question is
+  still dropped, due to a possessive-`'s` tokenization offset, not
+  covered by the whitelist. `ooni_methodology`'s thinness (n=11) stays
+  accepted, now understood as possibly-legitimate filtering (OONI's
+  event-specific reporting style shares generic phrasing with its own
+  source text) rather than a fixable bug. **Two real findings did land:**
+  (1) neighbor-aware Relaxed Hit Rate is 16.8pts above strict Hit Rate
+  for the recorded default (0.812 vs. 0.644) — lands inside Opus's own
+  "a third to half of misses" estimate, substantially confirming the
+  overlap-chunking artifact is real, not a minor factor. (2) HR@3/HR@5
+  are well below the HR@10 aggregate (0.366 / 0.465 vs. 0.644) — new,
+  not predicted by either advisor, real signal for generation-phase
+  chunk-count decisions. **Also new, not yet discussed with Sam:**
+  text search shows meaningfully higher source-diversity@10 (1.59
+  orgs/4.28 docs) than the recorded hybrid default (1.50/3.68) — a real
+  tension between the Hit-Rate-optimal method and the project's own
+  stated top safety priority (surfacing corroborating/contradictory
+  sources), not weighed into the method decision yet. Aggregate
+  Hit Rate/MRR essentially unchanged from the pre-fix run (0.644/0.270
+  vs. 0.649/0.275 — within CI). Recorded default (hybrid, k=10) left
+  unchanged. Full numbers and CIs in `decisionlog.md`. **Not yet
+  decided: what to do about the source-diversity tension or whether to
+  pursue P2 (country-metadata filtering)/P3 (BM25 swap) — Sam's call.**
 - **UPDATE, 2026-07-22, later same day: `src/ingestion/chunk.py` itself
   fixed (Sam's call), not yet re-run against the real corpus.** The
   `chunking` block now gets stamped into `metadata` before any chunk

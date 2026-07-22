@@ -53,18 +53,47 @@ from minsearch import Index, VectorSearch
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 INDEX_DIR = PROJECT_ROOT / "data" / "index"
 CORPUS_VERSION_PATH = PROJECT_ROOT / "corpus" / "CORPUS_VERSION"
+DEFAULT_METHOD_PATH = PROJECT_ROOT / "data" / "eval" / "default_method.json"
 
 VECTOR_INDEX_PATH = INDEX_DIR / "vector_index.pkl"
 TEXT_INDEX_PATH = INDEX_DIR / "text_index.pkl"
 INDEX_METADATA_PATH = INDEX_DIR / "index_metadata.json"
 
-DEFAULT_RRF_K = 60  # provisional — evaluate.py's sweep should set the real default
+# Fixed 2026-07-22 (Fable review, verified against this file directly): this
+# used to be a hardcoded constant (60) that any caller not passing rrf_k
+# explicitly would silently get -- while the actual measured, recorded
+# decision (evaluate.py --set-default) is k=10, written to
+# data/eval/default_method.json. On the multi_country slice the measured
+# gap between k=10 and k=60 is ~9 points of Hit Rate -- a real, silent drift
+# risk for any future generation-phase code calling search(query) plainly.
+# Same class of bug as the corpus_version staleness checks elsewhere in this
+# module: a derived artifact silently going stale relative to its source of
+# truth. Fixed by reading the recorded decision at call time instead of
+# duplicating it as a second, driftable constant. FALLBACK_RRF_K is only
+# used pre-evaluation, before any default has ever been recorded.
+FALLBACK_RRF_K = 60  # used only if default_method.json doesn't exist yet
 HYBRID_CANDIDATE_POOL = 50  # depth pulled from each backend before RRF-combining
 
 
 class StaleIndexError(RuntimeError):
     """Raised when data/index/ was built against a corpus_version that no
     longer matches corpus/CORPUS_VERSION — re-run embed.py."""
+
+
+@lru_cache(maxsize=1)
+def _recorded_default_rrf_k() -> int:
+    """Reads the actual measured/recorded RRF k from
+    data/eval/default_method.json if it exists, so hybrid search's default
+    always matches the last decision made via `evaluate.py --set-default`,
+    not a hand-maintained constant that can silently drift from it (see
+    module-level comment on FALLBACK_RRF_K)."""
+    if not DEFAULT_METHOD_PATH.exists():
+        return FALLBACK_RRF_K
+    with open(DEFAULT_METHOD_PATH, encoding="utf-8") as f:
+        config = json.load(f)
+    if config.get("method") != "hybrid":
+        return FALLBACK_RRF_K
+    return config.get("rrf_k", FALLBACK_RRF_K)
 
 
 @lru_cache(maxsize=1)
@@ -164,7 +193,7 @@ def search(
     top_k: int = 10,
     method: str = "hybrid",
     lifecycle_status: str | None = "active",
-    rrf_k: int = DEFAULT_RRF_K,
+    rrf_k: int | None = None,
 ) -> list[dict]:
     """
     Args:
@@ -173,7 +202,11 @@ def search(
         method: "text", "vector", or "hybrid".
         lifecycle_status: filter results to this lifecycle status
             (default "active"). Pass None to disable filtering.
-        rrf_k: RRF k parameter, only used when method="hybrid".
+        rrf_k: RRF k parameter, only used when method="hybrid". Defaults to
+            None, which resolves to the actual recorded decision in
+            data/eval/default_method.json (see _recorded_default_rrf_k) --
+            explicitly pass a value to override it for one call, e.g. during
+            evaluate.py's own k-sweep.
 
     Returns:
         list of chunk dicts (chunk_id, doc_id, text, pages, organization,
@@ -186,7 +219,8 @@ def search(
     if method == "vector":
         return _vector_search(query, top_k, lifecycle_status)
     if method == "hybrid":
-        return _hybrid_search(query, top_k, lifecycle_status, rrf_k)
+        resolved_rrf_k = rrf_k if rrf_k is not None else _recorded_default_rrf_k()
+        return _hybrid_search(query, top_k, lifecycle_status, resolved_rrf_k)
     raise ValueError(f"Unknown method {method!r} — expected 'text', 'vector', or 'hybrid'.")
 
 

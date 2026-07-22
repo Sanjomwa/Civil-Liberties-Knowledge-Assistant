@@ -17,8 +17,8 @@
   "filter": {
     "n_gram": 4,
     "total_before": 150,
-    "dropped": 53,
-    "kept": 97,
+    "dropped": 49,
+    "kept": 101,
     "unverifiable_chunk_missing": 0
   },
   "questions": [
@@ -317,6 +317,13 @@
       "category": "general"
     },
     {
+      "question": "What action did Kenya’s film board take against the movies Badhaai Do and I Am Samuel, and why did it say they were unsuitable for local viewers?",
+      "correct_chunk_id": "freedomhouse-ke-2024-fotn-chunk-0047",
+      "doc_id": "freedomhouse-ke-2024-fotn",
+      "organization": "Freedom House",
+      "category": "general"
+    },
+    {
       "question": "What did researchers find about the scale and organization of online activism supporting Tigray?",
       "correct_chunk_id": "freedomhouse-et-2023-fotn-chunk-0083",
       "doc_id": "freedomhouse-et-2023-fotn",
@@ -426,6 +433,13 @@
       "correct_chunk_id": "cipesa-ke-2025-sifa-ai-country-chunk-0108",
       "doc_id": "cipesa-ke-2025-sifa-ai-country",
       "organization": "CIPESA",
+      "category": "general"
+    },
+    {
+      "question": "What kind of online abuse did women in Kenyan politics face during the COVID-19 pandemic?",
+      "correct_chunk_id": "freedomhouse-ke-2022-fotn-chunk-0117",
+      "doc_id": "freedomhouse-ke-2022-fotn",
+      "organization": "Freedom House",
       "category": "general"
     },
     {
@@ -576,6 +590,13 @@
       "category": "general"
     },
     {
+      "question": "What powers do Ugandan security officials have to access, intercept, and monitor private communications under the RIC Act and the Anti-Terrorism Act?",
+      "correct_chunk_id": "freedomhouse-ug-2022-fotn-chunk-0100",
+      "doc_id": "freedomhouse-ug-2022-fotn",
+      "organization": "Freedom House",
+      "category": "general"
+    },
+    {
       "question": "What kinds of obstacles do stakeholders say are standing in the way of effective AI governance in Ethiopia?",
       "correct_chunk_id": "cipesa-et-2025-sifa-ai-country-chunk-0065",
       "doc_id": "cipesa-et-2025-sifa-ai-country",
@@ -685,6 +706,13 @@
       "correct_chunk_id": "freedomhouse-et-2023-fotn-chunk-0025",
       "doc_id": "freedomhouse-et-2023-fotn",
       "organization": "Freedom House",
+      "category": "general"
+    },
+    {
+      "question": "What is the title of the report on AI and digital democracy in Uganda, and when was it published?",
+      "correct_chunk_id": "cipesa-ug-2025-sifa-ai-country-chunk-0000",
+      "doc_id": "cipesa-ug-2025-sifa-ai-country",
+      "organization": "CIPESA",
       "category": "general"
     },
     {

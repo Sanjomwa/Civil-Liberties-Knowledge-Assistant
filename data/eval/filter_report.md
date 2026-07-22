@@ -1,6 +1,6 @@
 # Ground Truth Circularity Filter Report
 
-53/150 question(s) dropped for sharing a 4+-word descriptive phrase with their own source chunk (proper nouns/dates exempted). 97 kept for evaluate.py (of which 0 could not be verified -- source chunk file missing -- and were kept rather than dropped unchecked).
+49/150 question(s) dropped for sharing a 4+-word descriptive phrase with their own source chunk (proper nouns/dates exempted). 101 kept for evaluate.py (of which 0 could not be verified -- source chunk file missing -- and were kept rather than dropped unchecked).
 
 **Scope reminder:** this catches verbatim phrase lifts only. Looser paraphrases of a citation's own title won't be caught here -- see this script's own module docstring.
 
@@ -66,13 +66,10 @@
 - `ooni-ke-2025-telegram-kcse-blocking-chunk-0011` (flagged phrase: "over the past decade")
   Q: Which countries have been the focus of third-party research supported by OONI data over the past decade?
 
-- `freedomhouse-ke-2024-fotn-chunk-0047` (flagged phrase: "and i am samuel")
-  Q: What action did Kenya’s film board take against the movies Badhaai Do and I Am Samuel, and why did it say they were unsuitable for local viewers?
-
-- `freedomhouse-ug-2022-fotn-chunk-0115` (flagged phrase: "the uganda government citizens")
+- `freedomhouse-ug-2022-fotn-chunk-0115` (flagged phrase: "citizens interaction centre s")
   Q: What happened to the Uganda Government Citizens Interaction Centre’s Twitter account in March 2022, and what message did the hackers post after gaining access?
 
-- `freedomhouse-rw-2022-fotn-chunk-0018` (flagged phrase: "the rwanda internet exchange")
+- `freedomhouse-rw-2022-fotn-chunk-0018` (flagged phrase: "the consolidation of telecommunications")
   Q: Who manages the Rwanda Internet Exchange, and what concern do activists raise about the consolidation of telecommunications towers under IHS Towers?
 
 - `cipesa-ug-2026-shutdown-economic-impact-chunk-0018` (flagged phrase: "during elections and other")
@@ -89,9 +86,6 @@
 
 - `freedomhouse-et-2023-fotn-chunk-0052` (flagged phrase: "ethiopia s media regulator")
   Q: What action did Ethiopia’s media regulator take against an association linked to the Ethiopian Orthodox Tewahedo Church after it broadcast a breaking news alert and shared a statement about tensions among bishops?
-
-- `freedomhouse-ke-2022-fotn-chunk-0117` (flagged phrase: "during the covid 19")
-  Q: What kind of online abuse did women in Kenyan politics face during the COVID-19 pandemic?
 
 - `freedomhouse-et-2024-fotn-chunk-0108` (flagged phrase: "journalists from tigrai tv")
   Q: What happened to the journalists from Tigrai TV who were detained in Mekelle, and what was the outcome for the two who were still imprisoned at the end of 2023?
@@ -126,7 +120,7 @@
 - `freedomhouse-et-2022-fotn-chunk-0055` (flagged phrase: "supporters of the former")
   Q: What online manipulation tactics were used by supporters of the former Ethiopian government, and what rewards did they reportedly receive in return?
 
-- `freedomhouse-ug-2023-fotn-chunk-0021` (flagged phrase: "during the january 2021")
+- `freedomhouse-ug-2023-fotn-chunk-0021` (flagged phrase: "the january 2021 elections")
   Q: Which online services were blocked in Uganda during the January 2021 elections, and what did the government do about internet access more broadly?
 
 - `freedomhouse-rw-2025-fotn-chunk-0001` (flagged phrase: "for sim card registration")
@@ -137,9 +131,6 @@
 
 - `cipesa-ke-2025-sifa-ai-country-chunk-0016` (flagged phrase: "s freedom on the")
   Q: What was Kenya’s Freedom on the Net 2024 score and overall internet freedom rating?
-
-- `freedomhouse-ug-2022-fotn-chunk-0100` (flagged phrase: "the anti terrorism act")
-  Q: What powers do Ugandan security officials have to access, intercept, and monitor private communications under the RIC Act and the Anti-Terrorism Act?
 
 - `freedomhouse-ug-2022-fotn-chunk-0065` (flagged phrase: "major privately owned newspapers")
   Q: Which major privately owned newspapers in Uganda have online platforms that are only available in English?
@@ -161,7 +152,4 @@
 
 - `freedomhouse-ke-2023-fotn-chunk-0088` (flagged phrase: "are there laws that")
   Q: Are there laws that impose criminal or civil penalties for online expression in Kenya?
-
-- `cipesa-ug-2025-sifa-ai-country-chunk-0000` (flagged phrase: "digital democracy in uganda")
-  Q: What is the title of the report on AI and digital democracy in Uganda, and when was it published?
 
