@@ -121,6 +121,16 @@ case "$MODE" in
     # Cowork-side copy could silently stomp on the next time pull runs
     # first, per this project's own standing rule. Added ahead of the
     # first real re-run rather than waiting to get burned a third time.
+    #
+    # --exclude='.env' added 2026-07-22, retrieval phase: ground_truth.py
+    # is the first script in this project to need a real secret
+    # (OPENAI_API_KEY). .env was already in .gitignore (never committed),
+    # but nothing had excluded it from sync.sh itself -- if a .env ever
+    # existed in the Cowork mirror, pull would have written a secret
+    # into WSL, and push would have copied one back out. Sam's .env
+    # should live only at $WSL_REPO/.env, created directly in WSL, never
+    # in the Cowork mirror -- this exclude is a belt-and-suspenders
+    # backstop, not the only protection.
     stats_file="$(mktemp)"
     rsync -av --stats \
       --exclude='.venv' --exclude='__pycache__' --exclude='data/' \
@@ -128,6 +138,7 @@ case "$MODE" in
       --exclude='corpus/acquisition-log.md' --exclude='corpus/manifest.csv' \
       --exclude='corpus/checksums.sha256' --exclude='corpus/validation-report.md' \
       --exclude='corpus/validation-results.json' --exclude='corpus/derived-checksums/' \
+      --exclude='.env' \
       "$COWORK_MIRROR/" \
       "$WSL_REPO/" | tee "$stats_file"
     print_sync_summary "$WSL_REPO" "$stats_file"
@@ -176,7 +187,7 @@ case "$MODE" in
     rsync -av --stats \
       --exclude='.venv' --exclude='__pycache__' --exclude='data/' \
       --exclude='CLAUDE.md' --exclude='.git/' --exclude='claude-code-wsl-CLAUDE.md' \
-      --exclude='.claude/' \
+      --exclude='.claude/' --exclude='.env' \
       "$WSL_REPO/" \
       "$COWORK_MIRROR/" | tee "$stats_file"
     print_sync_summary "$COWORK_MIRROR" "$stats_file"

@@ -21,6 +21,24 @@ chunking actually runs. That stamp is what makes stale chunks detectable
 later (via check_drift.py, not yet built) if the corpus version moves on
 without this document being re-chunked.
 
+**Fixed 2026-07-22 — the chunking block now actually reaches chunk files
+too, not just data/metadata/{doc_id}.json.** Previously
+`chunk_document()` wrote every chunk file from the in-memory `metadata`
+dict *before* the chunking block was ever added to it (that used to
+happen in a separate step afterward), so each chunk's own embedded
+`document_metadata` never carried a `"chunking"` key at all — confirmed
+against the real corpus: zero of 3,783 chunk files had one. Found when
+`src/retrieval/embed.py` hard-failed against the real corpus expecting
+that stamp to be there (see decisionlog.md, 2026-07-22, for the full
+incident). `chunk_document()` now computes `total_chunks` from the
+window count first, stamps the `chunking` block into `metadata` in
+place, and only then writes chunk files — so every chunk file's
+embedded `document_metadata` matches `data/metadata/{doc_id}.json`
+exactly, including `chunking`. No other field, chunk boundary, chunk_id,
+or `pages` value changes as a result of this fix — confirmed via a
+smoke test comparing before/after chunk counts and content on a
+synthetic fixture before running this against the real corpus.
+
 Idempotent: rerunning a document clears its existing data/chunks/{doc_id}/
 directory first and rewrites it from scratch, so stale chunk counts or
 boundaries from a previous chunk_size/chunk_step never linger alongside
@@ -98,6 +116,25 @@ def make_windows(text: str, size: int = CHUNK_SIZE, step: int = CHUNK_STEP):
     return windows
 
 
+def stamp_chunking_block(metadata: dict, total_chunks: int) -> None:
+    """Mutates `metadata` in place, adding the ADR-0003 `chunking` block.
+    Must run BEFORE any chunk file is written (see chunk_document) so that
+    every chunk's own embedded document_metadata carries this block too,
+    not just data/metadata/{doc_id}.json — see this module's docstring,
+    "Fixed 2026-07-22", for why that distinction matters."""
+    metadata["chunking"] = {
+        "strategy": "fixed_overlap",
+        "chunk_size": CHUNK_SIZE,
+        "chunk_step": CHUNK_STEP,
+        "total_chunks": total_chunks,
+        "chunking_date": date.today().isoformat(),
+        # Stamped from declared.corpus_version at the moment chunking runs
+        # (ADR-0003) — a later mismatch against declared.corpus_version is
+        # what makes this document's chunks detectably stale.
+        "corpus_version": metadata["declared"]["corpus_version"],
+    }
+
+
 def chunk_document(doc_id: str, org: str, metadata: dict) -> int:
     processed_path = PROCESSED_DIR / org / f"{doc_id}.txt"
     if not processed_path.exists():
@@ -108,6 +145,14 @@ def chunk_document(doc_id: str, org: str, metadata: dict) -> int:
         )
     text = processed_path.read_text(encoding="utf-8")
     windows = make_windows(text)
+
+    # Stamp the chunking block into `metadata` (mutated in place) BEFORE
+    # writing any chunk file below, so every chunk's own embedded
+    # document_metadata includes it — this ordering is the fix (see
+    # module docstring, "Fixed 2026-07-22"). Previously this ran after
+    # every chunk file was already written, so the block never reached
+    # them.
+    stamp_chunking_block(metadata, total_chunks=len(windows))
 
     # ADR-0008: load once per document, not once per chunk. None for
     # non-PDF sources or a PDF not yet re-extracted since ADR-0008 landed
@@ -141,18 +186,13 @@ def chunk_document(doc_id: str, org: str, metadata: dict) -> int:
     return len(windows)
 
 
-def update_metadata_with_chunking(doc_id: str, metadata: dict, total_chunks: int) -> None:
-    metadata["chunking"] = {
-        "strategy": "fixed_overlap",
-        "chunk_size": CHUNK_SIZE,
-        "chunk_step": CHUNK_STEP,
-        "total_chunks": total_chunks,
-        "chunking_date": date.today().isoformat(),
-        # Stamped from declared.corpus_version at the moment chunking runs
-        # (ADR-0003) — a later mismatch against declared.corpus_version is
-        # what makes this document's chunks detectably stale.
-        "corpus_version": metadata["declared"]["corpus_version"],
-    }
+def write_metadata(doc_id: str, metadata: dict) -> None:
+    """Persists `metadata` (already stamped with `chunking` by
+    stamp_chunking_block, called from within chunk_document) to
+    data/metadata/{doc_id}.json. Renamed from update_metadata_with_chunking
+    2026-07-22 — it no longer computes the chunking block itself, just
+    writes what chunk_document already stamped, so the two can never
+    drift out of sync with each other again."""
     meta_path = METADATA_DIR / f"{doc_id}.json"
     with open(meta_path, "w", encoding="utf-8") as f:
         json.dump(metadata, f, indent=2, ensure_ascii=False)
@@ -194,7 +234,7 @@ def main() -> None:
             print(f"[FAIL] {e}", file=sys.stderr)
             sys.exit(1)
 
-        update_metadata_with_chunking(doc_id, metadata, n_chunks)
+        write_metadata(doc_id, metadata)
         print(f"[ok] {doc_id} — {n_chunks} chunk(s) written")
         total_docs += 1
         total_chunks_written += n_chunks

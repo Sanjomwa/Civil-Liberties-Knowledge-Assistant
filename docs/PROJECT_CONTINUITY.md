@@ -5,79 +5,97 @@ year — this doc should let anyone picking it up, including the original
 author, resume without reconstructing context from memory or old history.
 Read this file first, in full, when resuming cold.
 
-Last updated: 2026-07-13.
+Last updated: 2026-07-20.
 
 ---
 
 ## 1. Current state (snapshot)
 
-**Implementation status: walking-skeleton milestone AND the 10-document/
-4-org acquisition-method milestone are both complete.** All six ingestion
-modules exist in `src/ingestion/` — `acquire.py`, `extract.py`,
-`validate.py`, `metadata.py`, `chunk.py`, `pipeline.py` — and 10 real
-documents across all four v1 orgs have flowed through every stage
-successfully: 1671 chunks total. See Section 6a (walking skeleton, 1
-document) and Section 6b (10-document/4-org pass) for full detail. Project
-folder now also contains:
-- `docs/archituecture.md.docx` — frozen architecture, now **v1.4** (amended
-  2026-07-11 via ADR-0001 through ADR-0004 — see Section 5).
+**Ingestion phase: CLOSED, verified clean. Next phase (retrieval/
+embedding) is the active work.** All six ingestion modules exist and are
+implemented in `src/ingestion/` — `acquire.py`, `extract.py`,
+`validate.py`, `metadata.py`, `chunk.py`, `pipeline.py`, plus a new
+on-demand `reconcile.py`. **Corpus: 35 documents, 3,783 chunks**, across
+all four v1 orgs (Access Now 4, CIPESA 9, Freedom House 16, OONI 6). The
+full pipeline was re-run end to end on 2026-07-20 after the
+end-of-ingestion-phase Opus+Fable review's six findings were fixed
+(ADR-0007, ADR-0008) — confirmed clean, zero content-drift, zero
+cross-surface disagreement (`reconcile.py`). See Section 7's most recent
+entries for the full verification detail. Project folder now also
+contains:
+- `docs/archituecture.md.docx` — frozen architecture, now **v1.8**
+  (amended 2026-07-11 via ADR-0001–0004; amended 2026-07-20 via
+  ADR-0005–0008 — see Section 5 and `docs/adr/README.md`).
 - `docs/ingestion-design.md` — pipeline reference, synthesizing the
-  architecture plus all four ADRs, with a diagram.
-- `docs/licensing.md` — per-organization source licensing findings.
+  architecture plus all eight ADRs, with a diagram, updated 2026-07-20 for
+  ADR-0007/0008's new artifacts (`corpus/validation-results.json`,
+  `corpus/derived-checksums/{org}.json`, `.pages.json` sidecars,
+  `reconcile.py`).
+- `docs/retrieval-design.md` — **new, 2026-07-22.** Pre-implementation
+  design reference for the next phase (`src/retrieval/`), mirroring
+  `ingestion-design.md`'s shape. No code exists yet. See Section 7's most
+  recent entry for the full summary; `decisionlog.md`, 2026-07-22, for
+  the Opus consult and the three fixes it produced.
+- `docs/licensing.md` — per-organization source licensing findings
+  (Freedom House permission request still pending a reply — see Section 4).
 - `docs/corpus-inclusion-rubric.md` — concrete criteria for the semantic
   review stage (topic relevance, coverage contribution).
 - `docs/PROJECT_CONTINUITY.md` — this file.
 - `docs/data_governance.md` — governance policy.
-- `docs/adr/` — four ADRs (see Section 5), plus `README.md` (process + example
-  trigger thresholds).
-- `pyproject.toml` / `uv.lock` — Python dependencies declared and locked
-  (129 packages, `requires-python = ">=3.10,<3.13"`). Verified 2026-07-13
-  with `uv sync` against CPython 3.12.3 — clean install, no conflicts.
-- `src/ingestion/` — six modules, all tested (synthetically and/or against
-  the real document — see Section 6a for which).
-- `corpus/sources/ooni.yaml`, `corpus/CORPUS_VERSION`,
+- `docs/adr/` — **eight** ADRs (see Section 5), plus `README.md` (process +
+  example trigger thresholds).
+- `pyproject.toml` / `uv.lock` — Python dependencies declared and locked.
+- `src/ingestion/` — seven modules total (six pipeline stages +
+  `reconcile.py`), all real-corpus tested as of the 2026-07-20 re-run.
+- `corpus/sources/*.yaml` (four orgs), `corpus/CORPUS_VERSION`,
   `corpus/acquisition-log.md`, `corpus/manifest.csv`,
-  `corpus/checksums.sha256`, `corpus/validation-report.md` — generated or
-  hand-written artifacts from the real walking-skeleton run.
-- `data/raw/`, `data/processed/`, `data/metadata/`, `data/chunks/` — 10
-  real documents' worth of output at each stage (Sam's machine only —
-  these directories are gitignored and don't sync into the Cowork
-  workspace mirror; see the repo's own `.gitignore`).
-- `corpus/sources/accessnow.yaml`, `cipesa.yaml`, `freedomhouse.yaml` —
-  three new source files, alongside the original `ooni.yaml` (now with a
-  second document). All four now use a top-level `default_acquisition`
-  field (`auto` for Access Now/CIPESA/Freedom House, `manual` for OONI) —
-  see Section 6b for how that was determined.
+  `corpus/checksums.sha256`, `corpus/validation-report.md`,
+  `corpus/validation-results.json` (new, ADR-0007),
+  `corpus/derived-checksums/freedomhouse.json` (new, ADR-0007) — all
+  generated/current as of the 2026-07-20 real pipeline run.
+- `data/raw/`, `data/processed/` (including `.pages.json` sidecars for all
+  13 PDF-sourced documents, ADR-0008), `data/metadata/`, `data/chunks/`
+  (chunk records now carry a `"pages"` field) — 35 real documents' worth of
+  output at each stage (Sam's machine only — gitignored, doesn't sync into
+  the Cowork mirror; see the repo's own `.gitignore`).
 
-Not yet started: acquiring the remaining ~30-49 documents to build out the
-full 40-60 document corpus (this pass deliberately tested 2-4 documents per
-org to determine auto-vs-manual acquisition, per Section 6b's stated
-purpose, not to complete the corpus), and `pipeline.py`'s sibling utility
-`check_drift.py` (correctly deferred — only meaningful once a corpus
-version change actually exists to detect drift against).
+Not started yet: retrieval/embedding (the next phase — vector index,
+retrieval evaluation comparing methods), generation (citation-grounded
+answers, thin/contradictory-evidence flagging), LLM evaluation, interface,
+monitoring, containerization, and `pipeline.py`'s sibling utility
+`check_drift.py` (still correctly deferred — no corpus version change yet
+to detect drift against). Also not started: growing the corpus further —
+35 documents was judged sufficient to close the ingestion phase and move
+on, per Sam's own call (see Section 7); the architecture's 40-60 document
+target was a planning estimate, not a hard gate on advancing.
 
 **Two unrelated version numbers, don't conflate them:** the architecture
-document has its own revision version (`Document version`, now v1.4,
+document has its own revision version (`Document version`, now v1.8,
 incremented once per ADR — a tracking number for the *document itself*).
 Separately, the architecture's own content defines a corpus-scope version
 ("v1" sources: OONI/Access Now/CIPESA/Freedom House; "v1.1" deferred
 addition: Netblocks/Citizen Lab — a scope milestone for the *corpus*, set
-by the architecture, not by ADRs). "The architecture is at v1.4" and "the
+by the architecture, not by ADRs). "The architecture is at v1.8" and "the
 corpus is still v1, not yet v1.1" are both true at the same time and mean
 different things.
 
-**What is decided and stable:** the architecture (now v1.4, "Approved.
+**What is decided and stable:** the architecture (now v1.8, "Approved.
 Future changes via ADR only.") — scope (Kenya, Uganda, Tanzania, Ethiopia,
-Rwanda; 2022–2025), sources (OONI, Access Now, CIPESA, Freedom House for
-v1; Netblocks + Citizen Lab deferred to v1.1), pipeline shape (`acquire.py`
-→ `extract.py` → `validate.py` → `metadata.py` → `chunk.py`), doc ID scheme
-(`{org}-{country_iso2}-{year}-{slug}`), and the core acceptance principle:
-every answer must cite sources, thin/contradictory evidence must be
-flagged, not smoothed over. Refined by four ADRs since the original freeze:
-tiered (not uniform) validation routing, a `lifecycle` metadata block for
-supersession, a `corpus_version` stamp on chunks for drift detection, a
-`license` field, and an explicit disclosure of the English-only corpus
-limitation. See `docs/ingestion-design.md` for the synthesized picture.
+Rwanda; **2022–2026**, extended from 2022–2025 by ADR-0006), sources
+(OONI, Access Now, CIPESA, Freedom House for v1; Netblocks + Citizen Lab
+deferred to v1.1), pipeline shape (`acquire.py` → `extract.py` →
+`validate.py` → `metadata.py` → `chunk.py`, plus on-demand
+`reconcile.py`), doc ID scheme (`{org}-{country_iso2}-{year}-{slug}`), and
+the core acceptance principle: every answer must cite sources,
+thin/contradictory evidence must be flagged, not smoothed over. Refined by
+eight ADRs since the original freeze: tiered (not uniform) validation
+routing, a `lifecycle` metadata block for supersession, a `corpus_version`
+stamp on chunks for drift detection, a `license` field, an explicit
+disclosure of the English-only corpus limitation, a content-checksum
+mechanism for CDN-served HTML, the 2022–2026 window extension, four
+pipeline data-flow consistency fixes, and page-level citation provenance
+for PDF-sourced chunks. See `docs/ingestion-design.md` for the synthesized
+picture.
 
 ## 2. How to resume from cold
 
@@ -434,15 +452,28 @@ auto-vs-manual question; scaling further is future work, see Section 7),
   not kept (temporary, `/tmp` only) — this paragraph is the record of
   what it verified.
 
-  **Not yet done:** the real pipeline hasn't been re-run against the
-  actual 35-document corpus. Every PDF-sourced document needs
-  re-extraction (self-migrating — the existing skip logic forces it
-  automatically once it detects a missing `.pages.json`) and every
-  document needs re-validation/re-metadata/re-chunking to pick up the
-  new fields and confirm nothing regresses (chunk *counts* should be
-  identical — this is additive, not a re-chunking-parameter change).
-  Next step: hand off to Claude Code for that real run, then review
-  `reports.md` before declaring the ingestion phase clean.
+  **DONE, same day — real pipeline re-run confirmed clean.** Claude Code
+  ran `pipeline.py --all` + `reconcile.py` against the real corpus.
+  Result, independently re-verified from the Cowork side by reading the
+  pushed `corpus/validation-results.json` (35 entries, 0 drifted),
+  `corpus/derived-checksums/freedomhouse.json` (16 entries, every one
+  with both `sha256` and `content_sha256`), `corpus/acquisition-log.md`
+  (0 `content-drift flagged` lines), and `corpus/manifest.csv` (36
+  lines = 35 docs + header) directly, not just trusting `reports.md`'s
+  prose: **35 documents, 3,783 chunks — both exactly match the
+  pre-fix baseline, zero content-drift, `reconcile.py` clean.** All 13
+  PDF-sourced documents (4 Access Now + 9 CIPESA) forced through
+  re-extraction as designed and got real `.pages.json` sidecars; all 16
+  Freedom House documents' pre-ADR-0007 `sha256`/`content_sha256`
+  baselines migrated into `corpus/derived-checksums/freedomhouse.json`
+  cleanly, once each. One minor process gap, not a data problem:
+  `reports.md`'s own final "standing-rule verification" section was
+  left as an unfilled stub (the read-back-after-push step the WSL
+  CLAUDE.md requires) — covered by the independent Cowork-side
+  verification above instead, but worth a note back to the WSL side
+  next time this comes up, since the whole point of that rule is not
+  needing a second party to catch it. **Ingestion phase is clean.
+  Ready for retrieval/embedding.**
 - **DONE, 2026-07-20: two Tanzania OONI documents acquired, validated,
   Included, pipelined — corpus now at 35 documents / 3,783 chunks.**
   Neither new document flagged as a near-duplicate of topically
@@ -642,17 +673,205 @@ auto-vs-manual question; scaling further is future work, see Section 7),
   ADR-0003 — retrieval should exclude `status != "active"` by default.
   Nothing to build yet since the retrieval layer itself doesn't exist
   (later module) — noted here so it isn't rediscovered as a surprise.
-- **Retrieval-layer storage: deliberately deferred, not decided.** Ingestion
-  uses JSON files (`data/metadata/`, `data/chunks/`) per the frozen
-  architecture — the right call at this corpus size (40-60 documents, one
-  ingest run, no concurrent writers), and not a trap: the `declared`/
-  `derived`/`lifecycle` schema from ADR-0003 gives any later migration a
-  clean, stable `doc_id`-keyed structure to load from, so this doesn't lock
-  anything in. The real open question is what retrieval uses once that
-  stage is designed — a local index file, or a vector database, depending
-  on whether retrieval ends up doing lexical or vector search (or both).
-  Not decided now because retrieval hasn't been designed yet. Revisit when
-  that design starts, not before — and worth weighing this course's own
-  Module 4 finding (keyword search beat vector search on the lesson corpus)
-  as one data point against assuming a vector database is obviously needed,
-  rather than deciding on intuition alone.
+- **RESOLVED, 2026-07-22 — retrieval-layer storage decided.** In-memory,
+  persisted-to-disk vectors (`data/index/vectors.npy` + a
+  `index_metadata.json` stamp), not a standalone vector database —
+  matches the course's own explicit allowance for in-memory/lightweight
+  stores and the architecture's "no infrastructure beyond what's
+  necessary" principle. Full design in `docs/retrieval-design.md`.
+- **UPDATE, 2026-07-22, later same day: `embed.py` succeeded against the
+  real corpus — 3,783 chunks embedded, `data/index/` built.** A real
+  WSL/VS Code disconnect incident preceded this (two failed attempts,
+  diagnosed via Opus as WSL2 memory pressure from leftover VM state that
+  `wsl --shutdown` alone cleared, 90%→45% memory drop confirmed in Task
+  Manager) — fixed with a `.wslconfig` memory cap plus a smaller,
+  progress-printing batch size in `embed.py` itself. Clean run after
+  that: `[ok] embedded — shape (3783, 384)`, all three index artifacts
+  written. Full incident detail in `decisionlog.md`, 2026-07-22. Next:
+  `ground_truth.py`, then Sam's mandatory circularity review before
+  `evaluate.py`.
+- **UPDATE, 2026-07-22, later same day: `ground_truth.py`'s first real run
+  hard-failed on a wrong model name, fixed, re-run succeeded clean.**
+  `LLM_MODEL` was hardcoded to `gpt-4o-mini`, which Sam's OpenAI
+  project doesn't have enabled (403 `model_not_found` on every call, ~130
+  identical failures before Sam interrupted the run). Root cause found by
+  checking `LLM-ZOOMCAMP-2026-main.zip`'s real course code directly
+  (`rag_helper.py`, `evaluation_utils.py`) — both use `gpt-5.4-mini`,
+  which Sam had deliberately set up for lower credit usage. Fixed
+  `LLM_MODEL = "gpt-5.4-mini"`; no other retrieval-phase file calls an
+  LLM. Also added a fail-fast guard (aborts after 3 consecutive identical
+  failures instead of burning through the full sample) so a future
+  systemic account/model issue surfaces immediately. Re-run succeeded:
+  130/130 questions generated, `data/eval/ground_truth.json` +
+  `ground_truth_review_sample.json` (25 pairs) both written cleanly.
+  **Known, accepted gap:** the `ooni_methodology` stratum sampled 0/20 —
+  confirmed via `corpus/sources/ooni.yaml` that all 6 OONI documents in
+  the corpus are incident/country reports, not a dedicated methodology
+  page (one was named in the yaml's own acquisition-scope comment but
+  never actually acquired). Sam's decision: leave it rather than reopen
+  the closed 35-document ingestion phase to backfill one document.
+  Documented in `docs/retrieval-design.md`'s `ground_truth.py` section —
+  `evaluate.py`'s per-slice report will correctly show this stratum as
+  0-sample, expected, not a bug. Full detail in `decisionlog.md`,
+  2026-07-22. **Next, required before `evaluate.py`:** Sam's manual
+  circularity review of the 25-pair sample — not yet done.
+- **UPDATE, 2026-07-22, later same day: review sample itself was
+  unusable, fixed.** The 25-pair `ground_truth_review_sample.json` had
+  no chunk text attached — impossible to judge "does this question echo
+  the passage" without the passage. Found when Sam pasted the sample
+  back for review. `ground_truth.py` now attaches `chunk_text` to each
+  reviewed pair (`write_review_sample()`), and a new
+  `--regenerate-review-sample` flag rebuilds the sample from the
+  existing `ground_truth.json` for free (no OpenAI calls, same seed —
+  identical 25 pairs, just enriched). **Not yet re-run.** Next: Claude
+  Code runs `--regenerate-review-sample`, then Sam does the actual
+  circularity review against real passage text.
+- **UPDATE, 2026-07-22, later same day: Sam's manual review done —
+  found a real classify_category() bug AND a real circularity-rate
+  problem, both requiring a decision before `evaluate.py`.** (1) A
+  case-sensitivity bug (`chunk["organization"] == "ooni"` vs. the real
+  `"OONI"` value) meant `ooni_methodology` could never populate on any
+  run, contradicting the earlier "genuine corpus gap, accept it"
+  decision — fixed (`.lower()`), but that earlier decision is now
+  superseded, not confirmed; needs a fresh run to actually know if
+  methodology content exists. (2) ~20%+ of the 25-pair sample showed
+  severe circularity (near-verbatim phrase lifts) despite the
+  paraphrase-only prompt instruction, plus 3 uses of explicitly-forbidden
+  self-referential phrasing ("according to this passage"), plus 2
+  footnote-dominated chunks producing possibly-ungrounded questions.
+  Full detail in `decisionlog.md`. **Not yet decided:** whether to
+  strengthen `QUESTION_SYSTEM_PROMPT` and fully re-run `ground_truth.py`,
+  or proceed with the current 130 questions as-is with caveats. Blocking
+  `evaluate.py` either way until Sam decides.
+- **UPDATE, 2026-07-22, later same day: full re-run (150 questions,
+  strengthened prompt) done, second review done, mechanical filter
+  built and run, decision made — clear to run `evaluate.py`.** Full
+  chain: (1) full regenerate confirmed the `classify_category()` fix —
+  `ooni_methodology` went 0/20 → 20/20, total 150 questions (matches
+  `STRATUM_TARGETS` sum now that all strata populate). (2) Second manual
+  review: self-referential phrasing fully eliminated, verbatim-lift
+  circularity roughly halved, but a new pattern (echoing a passage's own
+  survey-question/citation-title header) emerged at similar volume —
+  still ~24% flagged overall. (3) Decided against a third re-run;
+  instead added `src/retrieval/filter_ground_truth.py` (mechanical
+  4+-word phrase-overlap filter, proper nouns/dates exempted) plus one
+  more prompt rule for future runs. (4) Filter ran: 97/150 kept, 53
+  dropped — more aggressive than the ~24% estimate (some false
+  positives from the exemption logic being too strict), and
+  disproportionately hit the just-fixed `ooni_methodology` stratum (10
+  of its 20 dropped). Sam's decision: accept 97/150 as final rather than
+  hand-review the OONI drops or re-engineer filter precision — the
+  asymmetric risk (dropping a borderline-fine question costs less than
+  keeping a genuinely circular one) favors proceeding. Full reasoning in
+  `decisionlog.md`. **Next: hand off `evaluate.py` to Claude Code** —
+  the last step of the retrieval phase before a human (Sam) picks the
+  default search method from the per-slice report.
+- **UPDATE, 2026-07-22, later same day: real evaluation results in —
+  no method wins uniformly.** `evaluate.py` ran clean against 97
+  questions (22/11/64 across multi_country/ooni_methodology/general).
+  Aggregate: hybrid beats both solo methods clearly (best ~k=10-30, Hit
+  Rate 0.649-0.660 vs. text 0.536 / vector 0.515). Per-slice split:
+  `general` and `ooni_methodology` both strongly favor hybrid
+  (`ooni_methodology` Hit Rate up to 0.909 with hybrid vs. 0.636 text —
+  though n=11 is thin, read directionally); `multi_country` is the
+  exception — plain text has the best MRR (0.267), beating every hybrid
+  k and vector outright. RRF k sensitivity isn't uniform either:
+  `multi_country` gets *worse* as k increases past 1, opposite of the
+  other two slices. Full numbers in `decisionlog.md`. Also fixed a real
+  cosmetic bug Claude Code's own verification caught: the report's own
+  header text hardcoded `ground_truth.json` even when it correctly
+  loaded from `ground_truth_filtered.json` — `load_ground_truth()` now
+  returns the actual path used. **Next, final step of retrieval phase:**
+  Sam picks the default method (`evaluate.py --set-default ...`) — not
+  yet decided.
+- **UPDATE, 2026-07-22, later same day: default method decided —
+  hybrid, RRF k=10.** Chosen over k=30 for best-or-near-best MRR across
+  all three slices (not just aggregate), closest any hybrid config gets
+  to text's real `multi_country` MRR advantage while keeping hybrid's
+  clear wins elsewhere. That `multi_country` gap (no config beats
+  text's MRR there) is documented as a known limitation, not resolved —
+  worth revisiting if a later phase adds query-type-aware routing. Full
+  reasoning in `decisionlog.md`. **Retrieval phase is now functionally
+  complete** — implementation, evaluation, and the default-method
+  decision are all done, pending the mechanical `--set-default` command
+  recording it to `data/eval/default_method.json`. Next real phase after
+  that: generation (citation-grounded answer synthesis), not started.
+- **UPDATE, 2026-07-22, later same day: `src/ingestion/chunk.py` itself
+  fixed (Sam's call), not yet re-run against the real corpus.** The
+  `chunking` block now gets stamped into `metadata` before any chunk
+  file is written (new `stamp_chunking_block()`, called from inside
+  `chunk_document()`), so every chunk file's own embedded
+  `document_metadata` will carry `chunking` too, matching
+  `data/metadata/{doc_id}.json` — previously it didn't. No ADR (a bug
+  fix restoring already-documented intended behavior, same precedent as
+  ADR-0007's langdetect-seeding fix). Smoke-tested on a synthetic
+  fixture: chunk boundaries/pages/text unaffected, fully idempotent on
+  rerun. **Retrieval code (`embed.py`/`ground_truth.py`) needs no
+  changes** — it already reads the stamp from `data/metadata/` directly,
+  which was already correct before this fix. Next: Claude Code re-runs
+  `chunk.py` across the real 35-document corpus (cheap — no PDF
+  re-extraction), then proceeds with the unchanged retrieval steps. Full
+  detail in `decisionlog.md`, 2026-07-22 (third entry that date).
+- **UPDATE, 2026-07-22, later same day: first real WSL run hard-failed as
+  designed — root cause found and fixed, one issue flagged not fixed.**
+  `embed.py` correctly hard-failed against all 35 real documents (not a
+  partial subset). Root cause: a real bug in already-shipped
+  `src/ingestion/chunk.py` — the `chunking.corpus_version` stamp
+  (ADR-0003) never actually reaches chunk files' embedded
+  `document_metadata`, only the separate `data/metadata/{doc_id}.json`
+  (confirmed: zero of 3,783 real chunk files have a `"chunking"` key at
+  all), plus a separate wrong assumption about `corpus/CORPUS_VERSION`'s
+  real format (`"v1.0 2026-07-13"`, not a bare version string — never
+  previously read programmatically by any script). Fixed in
+  `src/retrieval/{embed,ground_truth,search}.py`: the stamp is now read
+  from `data/metadata/{doc_id}.json` directly (cached per doc_id), and
+  `CORPUS_VERSION` parsing takes only the leading token. Re-smoke-tested
+  against a corrected synthetic fixture matching the real schema gap
+  (including a deliberately-stale document) — confirmed correct.
+  **Flagged, not fixed:** whether to also fix `chunk.py` itself (cheap
+  re-run — no PDF re-extraction involved — but touches a phase already
+  marked "closed, verified clean") is Sam's call, not blocking retrieval
+  either way. Full detail in `decisionlog.md`, 2026-07-22 (second entry
+  that date). Next: Claude Code re-runs from `embed.py` with the
+  corrected code.
+- **DONE, 2026-07-22: retrieval phase implemented, smoke-tested, handed to
+  Claude Code — not yet run against the real corpus.** All four modules
+  written in `src/retrieval/` (`embed.py`, `search.py`, `ground_truth.py`,
+  `evaluate.py`), matching `docs/retrieval-design.md` exactly. Uses real
+  library APIs confirmed by reading their actual source (`fastembed`'s
+  `TextEmbedding.embed()`/`query_embed()`, `minsearch`'s `Index`/
+  `VectorSearch` fit/search/save/load) — not assumed from memory. Every
+  chunk-schema field access (`chunk_id`, `document_metadata.declared/
+  lifecycle/chunking`) matches the real schema, read directly from
+  `chunk.py`/`metadata.py`'s own source, not the earlier design doc's
+  (slightly wrong) guess at the chunk_id format. Logic smoke-tested in the
+  Cowork sandbox against a synthetic 4-chunk fixture with `fastembed`/
+  `minsearch` stubbed out (their real installs need `huggingface.co`
+  network access this sandbox doesn't have, and scipy's own download kept
+  timing out here) — confirmed: RRF combine math, the corpus_version
+  freshness hard-fail (both embed.py's and search.py's), category
+  classification, stratified sampling with per-category caps, and
+  evaluate.py's per-slice Hit Rate/MRR + `--set-default` all work
+  correctly. `pyproject.toml` updated with `fastembed`, `minsearch`,
+  `numpy`; `uv.lock` regeneration deferred to Claude Code (`uv sync` in
+  WSL, where real network access exists). Next: Claude Code runs the real
+  pipeline against the actual 3,783-chunk corpus (handoff prompt in
+  `decisionlog.md`, 2026-07-22) — nothing run against real data yet.
+- **DONE, 2026-07-22: retrieval phase design finalized, no code yet.**
+  `docs/retrieval-design.md` written — phase named "retrieval" (embedding
+  is one internal stage, not the phase name), module breakdown
+  `embed.py` → `search.py` → `ground_truth.py` → `evaluate.py`, Opus
+  design review complete (three fixes folded in: paraphrase-based ground
+  truth to avoid circularity + manual spot-check, a
+  corpus_version/embedding-model stamp on `data/index/` with a hard-fail
+  on mismatch, and per-slice Hit Rate/MRR reporting so method selection
+  isn't aggregate-only). Embedding model decided: `BAAI/bge-small-en-v1.5`
+  (Xenova ONNX port) over the course's `all-MiniLM-L6-v2` — this corpus's
+  1500-char chunks exceed MiniLM's 256-token window, real truncation
+  risk; BGE is also trained specifically for asymmetric query/passage
+  retrieval, a better task fit. RRF explicit in `search.py`'s hybrid
+  backend, `k` swept in `evaluate.py`. Phase boundary stated explicitly:
+  ends at a working, evaluated `search()` with a chosen default method;
+  generation, LLM evaluation, reranking, and query rewriting are later,
+  separate phases. Full reasoning in `decisionlog.md`, 2026-07-22. Next
+  step: implementation of `src/retrieval/`, not yet started.
