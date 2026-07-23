@@ -912,6 +912,52 @@ auto-vs-manual question; scaling further is future work, see Section 7),
   unchanged. Full numbers and CIs in `decisionlog.md`. **Not yet
   decided: what to do about the source-diversity tension or whether to
   pursue P2 (country-metadata filtering)/P3 (BM25 swap) — Sam's call.**
+- **UPDATE, 2026-07-22, later same day: diversity diagnostic run — the
+  vector-backend hypothesis refuted too; real cause is RRF concentration
+  on cross-backend agreement, not embedding smoothness.** Hybrid's
+  top-10 doc set actually overlapped more with text's (29/101) than
+  vector's (18/101) across the real 101 questions — the opposite of the
+  predicted direction, 54/101 tied. Concrete examples show hybrid
+  concentrating on the smaller set both backends independently agree is
+  strong, which is usually a subset of *either* backend's own wider
+  list, not a copy of vector's specifically. Read as a structural
+  precision-for-diversity trade inherent to RRF fusion, not a defect in
+  the embedding model. No code changed — read-only diagnostic, as
+  instructed; Claude Code also correctly followed `sync.sh` over the
+  handoff prompt's literal `git pull`/`git push` wording and flagged
+  rather than pushing to GitHub directly, matching the established
+  policy that only Sam pushes to the real remote. Full detail in
+  `decisionlog.md`. **Not yet decided: whether this is worth addressing
+  before the Aug 10 deadline, given it's an inherent RRF property
+  rather than a bug — Sam's call.**
+- **UPDATE, 2026-07-22, later same day: decided — build P2, defer the
+  diversity tension to generation, P2 implemented and smoke-tested.**
+  Sam's call: country-metadata boost is worth building now (small,
+  both advisors converged on it, targets multi_country's real cause);
+  the source-diversity tension is deliberately NOT retrieval-fixed —
+  forcing extra sources into top-10 would dilute relevance where
+  evidence genuinely concentrates in 1-2 docs, and "flag thin/
+  single-sourced evidence" is already the generation phase's job per
+  the architecture, not retrieval's. `src/retrieval/search.py`: new
+  `_detect_countries()`/`_boost_by_country()` — a stable re-rank
+  (matches promoted, nothing ever dropped) triggered only when a query
+  names one of the 5 corpus countries; no-op otherwise. 5 smoke tests
+  passed, compiles clean. **Not yet run against the real corpus.**
+  Next: Claude Code re-runs `evaluate.py`, specifically checking the
+  `multi_country` slice improves. Full reasoning in `decisionlog.md`.
+
+**SESSION PAUSED HERE, 2026-07-23 — resume by running the P2 Claude Code
+prompt first, nothing else pending on retrieval.** The
+`claude_code_prompt_p2_country_boost.md` handoff was written and
+presented but **has not been run yet** — Sam ended the session before
+executing it in WSL. P2's code (`search.py`'s `_detect_countries()`/
+`_boost_by_country()`) is implemented, smoke-tested, and pushed via
+`sync.sh`, but has never touched the real corpus. **Next session's
+first action:** run that prompt (pull → sanity-check two real queries →
+`evaluate.py` → report the `multi_country` slice before/after, plus
+`general`/`ooni_methodology` regression check) and paste `reports.md`
+back for review. Do not re-derive or re-plan this — the prompt file
+already has the full instructions.
 - **UPDATE, 2026-07-22, later same day: `src/ingestion/chunk.py` itself
   fixed (Sam's call), not yet re-run against the real corpus.** The
   `chunking` block now gets stamped into `metadata` before any chunk

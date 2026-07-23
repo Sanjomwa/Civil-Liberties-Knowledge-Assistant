@@ -74,6 +74,30 @@ INDEX_METADATA_PATH = INDEX_DIR / "index_metadata.json"
 FALLBACK_RRF_K = 60  # used only if default_method.json doesn't exist yet
 HYBRID_CANDIDATE_POOL = 50  # depth pulled from each backend before RRF-combining
 
+# Added 2026-07-22 (P2, Opus+Fable consult, 2026-07-22): both reviewing
+# models independently converged on this as the fix for the multi_country
+# slice's real, mechanistically-explained problem -- plain TF-IDF beats
+# hybrid/vector there because entity-dense proper-noun matching (a query
+# naming "Kenya" and "Uganda" together) is exactly where sparse exact-term
+# matching has a real edge over dense embeddings. Every chunk already
+# carries a `countries` metadata list (from corpus/sources/*.yaml via
+# metadata.py) -- this was already present, just never used at query time.
+# Explicitly a *boost*, not a filter, per both advisors' shared caution:
+# a wrong or missed country detection must never drop a result, only
+# reorder it, so the worst case of a false-positive/-negative detection is
+# a no-op on ranking, not lost recall. Root country names are used as the
+# keyword (not adjectival forms) because every adjectival form in this
+# corpus's five countries contains its noun form as a literal substring
+# ("kenyan" contains "kenya", "ugandan" contains "uganda", etc.), so one
+# substring check catches both without a second keyword list to maintain.
+COUNTRY_KEYWORDS = {
+    "KE": "kenya",
+    "UG": "uganda",
+    "TZ": "tanzania",
+    "ET": "ethiopia",
+    "RW": "rwanda",
+}
+
 
 class StaleIndexError(RuntimeError):
     """Raised when data/index/ was built against a corpus_version that no
@@ -188,6 +212,35 @@ def _hybrid_search(
     return _rrf_combine([text_results, vector_results], k=rrf_k, top_k=top_k)
 
 
+def _detect_countries(query: str) -> set[str]:
+    """Returns the set of ISO-2 codes (matching the `countries` metadata
+    format) whose root country name appears anywhere in the query,
+    case-insensitive. Deliberately simple substring matching -- see the
+    module-level comment on COUNTRY_KEYWORDS for why adjectival forms
+    don't need a second keyword list."""
+    q = query.lower()
+    return {code for code, keyword in COUNTRY_KEYWORDS.items() if keyword in q}
+
+
+def _boost_by_country(results: list[dict], countries: set[str]) -> list[dict]:
+    """Stable re-rank, never a filter: chunks whose own `countries`
+    metadata overlaps the query's detected countries move to the front,
+    keeping their relative order; every other chunk follows, also in its
+    original relative order. If `countries` is empty (nothing detected)
+    or no chunk in `results` matches, this is a no-op -- the boost can
+    only ever help ranking, never drop a result."""
+    if not countries:
+        return results
+    matching_ids = {
+        r["chunk_id"] for r in results if countries & set(r.get("countries", []))
+    }
+    if not matching_ids:
+        return results
+    matching = [r for r in results if r["chunk_id"] in matching_ids]
+    rest = [r for r in results if r["chunk_id"] not in matching_ids]
+    return matching + rest
+
+
 def search(
     query: str,
     top_k: int = 10,
@@ -211,17 +264,33 @@ def search(
     Returns:
         list of chunk dicts (chunk_id, doc_id, text, pages, organization,
         countries, publication_date, lifecycle_status), ranked best-first.
+        If the query names one of the five corpus countries (P2, see
+        COUNTRY_KEYWORDS), chunks tagged with that country are boosted
+        toward the front of the returned list -- a re-rank, not a filter,
+        so results are never dropped by this step.
     """
     _check_index_freshness()
 
+    detected_countries = _detect_countries(query)
+    # Pull a deeper candidate pool than top_k whenever a boost might apply,
+    # so there's actually something lower-ranked-but-country-matching for
+    # _boost_by_country to promote -- boosting within an already-truncated
+    # top_k would have nothing to work with. No-op (same as before P2)
+    # when no country is detected.
+    pool_k = max(top_k, HYBRID_CANDIDATE_POOL) if detected_countries else top_k
+
     if method == "text":
-        return _text_search(query, top_k, lifecycle_status)
-    if method == "vector":
-        return _vector_search(query, top_k, lifecycle_status)
-    if method == "hybrid":
+        results = _text_search(query, pool_k, lifecycle_status)
+    elif method == "vector":
+        results = _vector_search(query, pool_k, lifecycle_status)
+    elif method == "hybrid":
         resolved_rrf_k = rrf_k if rrf_k is not None else _recorded_default_rrf_k()
-        return _hybrid_search(query, top_k, lifecycle_status, resolved_rrf_k)
-    raise ValueError(f"Unknown method {method!r} — expected 'text', 'vector', or 'hybrid'.")
+        results = _hybrid_search(query, pool_k, lifecycle_status, resolved_rrf_k)
+    else:
+        raise ValueError(f"Unknown method {method!r} — expected 'text', 'vector', or 'hybrid'.")
+
+    results = _boost_by_country(results, detected_countries)
+    return results[:top_k]
 
 
 def main() -> None:
