@@ -946,18 +946,32 @@ auto-vs-manual question; scaling further is future work, see Section 7),
   Next: Claude Code re-runs `evaluate.py`, specifically checking the
   `multi_country` slice improves. Full reasoning in `decisionlog.md`.
 
-**SESSION PAUSED HERE, 2026-07-23 — resume by running the P2 Claude Code
-prompt first, nothing else pending on retrieval.** The
-`claude_code_prompt_p2_country_boost.md` handoff was written and
-presented but **has not been run yet** — Sam ended the session before
-executing it in WSL. P2's code (`search.py`'s `_detect_countries()`/
-`_boost_by_country()`) is implemented, smoke-tested, and pushed via
-`sync.sh`, but has never touched the real corpus. **Next session's
-first action:** run that prompt (pull → sanity-check two real queries →
-`evaluate.py` → report the `multi_country` slice before/after, plus
-`general`/`ooni_methodology` regression check) and paste `reports.md`
-back for review. Do not re-derive or re-plan this — the prompt file
-already has the full instructions.
+**UPDATE, 2026-07-23: P2 run against the real corpus — implementation
+verified correct, zero regressions, but the `multi_country` gap has a
+different real cause than assumed, and P2 can't touch it.** Full
+detail in `decisionlog.md`. Also: a benign stray file
+(`docs/ziM3eRpl`, an orphaned docx-write temp artifact from
+2026-07-20's architecture-doc editing, confirmed via matching
+`docProps/core.xml` metadata against `archituecture.md.docx` — same
+creator/timestamp, not a foreign or malicious file) surfaced in the
+sync pull and was investigated and deleted on both sides, along with
+the empty `archituecture-new.docx` leftover from the same incident.
+- **UPDATE, 2026-07-24: generation phase designed and built same
+  session — Fable consult, `docs/generation-design.md`, ADR-0009
+  (v1.8→v1.9), `src/generation/{prompts,generate,citations}.py`, all
+  smoke-tested, not yet run against the real corpus/API key.** Full
+  design detail and a real docstring-vs-implementation bug caught
+  during smoke-testing (fixed) are in `decisionlog.md`, 2026-07-24.
+  Core mechanism: the LLM only picks `[n]` citation markers from
+  numbered excerpts, never writes citation text itself — fabrication
+  is structurally impossible, not just discouraged. Thin evidence is
+  computed mechanically on the CITED chunk subset (not the retrieved
+  one — a real correction to this project's own starting idea, made
+  during the consult); contradictory evidence is prompt-instructed and
+  left to the evaluation phase to verify. **Next: hand off to Claude
+  Code for a real smoke run** — a few real questions, checking
+  citations resolve to real pages and the sourcing footer fires
+  sensibly, per Fable's own stated completion bar for this phase.
 - **UPDATE, 2026-07-22, later same day: `src/ingestion/chunk.py` itself
   fixed (Sam's call), not yet re-run against the real corpus.** The
   `chunking` block now gets stamped into `metadata` before any chunk
