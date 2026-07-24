@@ -1,0 +1,66 @@
+{
+  "_comment": "Hand-authored supplement to data/eval/ground_truth_filtered.json, per docs/evaluation-design.md Decisions 1 and 5. Not generated, not chunk-anchored -- these test open-ended multi-chunk synthesis and correct refusal, which the 97-question reuse set does not exercise. See docs/adr/0010 and docs/adr/0011 for why these categories exist as a distinct labeled slice rather than being folded into the 97.",
+
+  "synthesis_supplement": [
+    {"question": "How have internet shutdown patterns in Uganda evolved across election cycles from 2021 to 2026?"},
+    {"question": "What methods have Kenyan authorities used to restrict internet access or specific platforms, and how has this changed over time?"},
+    {"question": "How do OONI's network measurement findings and Freedom House's internet freedom scores compare for Ethiopia's information controls?"},
+    {"question": "What common tactics do CIPESA and Access Now both document across multiple East African countries for restricting internet access during politically sensitive periods?"},
+    {"question": "How has Tanzania's approach to platform-specific blocking, such as X/Twitter, evolved between 2024 and 2025?"},
+    {"question": "What role have AI-related policies played in digital rights across the corpus's five countries, per CIPESA's SIFA AI reporting?"},
+    {"question": "How do the causes and durations of internet shutdowns differ between Kenya, Uganda, and Ethiopia?"},
+    {"question": "What has been the trend in Rwanda's overall internet freedom trajectory according to Freedom House's Freedom on the Net scoring from 2022 to 2025?"},
+    {"question": "How have LGBTIQ communities in East Africa been affected by online censorship, based on OONI and Freedom House findings?"},
+    {"question": "What role did legal or judicial action play in responding to internet shutdowns across the corpus's countries?"},
+    {"question": "How does Uganda's January 2026 election-related shutdown compare to its 2021 election-period blackout in terms of documented cause and platforms affected?"},
+    {"question": "How was Ethiopia's 2023 social media blocking documented differently by OONI compared to Freedom House?"}
+  ],
+
+  "refusal_slice": [
+    {
+      "question": "What has OONI's network measurement work found about internet censorship in Rwanda?",
+      "expected_behavior": "decline",
+      "rationale": "OONI has zero documents covering Rwanda in this corpus (confirmed via corpus/sources/ooni.yaml: TZ, KE, ET, UG only) -- a genuine, confirmed coverage gap, not a hypothetical."
+    },
+    {
+      "question": "Did OONI detect any instances of Telegram or WhatsApp blocking in Rwanda?",
+      "expected_behavior": "decline",
+      "rationale": "Same OONI/Rwanda gap as above, phrased as a specific platform-blocking question rather than a general one."
+    },
+    {
+      "question": "What test-helper infrastructure or false-positive rate does OONI report for measurements taken in Rwanda?",
+      "expected_behavior": "decline",
+      "rationale": "Same OONI/Rwanda gap, phrased in ooni_methodology style to test refusal within that category's own framing."
+    },
+    {
+      "question": "According to Freedom House's Freedom on the Net report, what is Tanzania's internet freedom score for 2024?",
+      "expected_behavior": "decline",
+      "rationale": "Freedom House has no Tanzania FOTN chapter in this corpus (confirmed via corpus/sources/freedomhouse.yaml: KE/UG/ET/RW only, 2022-2025 each) -- a genuine, confirmed coverage gap."
+    },
+    {
+      "question": "How did Freedom House score Tanzania's internet freedom in 2022 compared to 2024?",
+      "expected_behavior": "decline",
+      "rationale": "Same Freedom House/Tanzania gap, comparative phrasing."
+    },
+    {
+      "question": "What internet shutdowns has Access Now documented in Somalia?",
+      "expected_behavior": "decline",
+      "rationale": "Somalia is not one of this corpus's five target countries (Kenya, Uganda, Tanzania, Ethiopia, Rwanda) -- out of scope by architecture, not merely under-covered."
+    },
+    {
+      "question": "What does this corpus's evidence say about internet censorship in the Democratic Republic of Congo?",
+      "expected_behavior": "decline",
+      "rationale": "DRC is not a target country of this corpus -- same out-of-scope-by-architecture reasoning as the Somalia question."
+    },
+    {
+      "question": "What internet shutdowns occurred in Ethiopia during the 2015-2016 Oromo protests?",
+      "expected_behavior": "decline",
+      "rationale": "Outside the corpus's 2022-2026 date window (ADR-0006) -- a real historical event, but before this corpus's scope begins."
+    },
+    {
+      "question": "What 5G network rollout milestones has Rwanda achieved, according to ITU broadband infrastructure reports?",
+      "expected_behavior": "decline",
+      "rationale": "Out of topical scope entirely -- this corpus covers censorship/shutdowns/digital rights from OONI, Access Now, CIPESA, and Freedom House, not telecom infrastructure rollout from ITU."
+    }
+  ]
+}

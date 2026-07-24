@@ -80,15 +80,17 @@ observable condition, not just a feeling that something isn't working.
 
 ## Status
 
-Eight ADRs exist as of 2026-07-20 (architecture doc now at v1.8):
+**Eleven ADRs exist as of 2026-07-23 (architecture doc still at v1.9 —
+ADR-0011, like ADR-0010, is a methodology decision, not an architecture-
+document change).**
 `0001-english-only-corpus-disclosure.md`,
 `0002-tiered-validation-routing.md`,
 `0003-provenance-lifecycle-metadata.md`,
 `0004-editorial-corrections.md`, all written during architecture review,
-before implementation started, plus four written during implementation
-(all 2026-07-20, all prompted by real findings rather than architecture
-review): `0005-content-checksum-for-cdn-served-html.md` (a real
-acquisition-time finding), `0006-extend-corpus-window-to-2026.md` (a
+before implementation started, plus four written during ingestion
+implementation (all 2026-07-20, all prompted by real findings rather than
+architecture review): `0005-content-checksum-for-cdn-served-html.md` (a
+real acquisition-time finding), `0006-extend-corpus-window-to-2026.md` (a
 real document found during research that the frozen 2022-2025 window
 excluded on a date technicality), `0007-pipeline-consistency-fixes.md`
 and `0008-page-level-citation-provenance.md` (both prompted by an
@@ -100,3 +102,29 @@ architecture-doc bump that was never actually applied to
 `archituecture.md.docx` until ADR-0006's own edit caught and fixed it
 in the same pass — all bumps are now correctly reflected
 (v1.4 -> v1.5 -> v1.6 -> v1.7 -> v1.8).
+
+Two more written since, one per later phase, both Opus-consulted:
+`0009-generation-citation-protocol-and-evidence-flagging.md` (2026-07-24,
+v1.8->v1.9) — the index-only `[n]`-marker citation protocol that makes a
+fabricated citation structurally impossible, plus the split
+mechanical-thin-evidence / prompted-contradiction-handling design.
+`0010-citation-judge-protocol-and-contradiction-test-gap.md` (2026-07-23,
+no version bump — a methodology/evaluation-design decision, not an
+architecture-document change) — the per-citation isolated-entailment
+LLM-judge protocol for the evaluation phase, and the decision to document
+(not fabricate a fix for) the fact that no genuine cross-source
+contradiction had yet been confirmed in the real corpus at design time.
+
+One more, same day: `0011-claim-level-precision-and-judge-validity-fallbacks.md`
+— a second Opus 5 review pass (run once Opus 5 became the project's
+advisor model) found real gaps in ADR-0010 before any code existed
+against it: the judge's own inputs (claim text, cited chunk text) weren't
+persisted anywhere, multi-marker claims would have been mis-scored by
+per-marker isolation, and Cohen's κ risked being statistically degenerate
+under the low-disagreement-prevalence condition this project's own
+zero-fabrication smoke-test result makes likely. ADR-0011 amends ADR-0010's
+judge signature to claim-level (union of a claim's cited chunks, not one
+chunk per call), adds a raw-agreement-plus-error-direction fallback for
+when κ is uninformative, and replaces three inconsistent judge-model
+descriptions across the project's documents with one checked,
+ordered-fallback policy.

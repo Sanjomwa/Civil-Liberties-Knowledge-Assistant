@@ -5,69 +5,211 @@ year — this doc should let anyone picking it up, including the original
 author, resume without reconstructing context from memory or old history.
 Read this file first, in full, when resuming cold.
 
-Last updated: 2026-07-20.
+Last updated: 2026-07-23 — brought current after a full documentation-sync
+pass covering the retrieval and generation phases (both were closed and
+built respectively without this file's headline snapshot being updated
+at the time — see the "known gap, now fixed" note at the end of this
+section) and the new evaluation-phase design.
 
 ---
 
 ## 1. Current state (snapshot)
 
-**Ingestion phase: CLOSED, verified clean. Next phase (retrieval/
-embedding) is the active work.** All six ingestion modules exist and are
-implemented in `src/ingestion/` — `acquire.py`, `extract.py`,
-`validate.py`, `metadata.py`, `chunk.py`, `pipeline.py`, plus a new
-on-demand `reconcile.py`. **Corpus: 35 documents, 3,783 chunks**, across
-all four v1 orgs (Access Now 4, CIPESA 9, Freedom House 16, OONI 6). The
-full pipeline was re-run end to end on 2026-07-20 after the
-end-of-ingestion-phase Opus+Fable review's six findings were fixed
-(ADR-0007, ADR-0008) — confirmed clean, zero content-drift, zero
-cross-surface disagreement (`reconcile.py`). See Section 7's most recent
-entries for the full verification detail. Project folder now also
-contains:
-- `docs/archituecture.md.docx` — frozen architecture, now **v1.8**
+**Ingestion, retrieval, generation, and LLM-evaluation phases are all
+CLOSED/built and verified as of 2026-07-24 (evaluation phase). Nothing is
+actively in progress; the next phase (interface/monitoring) has not
+started.**
+
+- **Ingestion:** CLOSED 2026-07-20, verified clean. All six modules in
+  `src/ingestion/` (`acquire.py`, `extract.py`, `validate.py`,
+  `metadata.py`, `chunk.py`, `pipeline.py`) plus on-demand
+  `reconcile.py`. **Corpus: 35 documents, 3,783 chunks** across all four
+  v1 orgs (Access Now 4, CIPESA 9, Freedom House 16, OONI 6). Re-run end
+  to end after the end-of-ingestion-phase Opus+Fable review's six
+  findings were fixed (ADR-0007, ADR-0008) — zero content-drift, zero
+  cross-surface disagreement (`reconcile.py`).
+- **Retrieval:** CLOSED 2026-07-23. `src/retrieval/{embed,search,
+  ground_truth,evaluate}.py`. Recorded default: **hybrid search, RRF
+  k=10** (`data/eval/default_method.json`), chosen for best-or-near-best
+  MRR across all three question-category slices, not just the aggregate.
+  Real measured numbers: aggregate Hit Rate ~0.644-0.66 depending on k;
+  neighbor-aware Relaxed Hit Rate ~0.812 (most of the strict/relaxed gap
+  is same-document chunk-overlap scoring, not true misses, per Opus's
+  own mechanism check). A `multi_country` MRR gap (plain text search
+  beats every hybrid config there) was investigated across two rounds of
+  diagnostics and root-caused as a real, **not retrieval-fixable**
+  category-sampling property (RRF concentrates on cross-backend
+  agreement, not an embedding-smoothness defect) — documented as a known
+  limitation, not resolved. A country-metadata boost (P2) was built and
+  verified correct with zero regressions, but doesn't touch the actual
+  cause. Hybrid's narrower source-diversity@10 (vs. plain text search)
+  was **deliberately not retrieval-fixed** — explicitly deferred to the
+  generation phase as "flag thin/single-sourced evidence is generation's
+  job, not retrieval's."
+- **Generation:** built and real-smoke-tested 2026-07-24, per ADR-0009
+  ("Index-Only Citation Protocol and Split Thin/Contradictory Evidence
+  Flagging"). `src/generation/{prompts,generate,citations}.py`.
+  `answer(query) -> dict`. Core mechanism: the LLM only ever picks `[n]`
+  citation markers from numbered retrieved excerpts — it never writes a
+  citation itself, so a fabricated title/page/URL is structurally
+  impossible, not just discouraged. Thin evidence is a mechanical check
+  computed on the **cited** chunk subset (not the retrieved one).
+  Contradictory evidence is prompt-instructed only (no NLI machinery),
+  left for the evaluation phase to actually verify. `reports.md`
+  (2026-07-23/24) documents four real queries against the real corpus
+  and a real OpenAI API key, exit 0 each time: every citation
+  independently spot-checked against real chunk text (zero fabrications,
+  zero misattributions); the sourcing footer correctly distinguished all
+  three designed cases (single-org/multi-doc, single-org/single-doc —
+  the strongest caveat, multi-org/multi-doc) on live data. **This was a
+  smoke test only — no ground truth, no correctness scoring. That gap is
+  exactly what the evaluation phase now exists to close.**
+- **LLM evaluation: built and real-run 2026-07-24, per ADR-0010 (as
+  amended by ADR-0011).** `src/evaluation/{run_answers,judge,
+  contradiction_search,evaluate_generation}.py`. Real run: 122 questions
+  (101 general/multi_country/ooni_methodology reuse from
+  `ground_truth_filtered.json` + 12 hand-authored synthesis-supplement +
+  9 hand-authored refusal-slice questions), 481 claims extracted and
+  judged. **Claim-level citation precision: 0.879 aggregate** (423
+  supported / 37 partial / 21 unsupported) — general 0.912, multi_country
+  0.886, ooni_methodology 0.930, synthesis_supplement 0.806, refusal
+  0.565 (low refusal-category precision is expected/not fabrication — see
+  `reports.md`, 2026-07-24). Judge model: **`gpt-5.4-mini`, not `gpt-5.4`**
+  — `gpt-5.4` returned a real, confirmed 403 on this OpenAI project,
+  checked empirically per ADR-0011; calibration is therefore
+  self-judging, a named limitation. Manual spot-checking of judge verdicts
+  against real chunk text (per `reports.md`) confirmed the judge catches
+  real precision failures (a real named-individual misattribution, a real
+  overclaim) but also surfaced a real methodological nuance: negative/
+  hedge claims ("the excerpts do not say X") are frequently scored
+  `unsupported` under strict isolated entailment even when accurate,
+  meaning 0.879 likely understates true precision somewhat. Refusal slice
+  (9 questions): manually reviewed one-by-one, not just via the
+  heuristic — 5 clearly correct declines, 2 revealed a flaw in the test
+  design itself (Somalia/DRC questions assumed zero corpus evidence, but
+  continent-wide reports do mention these countries in passing, and the
+  system answered those real facts accurately), 1 appropriately hedged, 1
+  a minor caveat-ordering quibble — **zero cases of confident
+  fabrication**. Contradiction search (Decision 4/ADR-0010): bounded
+  search (7 candidate events, 37 of a 50-call budget) flagged 9
+  candidates; all 9 manually verified against real chunk text and found
+  to be false positives (mostly two distinct real events sharing
+  keywords, not one event reported inconsistently) — **no real
+  cross-source contradiction confirmed in this corpus**; the mechanism
+  itself was verified via a synthetic fixture, which passed. Cost: ~648
+  total API calls, ~1,028,000 input / ~51,150 output tokens (the
+  `run_answers.py` portion — 122 calls, 453,261/24,552 tokens — is exact
+  from real API `usage`; the judge/contradiction-search portion is a
+  disclosed, reconstructed estimate, not exact — see `reports.md` for why).
+  Human-review sample files written (judge-calibration: 65 rows stratified
+  by verdict; deployment: 75 rows, 15/category) — Sam's actual review is
+  the next real step (`--score-review` flag ready). **Real gap found and
+  reported, not fabricated around: `decisionlog.md` does not exist
+  anywhere (not in this repo, not in git history, not in the Cowork mirror
+  per a real `sync.sh pull`) despite being referenced dozens of times as
+  the authoritative transcript — see `reports.md` Section 0.** Full detail,
+  the verbatim refusal-slice reads, and the contradiction-search
+  verification notes are in `reports.md`, 2026-07-24 — see that file and
+  `docs/evaluation-design.md`/ADR-0010/ADR-0011 for the full design
+  reasoning behind these numbers.
+
+**Known gap, now fixed by this update:** this file's own headline
+snapshot said "ingestion CLOSED, retrieval is next" from 2026-07-20 all
+the way through the retrieval phase closing (2026-07-23) and the
+generation phase being built and verified (2026-07-24) — only individual
+file-listing bullets and Section 7 entries were kept current in that
+window, not this section's opening framing or the "Last updated" date
+itself. Caught 2026-07-23 while preparing for the evaluation phase. Same
+category of drift Section 3/6 of the root workspace `CLAUDE.md` already
+warns about — worth a standing habit of checking this section's own
+opening paragraph against Section 7's latest entries, not just trusting
+that keeping Section 7 current is sufficient on its own.
+
+Project folder now also contains:
+- `docs/archituecture.md.docx` — frozen architecture, now **v1.9**
   (amended 2026-07-11 via ADR-0001–0004; amended 2026-07-20 via
-  ADR-0005–0008 — see Section 5 and `docs/adr/README.md`).
+  ADR-0005–0008; amended 2026-07-24 via ADR-0009 — see Section 5 and
+  `docs/adr/README.md`).
 - `docs/ingestion-design.md` — pipeline reference, synthesizing the
-  architecture plus all eight ADRs, with a diagram, updated 2026-07-20 for
-  ADR-0007/0008's new artifacts (`corpus/validation-results.json`,
-  `corpus/derived-checksums/{org}.json`, `.pages.json` sidecars,
-  `reconcile.py`).
-- `docs/retrieval-design.md` — **new, 2026-07-22.** Pre-implementation
-  design reference for the next phase (`src/retrieval/`), mirroring
-  `ingestion-design.md`'s shape. No code exists yet. See Section 7's most
-  recent entry for the full summary; `decisionlog.md`, 2026-07-22, for
-  the Opus consult and the three fixes it produced.
+  architecture plus all ADRs relevant to ingestion, with a diagram,
+  updated 2026-07-20 for ADR-0007/0008's new artifacts
+  (`corpus/validation-results.json`, `corpus/derived-checksums/
+  {org}.json`, `.pages.json` sidecars, `reconcile.py`).
+- `docs/retrieval-design.md` — pre-implementation design reference for
+  `src/retrieval/`, written 2026-07-22 before that code existed. Phase now
+  CLOSED (implemented, evaluated, default method recorded) — this doc
+  is historical design reference, not a live status page; see this
+  section above and Section 7 for the real outcome.
+- `docs/generation-design.md` — pre-implementation design reference for
+  `src/generation/`, written 2026-07-24 before that code existed. Phase
+  now built and smoke-tested — same historical-reference relationship
+  to Section 1/7 as `retrieval-design.md`.
+- `docs/evaluation-design.md` — written 2026-07-23, revised same day after
+  a second review. Pre-implementation design reference for
+  `src/evaluation/`, mirroring `retrieval-design.md`/`generation-design.md`'s
+  shape exactly. Phase now built and real-run (2026-07-24) — this doc is
+  historical design reference, not a live status page; see Section 1
+  above and `reports.md` for the real outcome. Full design detail in that
+  file and both
+  `docs/adr/0010-citation-judge-protocol-and-contradiction-test-gap.md`
+  and `docs/adr/0011-claim-level-precision-and-judge-validity-fallbacks.md`;
+  both Opus consult transcripts were meant to be in `decisionlog.md`,
+  2026-07-23, but that file was found to be completely absent when this
+  phase went to add its own entry — see `reports.md` Section 0, 2026-07-24.
 - `docs/licensing.md` — per-organization source licensing findings
   (Freedom House permission request still pending a reply — see Section 4).
 - `docs/corpus-inclusion-rubric.md` — concrete criteria for the semantic
   review stage (topic relevance, coverage contribution).
 - `docs/PROJECT_CONTINUITY.md` — this file.
 - `docs/data_governance.md` — governance policy.
-- `docs/adr/` — **eight** ADRs (see Section 5), plus `README.md` (process +
+- `docs/adr/` — **eleven** ADRs (see Section 5), plus `README.md` (process +
   example trigger thresholds).
-- `pyproject.toml` / `uv.lock` — Python dependencies declared and locked.
-- `src/ingestion/` — seven modules total (six pipeline stages +
-  `reconcile.py`), all real-corpus tested as of the 2026-07-20 re-run.
+- `pyproject.toml` / `uv.lock` — Python dependencies declared and locked;
+  updated for retrieval's `fastembed`/`minsearch`/`numpy` additions.
+- `src/ingestion/` — seven modules (six pipeline stages + `reconcile.py`),
+  all real-corpus tested as of the 2026-07-20 re-run.
+- `src/retrieval/` — four modules (`embed.py`, `search.py`,
+  `ground_truth.py`, `evaluate.py`), all real-corpus tested, phase closed
+  2026-07-23.
+- `src/generation/` — three modules (`prompts.py`, `generate.py`,
+  `citations.py`), real-smoke-tested against the real corpus and a real
+  API key, 2026-07-24. `reports.md` (repo root) holds the verbatim
+  smoke-test transcript.
+- `src/evaluation/` — four modules (`run_answers.py`, `judge.py`,
+  `contradiction_search.py`, `evaluate_generation.py`), real-run against
+  the real corpus and a real API key, 2026-07-24 (122 questions, 481
+  claims judged). `reports.md` (repo root, same file, overwritten for this
+  phase) holds the verbatim real-run transcript and cost accounting.
 - `corpus/sources/*.yaml` (four orgs), `corpus/CORPUS_VERSION`,
   `corpus/acquisition-log.md`, `corpus/manifest.csv`,
   `corpus/checksums.sha256`, `corpus/validation-report.md`,
-  `corpus/validation-results.json` (new, ADR-0007),
-  `corpus/derived-checksums/freedomhouse.json` (new, ADR-0007) — all
+  `corpus/validation-results.json` (ADR-0007),
+  `corpus/derived-checksums/freedomhouse.json` (ADR-0007) — all
   generated/current as of the 2026-07-20 real pipeline run.
 - `data/raw/`, `data/processed/` (including `.pages.json` sidecars for all
   13 PDF-sourced documents, ADR-0008), `data/metadata/`, `data/chunks/`
-  (chunk records now carry a `"pages"` field) — 35 real documents' worth of
-  output at each stage (Sam's machine only — gitignored, doesn't sync into
-  the Cowork mirror; see the repo's own `.gitignore`).
+  (chunk records carry a `"pages"` field), `data/index/` (retrieval
+  vectors + `index_metadata.json` stamp), `data/eval/`
+  (`ground_truth.json`, `ground_truth_filtered.json`,
+  `default_method.json`, `eval_supplement_questions.json`,
+  `generation_results.jsonl`, `judgments.jsonl`,
+  `contradiction_search_results.json`, the judge-calibration/deployment
+  review-sample CSVs, `generation-evaluation-report.md`) — real output at
+  each stage; most of `data/` doesn't sync into the Cowork mirror
+  regardless of git status (see the repo's own `sync.sh`), and the
+  evaluation-phase files carrying real chunk excerpts
+  (`generation_results.jsonl`, `judgments.jsonl`,
+  `contradiction_search_results.json`, the `*_full.csv` review samples)
+  are additionally gitignored for licensing reasons, same as
+  `data/chunks/` — see `.gitignore` and `reports.md`, 2026-07-24.
 
-Not started yet: retrieval/embedding (the next phase — vector index,
-retrieval evaluation comparing methods), generation (citation-grounded
-answers, thin/contradictory-evidence flagging), LLM evaluation, interface,
-monitoring, containerization, and `pipeline.py`'s sibling utility
-`check_drift.py` (still correctly deferred — no corpus version change yet
-to detect drift against). Also not started: growing the corpus further —
-35 documents was judged sufficient to close the ingestion phase and move
-on, per Sam's own call (see Section 7); the architecture's 40-60 document
-target was a planning estimate, not a hard gate on advancing.
+**Not started yet:** interface, monitoring, containerization, and
+`pipeline.py`'s sibling utility `check_drift.py`
+(still correctly deferred — no corpus version change yet to detect drift
+against). Also not started: growing the corpus further — 35 documents was
+judged sufficient to close the ingestion phase and move on, per Sam's own
+call (see Section 7); the architecture's 40-60 document target was a
+planning estimate, not a hard gate on advancing.
 
 **Two unrelated version numbers, don't conflate them:** the architecture
 document has its own revision version (`Document version`, now v1.8,
@@ -79,7 +221,7 @@ by the architecture, not by ADRs). "The architecture is at v1.8" and "the
 corpus is still v1, not yet v1.1" are both true at the same time and mean
 different things.
 
-**What is decided and stable:** the architecture (now v1.8, "Approved.
+**What is decided and stable:** the architecture (now v1.9, "Approved.
 Future changes via ADR only.") — scope (Kenya, Uganda, Tanzania, Ethiopia,
 Rwanda; **2022–2026**, extended from 2022–2025 by ADR-0006), sources
 (OONI, Access Now, CIPESA, Freedom House for v1; Netblocks + Citizen Lab
@@ -88,14 +230,19 @@ deferred to v1.1), pipeline shape (`acquire.py` → `extract.py` →
 `reconcile.py`), doc ID scheme (`{org}-{country_iso2}-{year}-{slug}`), and
 the core acceptance principle: every answer must cite sources,
 thin/contradictory evidence must be flagged, not smoothed over. Refined by
-eight ADRs since the original freeze: tiered (not uniform) validation
-routing, a `lifecycle` metadata block for supersession, a `corpus_version`
-stamp on chunks for drift detection, a `license` field, an explicit
-disclosure of the English-only corpus limitation, a content-checksum
-mechanism for CDN-served HTML, the 2022–2026 window extension, four
-pipeline data-flow consistency fixes, and page-level citation provenance
-for PDF-sourced chunks. See `docs/ingestion-design.md` for the synthesized
-picture.
+nine ADRs since the original freeze (a tenth, ADR-0010, is an evaluation
+methodology decision that doesn't touch the architecture document itself
+— see below): tiered (not uniform) validation routing, a `lifecycle`
+metadata block for supersession, a `corpus_version` stamp on chunks for
+drift detection, a `license` field, an explicit disclosure of the
+English-only corpus limitation, a content-checksum mechanism for
+CDN-served HTML, the 2022–2026 window extension, four pipeline data-flow
+consistency fixes, page-level citation provenance for PDF-sourced chunks,
+and (ADR-0009, v1.8→v1.9) the index-only `[n]`-marker generation citation
+protocol plus the split mechanical-thin-evidence/prompted-contradiction
+design. See `docs/ingestion-design.md`, `docs/retrieval-design.md`,
+`docs/generation-design.md`, and `docs/evaluation-design.md` for the
+per-phase synthesized picture.
 
 ## 2. How to resume from cold
 
@@ -171,10 +318,12 @@ redistribution, not assumed to carry over automatically.
 
 Two records, each authoritative for a different thing — don't duplicate
 across them:
-- **Architecture decisions**: `docs/adr/` — four exist as of this update
-  (`0001` English-only disclosure, `0002` tiered validation routing, `0003`
-  provenance/lifecycle metadata, `0004` editorial corrections). See
-  `docs/adr/README.md` for format and example trigger thresholds. ADRs are
+- **Architecture decisions**: `docs/adr/` — ten exist as of 2026-07-23.
+  Deliberately not re-listing all ten here (that's exactly the
+  duplication-drift this project's documentation-consistency discipline
+  warns against) — see `docs/adr/README.md`'s own Status section for the
+  current, authoritative list and count; that file is updated every time
+  a new ADR lands, this line is not. ADRs are
   historical and don't get edited after acceptance — they may mention that
   a follow-up is implied, but this file's Section 7 (not the ADR) is where build
   status for that follow-up actually lives.
@@ -972,6 +1121,58 @@ the empty `archituecture-new.docx` leftover from the same incident.
   Code for a real smoke run** — a few real questions, checking
   citations resolve to real pages and the sourcing footer fires
   sensibly, per Fable's own stated completion bar for this phase.
+- **UPDATE, 2026-07-24: real smoke test in — clean, every mechanism
+  verified against real source text, generation phase's completion bar
+  met.** Four real queries, real corpus, real `gpt-5.4-mini` calls, exit
+  0 each time. Citation accuracy (not just presence) checked directly
+  against real chunk text — zero fabrications/misattributions found.
+  The sourcing footer correctly distinguished all three real cases:
+  single-org/multi-doc, single-org/single-doc (the strongest caveat,
+  deliberately tested on a real thin topic), and multi-org/multi-doc.
+  `unsupported_paragraphs` fired twice, both on harmless meta-commentary
+  (not dropped claims); `invalid_markers` never fired; no
+  metadata-lookup degraded path ever hit. Full detail in
+  `decisionlog.md`, 2026-07-24. **Next real step: LLM evaluation**
+  (the course's own next rubric item) — not started.
+- **NEW, 2026-07-23: full documentation-sync pass, plus the LLM
+  evaluation phase's design — ready for implementation next session,
+  nothing built yet.** Requested by Sam directly: bring every project doc
+  current, then prepare thoroughly for the evaluation phase so it can
+  start immediately in a future session even if this one isn't available.
+  Three things happened: (1) this file's own Section 1 snapshot and
+  header date, caught genuinely stale (see the "Known gap, now fixed"
+  note in Section 1 above) — the retrieval-close and generation-build
+  events had been logged in Section 7 and `decisionlog.md` correctly, but
+  never propagated up into this file's headline framing; fixed. (2)
+  `docs/adr/README.md`'s Status section, also stale (still said "eight
+  ADRs" after ADR-0009 shipped) — fixed, now correctly lists all ten.
+  (3) The evaluation phase itself designed: `docs/evaluation-design.md`
+  drafted first (mirroring `retrieval-design.md`/`generation-design.md`'s
+  pre-implementation-reference pattern), then an Opus consult on four
+  explicitly open questions (reuse-vs-fresh ground truth; LLM-judge
+  protocol and self-judging risk; human-review sample size/
+  stratification; how to test contradiction-handling given no confirmed
+  real contradiction in the corpus). Two of the four crossed this
+  project's "genuinely novel decision" bar and became
+  `docs/adr/0010-citation-judge-protocol-and-contradiction-test-gap.md`
+  — a per-citation, isolated-entailment LLM-judge protocol (3-way
+  supported/partial/unsupported verdict, a stronger/different judge model
+  for the human-reviewed calibration subset specifically, to
+  structurally avoid self-preference bias rather than argue it away) and
+  a firm decision **not** to fabricate a contradictory-evidence test case
+  if a real one can't be found in the corpus — document the gap honestly
+  instead, backed by a synthetic-fixture unit test of the mechanism only,
+  kept structurally separate from real-corpus metrics. The other two
+  questions resolved as refinements within already-open design space, no
+  ADR needed: reuse the existing 97-question retrieval ground truth
+  (`data/eval/ground_truth_filtered.json`) plus a small ~10-15-question
+  labeled multi-chunk-synthesis supplement, and stratify human review by
+  verdict (judge calibration) or by category (deployment review), not by
+  a flat percentage. Full Opus transcript and reasoning trail in
+  `decisionlog.md`, 2026-07-23. **No `src/evaluation/` code exists yet —
+  the design is the deliverable of this pass, ready for a Claude Code
+  handoff (prompt drafted, see below) whenever the next session starts
+  implementation.**
 - **UPDATE, 2026-07-22, later same day: `src/ingestion/chunk.py` itself
   fixed (Sam's call), not yet re-run against the real corpus.** The
   `chunking` block now gets stamped into `metadata` before any chunk

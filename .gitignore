@@ -223,6 +223,18 @@ data/processed/
 data/chunks/
 data/index/
 
+# LLM evaluation phase (docs/evaluation-design.md, ADR-0010/0011, added
+# 2026-07-24): these files carry real cited/retrieved chunk excerpts
+# (verbatim corpus text) -- same licensing sensitivity as data/chunks/
+# above, decided before the first push per ADR-0011's own consequence
+# list. Only the slim, excerpt-free CSVs (judgment_id/question_id/
+# category/verdict/reason/human_verdict, no chunk text) and the final
+# markdown report are committed.
+data/eval/generation_results.jsonl
+data/eval/judgments.jsonl
+data/eval/contradiction_search_results.json
+data/eval/*_full.csv
+
 # Local-only orchestration files (Cowork <-> Claude Code in WSL workflow,
 # established 2026-07-20) — never committed, never authored from the
 # Cowork side, so also excluded from the Cowork-to-WSL rsync direction
