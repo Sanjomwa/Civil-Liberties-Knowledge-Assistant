@@ -164,7 +164,9 @@ def claims_with_chunk_text(answer_markdown: str, citations: list[dict],
     return claims
 
 
-JUDGE_SYSTEM_PROMPT = """You are an evidence-verification judge. You will be given a single \
+# v1: original protocol prompt (ADR-0010/0011). Kept verbatim, unmodified, for
+# audit/comparison -- this is the prompt the recorded 0.879 result actually used.
+JUDGE_SYSTEM_PROMPT_V1 = """You are an evidence-verification judge. You will be given a single \
 claim -- one sentence from a generated answer -- and one or more excerpts that were cited as \
 its source. Your only job is to judge whether the excerpt(s) actually support the claim: pure \
 entailment, nothing else.
@@ -178,6 +180,104 @@ indirectly support it.
 - "unsupported": the excerpt(s) do not support the claim at all, or contradict it.
 
 Do not use any outside knowledge. Judge only whether the given excerpt(s) entail the claim."""
+
+# v2, 2026-07-25: two targeted edits per the ADR-0011 addendum's Opus 5 consult
+# and the empirical claim-shape cross-check that preceded this change (see
+# reports.md for both). (1) "supported" now explicitly covers a direct,
+# one-step paraphrase/combination of facts that are each separately and
+# explicitly stated -- the v1 "partial" catch-all ("loosely or indirectly
+# support it") was broad enough to absorb this and was doing so on the large
+# majority of the calibration sample's disagreements, not just negation
+# claims. (2) "supported" now explicitly covers an accurately-reported
+# absence claim (the cited material genuinely does not contain the thing the
+# claim says is absent) -- previously structurally unverifiable under
+# isolated entailment even when correct. A claim asserting absence of
+# something that IS actually present in the excerpt(s) remains "unsupported"
+# (a contradiction), unchanged from v1's intent.
+JUDGE_SYSTEM_PROMPT_V2 = """You are an evidence-verification judge. You will be given a single \
+claim -- one sentence from a generated answer -- and one or more excerpts that were cited as \
+its source. Your only job is to judge whether the excerpt(s) actually support the claim: pure \
+entailment, nothing else.
+
+Respond with ONLY a compact JSON object, no other text:
+{"verdict": "supported" | "partial" | "unsupported", "reason": "<one short sentence>"}
+
+- "supported": the excerpt(s) fully and directly support the claim's factual content. This \
+includes a claim that directly restates, paraphrases, or combines two or more facts that are \
+EACH separately and explicitly stated in the excerpt(s) -- a single, reasonable synthesis step \
+over explicit facts is "supported," not "partial." This also includes a claim that asserts the \
+excerpt(s) do NOT contain, state, or mention some specific thing, when that thing genuinely does \
+not appear anywhere in the excerpt(s) -- an accurately-reported absence is directly checkable \
+against the given text and counts as "supported," not "partial" or "unsupported."
+- "partial": the excerpt(s) support part of the claim but not all of it, or the claim requires \
+real speculative reasoning, an unstated assumption, or more than one genuine inferential step \
+beyond directly combining explicitly stated facts.
+- "unsupported": the excerpt(s) do not support the claim at all, contradict it, or the claim \
+asserts an absence of something that the excerpt(s) actually DO state (a false "not mentioned" \
+claim is a contradiction, not a partial match).
+
+Do not use any outside knowledge. Judge only whether the given excerpt(s) entail the claim."""
+
+# v3, 2026-07-25: targeted at a distinct gap found in a blind independent
+# re-read of the 22 remaining v1-vs-AI-reviewer disagreement rows (see
+# reports.md and decisionlog.md, 2026-07-25). v2's "supported" clause
+# already read "combines two OR MORE facts" (not literally capped at two --
+# confirmed against the real text, not assumed), but 17 of the 22 rows were
+# three-plus-fact combinations or comparative/superlative claims ("X is the
+# longest/most persistent," "Y's duration is not given") that v2 still
+# scored partial/unsupported in practice. Diagnosis: (1) "combines... facts"
+# doesn't naturally read as covering a COMPARISON or ranking operation across
+# facts, only restating/combining them; (2) the "partial" clause's "more than
+# one genuine inferential step" is ambiguous for a claim chaining 3+ facts,
+# even though "supported"'s "two or more" was never meant to exclude that.
+# v3 makes both points explicit: three-or-more-fact synthesis is unambiguously
+# "supported" regardless of count, and comparative/superlative claims are
+# "supported" when the comparison is stated outright or directly computable
+# from values each explicitly stated in the excerpt(s) -- no outside
+# knowledge or estimation. The negation-claim clause (the separate,
+# already-disclosed rows-1/3/4 issue) is copied byte-for-byte from v2,
+# untouched -- not this task's target, and changing it risks conflating two
+# different fixes.
+JUDGE_SYSTEM_PROMPT_V3 = """You are an evidence-verification judge. You will be given a single \
+claim -- one sentence from a generated answer -- and one or more excerpts that were cited as \
+its source. Your only job is to judge whether the excerpt(s) actually support the claim: pure \
+entailment, nothing else.
+
+Respond with ONLY a compact JSON object, no other text:
+{"verdict": "supported" | "partial" | "unsupported", "reason": "<one short sentence>"}
+
+- "supported": the excerpt(s) fully and directly support the claim's factual content. This \
+includes a claim that directly restates, paraphrases, or combines two, three, or more facts \
+that are EACH separately and explicitly stated in the excerpt(s) -- a single, reasonable \
+synthesis step over any number of explicit facts is "supported," not "partial," regardless of \
+how many individual facts are combined. This also includes a comparative or superlative claim \
+(e.g. "X lasted the longest," "Y's duration is not given") when the comparison is either \
+explicitly stated somewhere in the cited excerpt(s), or directly computable by comparing two or \
+more numbers or values that are each explicitly stated within the cited excerpt(s) -- never \
+requiring outside knowledge, estimation, or a value not present in the excerpt(s). This also \
+includes a claim that asserts the excerpt(s) do NOT contain, state, or mention some specific \
+thing, when that thing genuinely does not appear anywhere in the excerpt(s) -- an \
+accurately-reported absence is directly checkable against the given text and counts as \
+"supported," not "partial" or "unsupported."
+- "partial": the excerpt(s) support part of the claim but not all of it, or the claim requires \
+real speculative reasoning, an unstated assumption, or more than one genuine inferential step \
+beyond directly combining or comparing explicitly stated facts.
+- "unsupported": the excerpt(s) do not support the claim at all, contradict it, or the claim \
+asserts an absence of something that the excerpt(s) actually DO state (a false "not mentioned" \
+claim is a contradiction, not a partial match).
+
+Do not use any outside knowledge. Judge only whether the given excerpt(s) entail the claim."""
+
+# JUDGE_SYSTEM_PROMPT stays bound to v1 until Step 4's cheap validation on the
+# 47-row disagreement subset actually passes -- do not flip this default ahead
+# of that result. judge() also accepts an explicit prompt_version="v2" for
+# side-by-side comparison calls before any default changes.
+JUDGE_SYSTEM_PROMPT = JUDGE_SYSTEM_PROMPT_V1
+_PROMPTS_BY_VERSION = {
+    "v1": JUDGE_SYSTEM_PROMPT_V1,
+    "v2": JUDGE_SYSTEM_PROMPT_V2,
+    "v3": JUDGE_SYSTEM_PROMPT_V3,
+}
 
 
 def _build_judge_user_prompt(claim_text: str, cited_chunk_texts: list[str]) -> str:
@@ -242,27 +342,49 @@ def get_judge_model(client: OpenAI | None = None) -> dict:
 
 
 def judge(claim_text: str, cited_chunk_texts: list[str],
-          client: OpenAI | None = None, model: str | None = None) -> dict:
+          client: OpenAI | None = None, model: str | None = None,
+          prompt_version: str = "v1") -> dict:
     """The one entailment-scoring call. Sees ONLY claim_text and
     cited_chunk_texts -- no answer, no question, no other claims' chunks.
 
+    prompt_version selects JUDGE_SYSTEM_PROMPT_V1 (original, ADR-0010/0011) or
+    JUDGE_SYSTEM_PROMPT_V2 (2026-07-25 partial-catch-all/negation fix) -- kept
+    explicit and separate so v1 and v2 can be run side by side for
+    comparison, rather than only ever calling whichever one is the module
+    default at the time.
+
     Returns:
-        {"verdict": "supported" | "partial" | "unsupported", "reason": str}
+        {"verdict": "supported" | "partial" | "unsupported", "reason": str,
+         "reasoning_tokens": int | None, "system_fingerprint": str | None}
+        reasoning_tokens/system_fingerprint added 2026-07-25 for the
+        reasoning-token/determinism diagnostic (reports.md) -- logged for
+        every future call so the question is answerable from data already
+        on disk next time, not a one-off probe. Not backfilled into
+        existing judgments.jsonl/judgments_v2.jsonl rows.
     """
     client = client or OpenAI()
     if model is None:
         model = get_judge_model(client)["model"]
+    system_prompt = _PROMPTS_BY_VERSION[prompt_version]
 
     response = client.chat.completions.create(
         model=model,
         messages=[
-            {"role": "system", "content": JUDGE_SYSTEM_PROMPT},
+            {"role": "system", "content": system_prompt},
             {"role": "user", "content": _build_judge_user_prompt(claim_text, cited_chunk_texts)},
         ],
         temperature=0.0,
     )
     raw_text = response.choices[0].message.content or ""
-    return _parse_verdict(raw_text)
+    parsed = _parse_verdict(raw_text)
+
+    reasoning_tokens = None
+    usage = response.usage
+    if usage is not None and getattr(usage, "completion_tokens_details", None) is not None:
+        reasoning_tokens = getattr(usage.completion_tokens_details, "reasoning_tokens", None)
+    parsed["reasoning_tokens"] = reasoning_tokens
+    parsed["system_fingerprint"] = getattr(response, "system_fingerprint", None)
+    return parsed
 
 
 # --- Synthetic contradiction-mechanism fixture (ADR-0010 / Decision 4) ---

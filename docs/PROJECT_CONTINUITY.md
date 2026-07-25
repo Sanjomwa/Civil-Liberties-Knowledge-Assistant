@@ -5,45 +5,68 @@ year — this doc should let anyone picking it up, including the original
 author, resume without reconstructing context from memory or old history.
 Read this file first, in full, when resuming cold.
 
-Last updated: 2026-07-24 (later same day) — a full rubric audit against
-the real, verbatim `project.md` Evaluation Criteria found the LLM
-evaluation phase is genuinely 1/2, not 2/2, despite feeling closed (only
-one generation approach was ever compared — see ADR-0012). An Opus 5
-consult produced a ranked completion plan now in force: a Prompt A/B
-comparison to fix LLM evaluation properly, a README rewrite per
-`docs/readme-plan.md`, a 2026-08-02 feature-freeze gate ahead of the
-confirmed 2026-08-11 02:00 deadline, and a posts-7+8 merge in the
-learning-in-public series. Full detail: ADR-0012 and `decisionlog.md`,
-2026-07-24. Prior update, same day, earlier: LLM evaluation phase built
-and real-run against the real corpus (0.879 aggregate claim-level
-citation precision); human-calibration review is still the one remaining
-step before that phase's own internal definition of done is met — that
-finding stands, it's just no longer the only open item on this phase (see
-ADR-0012's Decision 2). Prior update (2026-07-23) brought this file
-current after a full documentation-sync pass covering the retrieval and
-generation phases (both were closed and built respectively without this
-file's headline snapshot being updated at the time — see the "known gap,
-now fixed" note below).
+Last updated: 2026-07-25 (later still) — **judge rubric v2 run for real
+and adopted as the headline result (ADR-0014).** A documented defect in
+the judge's original "partial" catch-all (absorbing both one-step fact
+synthesis and unscored negation claims — found via two Opus 5 consults
+plus an empirical cross-check, not assumed) was fixed and validated in
+two stages before being trusted: cheaply on a 47-row known-disagreement
+subset, then for real across all 481 claims. **Citation precision moved
+from 0.879 (v1, original) to 0.946 (v2, fixed) — every category
+improved, 33/481 claims moved to "supported," exactly 1 moved the other
+way (a defensible edge case).** Sam chose 0.946 as the headline
+reported number, with 0.879 disclosed as the superseded original
+methodology, not deleted. **Judge-validity against independent human
+judgment remains explicitly OPEN** — this fix closes "is the rubric
+itself sound," not "has a human confirmed this," and both must be
+disclosed together wherever 0.946 is reported. Full numbers in
+`reports.md`/`decisionlog.md`, 2026-07-25, and ADR-0014. The rubric-gap
+half of LLM evaluation's definition of done was already closed earlier
+today (Prompt A/B comparison — Prompt A won, 0.893 vs 0.869, see below).
+Prior update (2026-07-24, later same day): a full rubric audit against the real, verbatim `project.md`
+Evaluation Criteria found the LLM evaluation phase was genuinely 1/2, not
+2/2 (only one generation approach had ever been compared — see
+ADR-0012); an Opus 5 consult produced the ranked completion plan now in
+force (Prompt A/B comparison, README rewrite per `docs/readme-plan.md`,
+2026-08-02 feature-freeze gate ahead of the confirmed 2026-08-11 02:00
+deadline, a posts-7+8 merge in the learning-in-public series). Prior
+update (2026-07-23) brought this file current after a full
+documentation-sync pass covering the retrieval and generation phases.
+
+**Known process gap, found 2026-07-25:** this file's edits from earlier
+today (the same headline update this replaces, plus an ADR-0011
+addendum) were lost — reverted to their pre-edit state, almost certainly
+by a `sync.sh pull` that ran after the Cowork-side edits were made but
+before they were ever pushed to WSL. `decisionlog.md` was unaffected
+(lives outside `repo/`, never synced). Practical takeaway: push any
+pending Cowork-side doc edits to WSL before the next pull, not after —
+otherwise they're silently overwritten with no error. Not yet fixed at
+the tooling level; Sam's call whether that's worth automating.
 
 ---
 
 ## 1. Current state (snapshot)
 
 **Ingestion, retrieval, and generation phases are CLOSED. LLM evaluation
-is built and real-run against the real corpus and API, verified
-2026-07-24 — one step short of fully closed: Sam's human-calibration
-review (`judge_calibration_sample_full.csv`) has not been done yet, so
-the judge-validity κ-or-fallback verdict from ADR-0011 doesn't exist yet
-either. Separately, and more consequentially: a full rubric audit
-(ADR-0012, 2026-07-24) found this phase is currently 1/2 against the
-real `project.md` grading criterion, not 2/2 — it judges one generation
-approach's citation precision, but the rubric's 2-point bar requires
-comparing multiple approaches and picking a winner. Both the
-human-calibration step AND a Prompt A/B comparison are now open before
-this phase is genuinely done — see ADR-0012 Decision 2.** The overall
-project plan (build order, timeline, README standard) now runs against
-`project.md`'s Evaluation Criteria explicitly, not informally — full
-completion plan in ADR-0012.
+is built and real-run against the real corpus and API — both rubric gaps
+identified in the 2026-07-24 audit (ADR-0012) are now addressed.** The
+"compare multiple approaches" gap closed via the Prompt A/B comparison
+(2026-07-25 — Prompt A won, 0.893 vs 0.869, and stays the default). The
+judge-scoring-quality question closed via judge rubric v2 (ADR-0014,
+2026-07-25, later same day) — a real, confirmed defect in the original
+judge prompt was found and fixed, validated in two stages, and re-run for
+real: **citation precision moved from 0.879 (v1) to 0.946 (v2)**, now the
+headline reported number. **What remains open: judge-validity against
+independent human judgment.** ADR-0011's human-calibration requirement
+was never satisfied by a real human read — two same-day substitute
+attempts (an AI-reviewer read, then a disagreement-only subset) both
+proved impractical, and Sam explicitly chose to invest further effort in
+fixing the judge's rubric instead of more review time. This is disclosed
+as an open limitation everywhere the 0.946 figure is reported, not
+smoothed over. Full detail: ADR-0011's addendum, ADR-0014, `reports.md`
+and `decisionlog.md`, 2026-07-25. The overall project plan (build order,
+timeline, README standard) runs against `project.md`'s Evaluation
+Criteria explicitly, not informally — full completion plan in ADR-0012.
 
 - **Ingestion:** CLOSED 2026-07-20, verified clean. All six modules in
   `src/ingestion/` (`acquire.py`, `extract.py`, `validate.py`,
@@ -1424,6 +1447,49 @@ the empty `archituecture-new.docx` leftover from the same incident.
   `data/` by design — unlike `corpus/sources/*.yaml`, a comparably
   curated artifact that does sync. Not fixed this pass; Sam's call
   whether it's worth a future revision.
+- **UPDATE, 2026-07-25: human-calibration path changed twice, ended on a
+  judge-prompt fix instead of more human review time.** Attempt 1: Sam
+  found the full 65-row human read unsustainable, substituted an
+  independent AI reviewer read (blind to the judge), and an Opus 5
+  consult recommended a disagreement-only human read as the cheap
+  alternative — implemented, but the real disagreement rate (45/63 rows,
+  28.6% raw agreement) made the "cheap" subset not actually cheap.
+  Attempt 2: Sam declined that too and asked why the disagreement was
+  100% one-directional. A second Opus 5 consult, grounded in the real
+  `judge.py` prompt, found a genuine protocol issue (the "partial"
+  catch-all clause, and structural inability to verify negative/absence
+  claims under isolated entailment) and recommended fixing the judge's
+  prompt and re-running all 481 claims instead — adopted, ranked above a
+  smaller human sample (explicitly advised against: too close to
+  ADR-0011's own degenerate-κ case at this population's disagreement
+  prevalence) and above stopping at a documented limitation (held in
+  reserve for whatever gap remains after the fix attempt, not skipped
+  outright). Empirical cross-check run before accepting the hypothesis:
+  my own 52 "supported" verdicts from the original review were
+  categorized by claim shape and handed to the fix's implementation for
+  a real per-shape breakdown, not taken on Opus's word alone. **Judge-
+  validity status: OPEN**, not yet run as of this update. Full transcripts
+  in `decisionlog.md`, 2026-07-25 (two entries), ADR-0011's addendum.
+- **UPDATE, 2026-07-25 (later still): judge rubric v2 run for real,
+  adopted as the headline citation-precision result (ADR-0014).** The
+  fix from the entry above was implemented, validated cheaply on the
+  47-row disagreement subset first (gap narrowed 63-67% evenly across all
+  three claim shapes, no overshoot found on spot-check), then re-run
+  across all 481 claims. **Citation precision: 0.879 (v1) → 0.946 (v2)**,
+  every category improved, 33/481 claims moved to "supported," 1 moved
+  the other way (a defensible edge case on inspection). Sam chose 0.946
+  as the headline reported number (offered three options directly, didn't
+  default to one); 0.879 stays disclosed as the superseded original
+  methodology. **Judge-validity against independent human judgment
+  remains explicitly OPEN** — this closes "is the rubric sound," not "has
+  a human confirmed this," and both statements must appear together
+  wherever 0.946 is reported (README, `docs/evaluation-design.md`).
+  Full numbers, the verbatim prompt diff, and per-category/per-shape
+  breakdown in `reports.md`, 2026-07-25. **Separately, a real process gap
+  found and fixed this pass:** this file's own headline snapshot and
+  ADR-0011's addendum, both written earlier today, had been silently
+  reverted by an un-pushed `sync.sh pull` — redone; see the "Known
+  process gap" note at the top of this file.
 - **UPDATE, 2026-07-22, later same day: `src/ingestion/chunk.py` itself
   fixed (Sam's call), not yet re-run against the real corpus.** The
   `chunking` block now gets stamped into `metadata` before any chunk

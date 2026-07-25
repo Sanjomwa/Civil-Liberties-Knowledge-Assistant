@@ -157,6 +157,49 @@ risk, labeled-supplement category tagging, and reporting
 `decisionlog.md`, 2026-07-23, for the full review transcript and the
 complete list.
 
+## Addendum, 2026-07-25 — human-calibration path changed twice in one day; judge-validity status stays OPEN
+
+**First change:** Sam found reading all 65 calibration rows by hand
+unsustainable and substituted an independent second-LLM read (a separate
+Claude instance, blind to the judge's verdicts). An Opus 5 consult found
+that AI-vs-AI agreement cannot satisfy this ADR's purpose (both raters
+share reading-comprehension failure modes and are likeliest to agree
+exactly where the judge is wrong) and recommended a disagreement-only
+human read instead: diff the AI reviewer's 65 verdicts against the
+judge's own, and have Sam read only the rows where they disagreed.
+Implemented — but the real disagreement rate came back far higher than
+estimated (45 of 63 scored rows, 28.6% raw agreement), making the
+"cheap" subset not actually cheap (47 rows, close to the original 65).
+
+**Second change, same day:** Sam declined that review too and asked why
+the disagreement was so lopsided (100% one-directional — the AI reviewer
+was never once *stricter* than the judge). A second Opus 5 consult, this
+time grounded directly in `judge.py`'s real prompt text, found the
+pattern is diagnostic of a genuine protocol issue, not rater bias: the
+`"partial"` verdict's catch-all clause ("loosely or indirectly support
+it") absorbs claims needing one inference step, and negative/absence
+claims are structurally unverifiable under isolated entailment even when
+accurate. **Adopted path: fix the judge's prompt (tighten the partial
+catch-all, add an explicit negated-claim rule), validate cheaply on the
+47-row disagreement subset, then re-run all 481 claims and report v1
+(0.879) vs. v2 with a per-claim-shape breakdown** — no further owner
+review time required. Ranked above both a smaller human sample (explicitly
+advised against — at the population's 12.1% disagreement prevalence, a
+10-15-row sample lands in the same degenerate-κ case this ADR already
+flagged) and a bare "document and stop" (held in reserve as the honest
+fallback for whatever gap remains after the fix, not a replacement for
+attempting it).
+
+**Judge-validity status for the LLM-evaluation phase remains OPEN** —
+neither change above closes it. The 0.879 figure stays reported as
+unvalidated against independent human judgment until a real result
+exists from the v2 re-run. Full Opus 5 transcripts (both consults) and
+the empirical claim-shape cross-check run before accepting the second
+consult's hypothesis are in `decisionlog.md`, 2026-07-25 (two entries,
+same date). If the v2 re-run produces a material change, it gets either a
+second dated addendum here or a new ADR number, decided once real numbers
+exist.
+
 ## What would trigger a revisit
 
 - If claim extraction (sentence-splitting on `answer_markdown`) turns out

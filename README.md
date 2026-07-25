@@ -115,7 +115,7 @@ one cited excerpt (marker [5], the 2024 Freedom House report) also notes
 NSO Group stated Rwanda has not been a client since 2021, corroborated by
 Citizen Lab — the answer's own citations remain accurate (it only claims
 historical, not current, Pegasus use), but this is exactly the kind of
-finer distinction the claim-level judge's 0.879 (not 1.0) precision score
+finer distinction the claim-level judge's 0.946 (not 1.0) precision score
 reflects (see [Evaluation](#evaluation)), stated here rather than
 smoothed over.
 
@@ -174,11 +174,57 @@ Full methodology and numbers: `docs/retrieval-design.md` and
 A claim-level citation-precision judge (`src/evaluation/judge.py`,
 isolated-entailment protocol, three-way supported/partial/unsupported
 verdict) was built and run for real against 481 claims across 122
-questions: **0.879 aggregate claim-level citation precision** for the
-generation prompt (see
+questions (see
 `docs/adr/0010-citation-judge-protocol-and-contradiction-test-gap.md` and
 `0011-claim-level-precision-and-judge-validity-fallbacks.md` for the
-protocol design).
+protocol design). Citation-precision confidence rests on three distinct
+sources — labeled explicitly below so none can be mistaken for another:
+
+**1. AI Judge (`gpt-5.4-mini`, this project's actual evaluation
+mechanism) — 0.946 aggregate claim-level citation precision (v2),
+0.879 (v1, superseded).** The first real run scored **0.879** — a rubric
+audit later found the judge's `"partial"` catch-all clause was broad
+enough to absorb both one-step fact synthesis and unscored
+negation/absence claims as under-scored rather than "supported." The
+rubric was fixed and re-validated (cheap 47-row check, then a full
+481-claim re-run) before being adopted as the new default; full
+empirical justification, the exact prompt diff, and the validation
+results are in `reports.md` (2026-07-25) and
+`docs/adr/0014-judge-rubric-v2-headline-citation-precision.md`. **0.946
+is the headline figure reported going forward; 0.879 is disclosed here
+as the superseded original methodology, not deleted or silently
+dropped.**
+
+**2. AI Reviewer cross-check (a separate Claude instance, Cowork
+session) — 28.6% raw agreement with the judge (45 of 63 scored rows
+disagreed), 100% one-directional (the AI reviewer was never once
+*stricter* than the judge).** This is an AI-vs-AI comparison, not a
+human validation — an independent LLM instance, blind to the judge's
+verdicts, read the same 65-row calibration sample. It surfaced the
+rubric defect that led to v2 (above), but per ADR-0011's addendum, this
+kind of AI-vs-AI check cannot substitute for real human judgment: both
+raters can share the same reading-comprehension failure modes and are
+likeliest to agree exactly where the judge is actually wrong. Full
+framing: `docs/adr/0011-claim-level-precision-and-judge-validity-fallbacks.md`'s
+2026-07-25 addendum.
+
+**3. Human calibration (Sam, direct review) — PENDING, not yet
+performed.** No number is estimated or fabricated here. A redesigned
+review artifact (`data/eval/human_calibration_review_v2.html`, generated
+by `scripts/build_calibration_review_v2.py`) replaces an earlier
+Excel-based attempt that hit a real wall — Excel's 409pt row-height cap
+truncated 41 of 47 long excerpts on-screen — with a plain HTML page
+covering all 65 rows, full verbatim claim and excerpt text, no length
+cap. Verdicts get recorded in a companion slim CSV
+(`data/eval/human_calibration_v2_verdicts.csv`), not in the HTML itself.
+
+**Neither AI source above has been checked against independent human
+judgment.** That calibration step (ADR-0011) never happened as designed,
+and the AI-reviewer cross-check and the resulting rubric fix narrow a
+documented AI-vs-AI disagreement — neither substitutes for human
+validation. Judge-validity remains an open, disclosed limitation
+regardless of which rubric version is reported (see
+[Limitations](#limitations)).
 
 **Two generation approaches compared, per the rubric's requirement
 (`src/evaluation/compare_prompts.py`, real run, 2026-07-25).** A rubric
@@ -493,12 +539,23 @@ Stated here rather than left to be discovered as an absence.
   (`gpt-5.4`) isn't available and the code falls back to `gpt-5.4-mini`
   (the same model the generator uses), that's a disclosed limitation, not
   a silent one (`docs/adr/0011-claim-level-precision-and-judge-validity-fallbacks.md`).
-- **A methodological nuance in the 0.879 citation-precision number** —
-  spot-checking found some "unsupported" verdicts are a structural
-  property of isolated-entailment scoring applied to hedge/negation
-  claims ("the excerpts do not mention X"), not fabrication. The true
-  precision on well-formed positive claims is likely somewhat higher than
-  the raw aggregate number suggests (`reports.md`, Section 5).
+- **Citation-precision headline number superseded once, for a confirmed
+  rubric defect, not a re-run for a better number.** The original run
+  scored 0.879; a rubric audit confirmed (via an empirical claim-shape
+  cross-check, not just diagnosis) that the judge's `"partial"` catch-all
+  was absorbing both one-step fact synthesis and unscored negation/
+  absence claims. The rubric was fixed and validated in two stages before
+  being re-run on all 481 claims: **0.946 is now the headline number**,
+  0.879 is disclosed as the superseded original
+  (`docs/adr/0014-judge-rubric-v2-headline-citation-precision.md`,
+  `reports.md`, 2026-07-25).
+- **Judge-validity against independent human judgment remains an open,
+  disclosed limitation for both numbers above.** The ADR-0011 human-
+  calibration check never happened as designed (see
+  `docs/adr/0011-claim-level-precision-and-judge-validity-fallbacks.md`'s
+  addendum); the rubric fix above narrows a documented AI-vs-AI
+  disagreement, it does not substitute for a real human calibration pass.
+  Neither 0.879 nor 0.946 should be read as human-validated.
 - **No automated tests, no CI/CD** — see [Testing](#testing) and
   [CI/CD](#cicd).
 - **No public deployment yet** — see [Deployment](#deployment).

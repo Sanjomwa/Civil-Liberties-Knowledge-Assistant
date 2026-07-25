@@ -413,9 +413,22 @@ def main() -> None:
     parser.add_argument("--score-review", action="store_true",
                         help="Join the calibration sample's human_verdict column back on "
                              "judgment_id and compute the confusion matrix/kappa/fallback.")
+    parser.add_argument("--input", type=Path, default=None,
+                        help="Only used with --score-review: path to an alternate "
+                             "verdict/human_verdict CSV to score standalone (e.g. "
+                             "data/eval/human_calibration_disagreement_subset.csv), instead "
+                             "of the full generation-evaluation report's usual "
+                             "judge_calibration_sample.csv. Prints the confusion matrix/"
+                             "agreement directly rather than folding it into "
+                             "generation-evaluation-report.md, which describes the whole "
+                             "generation run, not one ad hoc calibration file.")
     args = parser.parse_args()
 
     if args.score_review:
+        if args.input:
+            review_score = score_review(args.input)
+            print(json.dumps(review_score, indent=2, default=str))
+            return
         judge_info = get_judge_model()
         records = load_results()
         judgments = load_judgments()

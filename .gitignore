@@ -244,6 +244,27 @@ data/eval/*_full.csv
 # same split as the original generation-evaluation-report.md.
 data/eval/prompt_comparison_results.jsonl
 data/eval/prompt_comparison_judgments.jsonl
+# Added 2026-07-25, human-calibration correction: this file carries full
+# cited_chunk_texts (verbatim corpus excerpts) same as the *_full.csv
+# files above, but its name doesn't match that wildcard -- same class of
+# gap as the prompt_comparison files just above, caught the same way
+# (git check-ignore, before any push) rather than after the fact.
+data/eval/human_calibration_disagreement_subset.csv
+# Added 2026-07-25, judge rubric v2 full re-run: same reasoning as
+# judgments.jsonl above -- carries real cited chunk excerpts. Checked with
+# git check-ignore before writing this session's reports.md rather than
+# assuming the existing judgments.jsonl entry covered it (it didn't, same
+# gap class as the two entries just above).
+data/eval/judgments_v2.jsonl
+# Added 2026-07-25, redesigned human-calibration review artifact
+# (scripts/build_calibration_review_v2.py): the HTML page embeds full
+# verbatim cited-excerpt text for all 65 calibration rows, same licensing
+# sensitivity as the *_full.csv files above -- same gap class, checked
+# with git check-ignore before claiming it in reports.md. The companion
+# data/eval/human_calibration_v2_verdicts.csv is NOT excluded here: it's
+# the slim judgment_id/human_verdict file, no excerpt text, same split as
+# judge_calibration_sample.csv vs. judge_calibration_sample_full.csv.
+data/eval/human_calibration_review_v2.html
 
 # Local-only orchestration files (Cowork <-> Claude Code in WSL workflow,
 # established 2026-07-20) — never committed, never authored from the

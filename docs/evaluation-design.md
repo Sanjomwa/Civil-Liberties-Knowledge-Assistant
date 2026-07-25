@@ -364,6 +364,69 @@ documented change" discipline as every prior post-closure fix).
 
 ---
 
+## Decision 7 — judge rubric v2: fixing a confirmed "partial" catch-all defect, 0.946 as the new headline number
+
+**Why this decision exists:** ADR-0011 required an independent human
+calibration check against the judge's real-run result (0.879, 481
+claims). That check didn't happen as designed — a same-day substitution
+(an independent AI reviewer, blind to the judge's verdicts) produced only
+28.6% raw agreement with the judge, 100% of disagreements running one
+direction (AI reviewer said "supported," judge said "partial" or
+"unsupported," never the reverse). Full detail in ADR-0011's addendum
+(2026-07-25) and `docs/adr/0014-judge-rubric-v2-headline-citation-precision.md`
+— not restated here.
+
+**Confirmed empirically, not just diagnosed.** Before any prompt change,
+a manual claim-shape categorization of the 52 rows the AI reviewer scored
+"supported" (23 negation/bounded-hedge claims, 26 direct/near-verbatim
+claims, 3 compound-hedge claims) was cross-tabulated against the real
+judge verdicts already on record. Result: all three shapes showed high
+disagreement (100%, 73.1%, 100% respectively) — confirming the judge's
+`"partial"` catch-all ("...or only loosely or indirectly support it") was
+absorbing two distinct defects roughly equally, not one: (1) claims that
+are a direct, one-step synthesis or paraphrase of two-or-more
+explicitly-stated facts, scored "partial" for lacking a single verbatim
+source sentence even when every component fact is present; and (2) claims
+that assert an absence ("the excerpts do not say X"), which had no
+explicit scoring rule and defaulted to under-scoring even when factually
+accurate. This ruled out the initial narrower hypothesis (that negation
+claims alone were driving the gap) — the direct-match shape disagreed
+almost as often as the negation shape did.
+
+**The fix (`JUDGE_SYSTEM_PROMPT_V2`, `src/evaluation/judge.py`):** two
+targeted edits to the `"supported"`/`"partial"`/`"unsupported"`
+definitions — explicitly counting one-step fact synthesis as
+`"supported"` rather than `"partial"`, and adding an explicit rule that
+an accurately-reported absence claim is `"supported"` (directly checkable
+against the given excerpts), while a claim that falsely asserts an
+absence the excerpts actually contradict remains `"unsupported"`. Full
+before/after prompt diff: `reports.md` (2026-07-25). `JUDGE_SYSTEM_PROMPT_V1`
+is preserved unmodified in `judge.py`; `judge()` takes an explicit
+`prompt_version` argument and defaults to v1 unless `"v2"` is passed.
+
+**Validated in two stages before being trusted:** first cheaply on the 47
+known-disagreement rows (`data/eval/human_calibration_disagreement_subset.csv`)
+— 64.4% flipped to "supported," fairly evenly across all three shapes
+(63–67%), with spot-checks confirming the fix doesn't over-credit false
+claims (a claim that falsely asserted an absence the excerpt actually
+contradicted correctly stayed "unsupported" under v2). Then for real
+across all 481 claims: **citation precision moved from 0.879 (v1) to
+0.946 (v2)**, every category improved, 33 claims moved to "supported"
+that weren't under v1, exactly 1 moved the other way (inspected and found
+to be a legitimate, defensible judge call, not a regression the edit
+introduced).
+
+**Decision (Sam's, made directly per ADR-0014):** 0.946 is the headline
+citation-precision result reported going forward; 0.879 is retained and
+disclosed as the superseded original methodology, not deleted.
+**Judge-validity against independent human judgment remains explicitly
+open** — this decision does not close it; neither number has been
+checked against a real human-calibration pass, and that must be stated
+alongside 0.946 wherever it's reported as headline, not as a buried
+footnote.
+
+---
+
 ## Pipeline shape (resolved, per Decisions 1-4 above)
 
 1. Run `answer()` over the evaluation question set — the 97-question

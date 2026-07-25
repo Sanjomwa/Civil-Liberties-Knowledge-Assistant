@@ -171,6 +171,13 @@ case "$MODE" in
     # locally every run, already gitignored via .git/info/exclude. Never
     # worth syncing, same reasoning as .venv/__pycache__.
     #
+    # --exclude='dist/' added 2026-07-25, caught by a Cowork-side hygiene
+    # check: dist/corpus-release-v1.zip (4.3MB, ADR-0013's built release
+    # artifact) was landing in the Cowork mirror on every push because
+    # dist/ was never added here, even though it's already gitignored
+    # (a WSL-local build output, not source). Same reasoning as .venv/
+    # __pycache__ -- a regenerable local artifact, never worth syncing.
+    #
     # Everything else -- src/, corpus/sources/*.yaml, corpus/
     # acquisition-log.md, corpus/manifest.csv, corpus/checksums.sha256,
     # corpus/validation-report.md, docs/, reports.md -- flows back. This
@@ -187,7 +194,7 @@ case "$MODE" in
     rsync -av --stats \
       --exclude='.venv' --exclude='__pycache__' --exclude='data/' \
       --exclude='CLAUDE.md' --exclude='.git/' --exclude='claude-code-wsl-CLAUDE.md' \
-      --exclude='.claude/' --exclude='.env' \
+      --exclude='.claude/' --exclude='.env' --exclude='dist/' \
       "$WSL_REPO/" \
       "$COWORK_MIRROR/" | tee "$stats_file"
     print_sync_summary "$COWORK_MIRROR" "$stats_file"

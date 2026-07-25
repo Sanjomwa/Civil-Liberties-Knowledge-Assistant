@@ -80,7 +80,21 @@ observable condition, not just a feeling that something isn't working.
 
 ## Status
 
-**Thirteen ADRs exist as of 2026-07-25.**
+**Fourteen ADRs exist as of 2026-07-25 (later same day).**
+`0014-judge-rubric-v2-headline-citation-precision.md` — the human-
+calibration check ADR-0011 requires never happened as designed (an
+AI-vs-AI substitute produced too high a disagreement rate to be a cheap
+stand-in); a second Opus 5 consult found the disagreement was driven by a
+real, confirmed defect in the judge's prompt (a "partial" catch-all
+absorbing both one-step fact synthesis and unscored negation claims), not
+rater bias. Fixed, validated in two stages (cheap 47-row check, then a
+full 481-claim re-run), and adopted: 0.946 (the fixed rubric) is now the
+headline citation-precision result, with 0.879 (the original) disclosed
+as the superseded methodology, not deleted. Judge-validity against real
+human judgment remains explicitly open under this ADR — the fix is a
+documented rubric correction, not a substitute for that check.
+
+**Thirteen ADRs existed as of 2026-07-25 (earlier same day).**
 `0013-tiered-corpus-release.md` — found, before executing ADR-0012's
 "ship the processed corpus" Tier 1 item, that this project's own two
 governance documents disagreed on the scope of Freedom House's

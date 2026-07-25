@@ -174,10 +174,21 @@ def call_model(client: OpenAI, system_prompt: str, user_prompt: str) -> tuple[st
     raw_text = response.choices[0].message.content.strip()
     usage = None
     if response.usage is not None:
+        # reasoning_tokens/system_fingerprint added 2026-07-25 for the
+        # reasoning-token/determinism diagnostic (reports.md) -- logged for
+        # every future call, not backfilled into existing
+        # prompt_comparison_results.jsonl rows.
+        reasoning_tokens = None
+        if getattr(response.usage, "completion_tokens_details", None) is not None:
+            reasoning_tokens = getattr(
+                response.usage.completion_tokens_details, "reasoning_tokens", None
+            )
         usage = {
             "prompt_tokens": response.usage.prompt_tokens,
             "completion_tokens": response.usage.completion_tokens,
             "total_tokens": response.usage.total_tokens,
+            "reasoning_tokens": reasoning_tokens,
+            "system_fingerprint": getattr(response, "system_fingerprint", None),
         }
     return raw_text, usage
 
