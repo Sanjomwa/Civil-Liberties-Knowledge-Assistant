@@ -455,14 +455,24 @@ Section 3). OONI's measurement *data* license (CC BY-NC-SA 4.0) is
 confirmed in `docs/licensing.md`; the exact license variant for OONI's
 *content* (reports, as opposed to raw measurements) is still an open
 action item — see Section 7. Freedom House content is permission-gated,
-not Creative Commons — permission requested 2026-07-13, still awaiting
-response (Section 7); the four Freedom House documents acquired in
-Section 6b are for internal course-project use only, not any CLIO-facing
-redistribution, until that permission is confirmed. Access Now and CIPESA
-licensing terms not yet independently re-verified against the specific
-documents acquired this pass — `docs/licensing.md`'s original per-org
-findings should be checked against these specific URLs before any
-redistribution, not assumed to carry over automatically.
+not Creative Commons — permission requested 2026-07-13, followed up
+2026-07-25, still awaiting response as of 2026-07-26 (Section 7); the
+Freedom House documents acquired in Section 6b are for internal
+course-project use only, **not any public-facing redistribution — through
+the CLIO API boundary or any other public-facing channel, including this
+project's own GitHub Release or a publicly-buildable Docker artifact —
+until that permission is confirmed.** (Corrected 2026-07-26: this line
+previously said "not any CLIO-facing redistribution," the exact narrower
+reading ADR-0013 corrected everywhere else in this file — ADR-0013's own
+fix updated Section 7 and missed this section; same underlying
+`docs/licensing.md` wording applies here too, not a looser version of it.)
+Access Now's report *text* specifically carries the same caution
+(`docs/licensing.md` warns against "full verbatim redistribution of large
+excerpts" of it), independent of its more clearly reusable shutdown-
+tracking data. CIPESA licensing terms not yet independently re-verified
+against the specific documents acquired this pass — `docs/licensing.md`'s
+original per-org findings should be checked against these specific URLs
+before any redistribution, not assumed to carry over automatically.
 
 ## 5. Decision records
 
@@ -679,6 +689,27 @@ auto-vs-manual question; scaling further is future work, see Section 7),
 `check_drift.py` (still no corpus version change to detect drift against).
 
 ## 7. Open action items (don't lose track of these)
+
+**Doc-pruning audit, 2026-07-25:** this section was read in full alongside
+`decisionlog.md` against the same preservation constraint (context, real
+numbers, rationale, presentation-ready metrics must survive). Same
+verdict: dense with unique detail, not padding — nothing deleted. Entries
+below aren't in strict chronological order (several got appended near
+whichever related entry made sense at the time, not always at the
+bottom), so a topic index is more useful here than a line-count skim:
+
+| Topic | Roughly where |
+|---|---|
+| Rubric completion plan (ADR-0012), README Tier 1, Prompt A/B, tiered corpus release (ADR-0013), judge rubric v2 (ADR-0014) | Top of this section, dated 2026-07-24–25 |
+| Ingestion Opus+Fable review (6 findings) + ADR-0007/0008 fixes, real re-run clean | Entries dated 2026-07-20, mid-section |
+| Corpus growth to 35 docs, org-by-org acquisition batches | Multiple 2026-07-20 entries, mid-section |
+| Retrieval: embed.py run, ground_truth.py circularity saga, evaluate.py results, default-method decision, Opus+Fable reviews, P2 country-boost | 2026-07-22 entries, back half of this section |
+| Generation phase build + smoke test | 2026-07-24 entries, near the bottom |
+| Freedom House permission / licensing status | Search "Freedom House permission request" |
+
+For the single-page version of all the headline numbers across every
+phase, see `docs/presentation-reference.md` instead of re-scanning this
+section.
 
 - **DONE, 2026-07-25: re-ranking best practice — ablation run for real,
   Tier 1 item closed.** `search.py` gained a `boost_country: bool = True`

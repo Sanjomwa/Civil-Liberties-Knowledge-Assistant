@@ -16,6 +16,7 @@ Usage (as a library, not a script):
 """
 
 import sys
+import time
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -75,11 +76,26 @@ def answer(query: str, client: OpenAI | None = None) -> dict:
             "sources": str,                 -- rendered Sources list
             "sourcing": {...},              -- footer + distinct org/doc counts
             "usage": {...} | None,          -- token usage, for the monitoring phase
+            "timings": {"retrieval_ms": int, "llm_ms": int},
+                -- added 2026-07-26 (interface-design.md Decision 4/4a),
+                measured around the existing search() and LLM calls --
+                additive, every existing caller accesses specific keys by
+                name (confirmed against run_answers.py) so this can't break
+                anything already reading this dict.
+            "retrieved_chunks": [{"chunk_id": str, "score": float | None}, ...]
+                -- added 2026-07-26 (Decision 4a): chunk_id + score only,
+                deliberately no excerpt text, same restraint `citations`
+                already applies. Lets the interface layer build
+                citations_summary/retrieval_scores by joining against
+                `citations`, without answer() exposing raw chunk text.
         }
     """
     client = client or OpenAI()
 
+    retrieval_start = time.monotonic()
     chunks = search(query, top_k=TOP_K)
+    retrieval_ms = int((time.monotonic() - retrieval_start) * 1000)
+
     if not chunks:
         return {
             "query": query,
@@ -90,9 +106,12 @@ def answer(query: str, client: OpenAI | None = None) -> dict:
             "sources": "",
             "sourcing": sourcing_footer([]),
             "usage": None,
+            "timings": {"retrieval_ms": retrieval_ms, "llm_ms": 0},
+            "retrieved_chunks": [],
         }
 
     user_prompt = build_user_prompt(query, chunks)
+    llm_start = time.monotonic()
     response = client.chat.completions.create(
         model=LLM_MODEL,
         messages=[
@@ -101,6 +120,7 @@ def answer(query: str, client: OpenAI | None = None) -> dict:
         ],
         temperature=0.2,
     )
+    llm_ms = int((time.monotonic() - llm_start) * 1000)
     answer_text = response.choices[0].message.content.strip()
 
     parsed = parse_citations(answer_text, chunks)
@@ -124,6 +144,8 @@ def answer(query: str, client: OpenAI | None = None) -> dict:
         "sources": sources_list,
         "sourcing": footer,
         "usage": usage,
+        "timings": {"retrieval_ms": retrieval_ms, "llm_ms": llm_ms},
+        "retrieved_chunks": [{"chunk_id": c["chunk_id"], "score": c.get("score")} for c in chunks],
     }
 
 

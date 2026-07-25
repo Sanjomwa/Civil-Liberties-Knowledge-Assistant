@@ -191,7 +191,16 @@ def _rrf_combine(ranked_lists: list[list[dict]], k: int, top_k: int) -> list[dic
     """Reciprocal Rank Fusion: score(chunk) = sum over ranked_lists of
     1 / (k + rank), rank starting at 1. Returns the top_k chunks by
     combined score, each result carrying its own chunk dict (from
-    whichever ranked list first produced it)."""
+    whichever ranked list first produced it).
+
+    Interface-design.md Decision 4a, 2026-07-26: the combined RRF score
+    was computed here but discarded before return, leaving no retrieval
+    score exposed anywhere in the pipeline. Now attached as a "score" key
+    on each returned chunk -- additive only, scoped to the hybrid path
+    (the only method the interface ever calls); does not change ordering
+    or which chunks are returned. text/vector's own return shape is
+    untouched -- minsearch's Index/VectorSearch don't expose an internal
+    score to reattach."""
     scores: dict[str, float] = {}
     chunk_by_id: dict[str, dict] = {}
     for ranked in ranked_lists:
@@ -201,7 +210,7 @@ def _rrf_combine(ranked_lists: list[list[dict]], k: int, top_k: int) -> list[dic
             scores[chunk_id] = scores.get(chunk_id, 0.0) + 1.0 / (k + rank)
 
     ranked_ids = sorted(scores, key=lambda cid: scores[cid], reverse=True)
-    return [chunk_by_id[cid] for cid in ranked_ids[:top_k]]
+    return [{**chunk_by_id[cid], "score": scores[cid]} for cid in ranked_ids[:top_k]]
 
 
 def _hybrid_search(

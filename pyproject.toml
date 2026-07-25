@@ -18,6 +18,8 @@ dependencies = [
     "minsearch>=0.2.0",   # Index (TF-IDF text search) + VectorSearch (cosine similarity)
     "numpy>=1.24.0",      # imported directly by src/retrieval/embed.py
     "openpyxl>=3.1.5",
+    "psycopg[binary]>=3.2.0",
+    "streamlit>=1.60.0",
 ]
 
 [dependency-groups]

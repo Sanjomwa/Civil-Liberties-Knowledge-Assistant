@@ -1,21 +1,21 @@
 # Civil Liberties Knowledge Assistant
 
-A citation-grounded RAG assistant that helps researchers, journalists, and
-civic-tech practitioners investigate internet censorship and digital rights
-in East Africa (Kenya, Uganda, Tanzania, Ethiopia, Rwanda; 2022–2026). It
-retrieves and answers from a curated corpus of OONI, Access Now, CIPESA,
-and Freedom House reports — every answer cites the specific excerpt it
-draws from, and thin or single-sourced evidence is flagged rather than
-smoothed into a confident-sounding narrative.
+I built a citation-grounded RAG assistant to help researchers, journalists,
+and civic-tech practitioners investigate internet censorship and digital
+rights in East Africa (Kenya, Uganda, Tanzania, Ethiopia, Rwanda;
+2022–2026). It retrieves and answers from a curated corpus of OONI, Access
+Now, CIPESA, and Freedom House reports — every answer cites the specific
+excerpt it draws from, and I made sure thin or single-sourced evidence gets
+flagged rather than smoothed into a confident-sounding narrative.
 
 Built for DataTalksClub's LLM Zoomcamp 2026 capstone project.
 
-> **Status, 2026-07-25:** ingestion, retrieval, and generation are built
-> and verified. LLM evaluation is built and real-run, with one known gap
-> being actively closed (see [Evaluation](#evaluation) and
+> **Status, 2026-07-25:** I've built and verified ingestion, retrieval, and
+> generation. LLM evaluation is built and real-run, with one known gap I'm
+> actively closing (see [Evaluation](#evaluation) and
 > [Limitations](#limitations)). Interface, monitoring, containerization,
-> and deployment are not built yet — this README states plainly, section
-> by section, what exists today versus what's still in progress, per
+> and deployment aren't built yet — I've stated plainly, section by
+> section, what exists today versus what I still have in progress, per
 > [`docs/adr/0012-rubric-driven-completion-plan.md`](docs/adr/0012-rubric-driven-completion-plan.md).
 
 ## Contents
@@ -48,27 +48,27 @@ several separate sites and PDF reports, with no single place to ask a
 direct question and get a sourced answer.
 
 That manual cross-referencing has a second, easy-to-miss failure mode
-beyond being slow: it's easy to accidentally flatten disagreement or
-thin evidence into a single confident-sounding narrative, because nothing
-forces the reader to notice when only one organization covers an event,
-or when two sources describe it differently. This project's core design
-principle follows directly from that: **every answer must cite the exact
-excerpt it's drawn from, and evidence that's thin (one source) or
-contradictory (sources disagree) must be flagged explicitly, not smoothed
-over.** The [Architecture](#architecture) and
+beyond being slow: it's easy to accidentally flatten disagreement or thin
+evidence into a single confident-sounding narrative, because nothing
+forces the reader to notice when only one organization covers an event, or
+when two sources describe it differently. My core design principle
+follows directly from that: **every answer must cite the exact excerpt
+it's drawn from, and evidence that's thin (one source) or contradictory
+(sources disagree) must be flagged explicitly, not smoothed over.** The
+[Architecture](#architecture) and
 [Decisions and trade-offs](#decisions-and-trade-offs) sections below cover
-how that principle is actually enforced in code, not just stated as
+how I actually enforced that principle in code, not just stated it as
 intent.
 
 ## Demo
 
 **No live interface yet** (see [Limitations](#limitations)) — this is one
-real, verified question/answer pair pulled directly from
+real, verified question/answer pair I pulled directly from
 `data/eval/generation_results.jsonl` (question `general-0094`), not a
-constructed example. Every `[n]` marker below was spot-checked by hand
-against the actual cited chunk text before being included here; all eight
-resolve to real supporting passages. A screenshot/video of a live
-interface will replace this once one exists
+constructed example. I spot-checked every `[n]` marker below by hand
+against the actual cited chunk text before including it here; all eight
+resolve to real supporting passages. I'll replace this with a screenshot/
+video of a live interface once one exists
 (`docs/adr/0012-rubric-driven-completion-plan.md`, Tier 2).
 
 **Question:** What surveillance tools is the Rwandan government known to use?
@@ -110,51 +110,51 @@ interface will replace this once one exists
 
 *Sourcing: this answer cites 4 documents from 2 organizations (2022-2024).*
 
-Note one nuance this answer doesn't surface, found during spot-checking:
+One nuance this answer doesn't surface, which I found while spot-checking:
 one cited excerpt (marker [5], the 2024 Freedom House report) also notes
 NSO Group stated Rwanda has not been a client since 2021, corroborated by
 Citizen Lab — the answer's own citations remain accurate (it only claims
 historical, not current, Pegasus use), but this is exactly the kind of
 finer distinction the claim-level judge's 0.946 (not 1.0) precision score
-reflects (see [Evaluation](#evaluation)), stated here rather than
-smoothed over.
+reflects (see [Evaluation](#evaluation)) — I'm stating it here rather than
+smoothing it over.
 
 ## Evaluation
 
 ### Retrieval
 
-Three retrieval approaches — keyword/text search, vector search, and a
-hybrid of the two (Reciprocal Rank Fusion) — were evaluated against a
+I evaluated three retrieval approaches — keyword/text search, vector
+search, and a hybrid of the two (Reciprocal Rank Fusion) — against a
 101-question ground-truth set (mechanically filtered from an initial
 150-question generated set to remove residual circularity) spanning
 general, multi-country, and OONI-methodology question categories
 (`src/retrieval/ground_truth.py`, `evaluate.py`).
 
-**Recorded default: hybrid search, RRF k=10** — chosen for best-or-near-best
-Mean Reciprocal Rank across all three question categories, not just the
-aggregate. Real measured numbers:
+**Recorded default: hybrid search, RRF k=10** — I chose this for
+best-or-near-best Mean Reciprocal Rank across all three question
+categories, not just the aggregate. Real measured numbers:
 
 - Aggregate Hit Rate: ~0.644–0.66, depending on `k`.
 - Neighbor-aware Relaxed Hit Rate: ~0.812 (most of the gap between strict
   and relaxed scoring turned out to be same-document chunk overlap being
-  scored as a miss, not a true retrieval failure — confirmed by a
+  scored as a miss, not a true retrieval failure — I confirmed this with a
   follow-up mechanism check).
 - A real, disclosed limitation: on the `multi_country` question slice
-  specifically, plain text search beats every hybrid configuration.
-  Investigated across two rounds of diagnostics and root-caused as a
-  genuine, **not retrieval-fixable** property of how RRF concentrates
+  specifically, plain text search beats every hybrid configuration. I
+  investigated this across two rounds of diagnostics and root-caused it as
+  a genuine, **not retrieval-fixable** property of how RRF concentrates
   results toward cross-backend agreement on that particular question
-  category — not an embedding-quality defect. Documented, not silently
-  patched over.
+  category — not an embedding-quality defect. I'm documenting it, not
+  silently patching over it.
 
-**Document re-ranking ablation (`_boost_by_country` in `search.py`).**
-The existing country-metadata boost — chunks tagged with a query's
-detected country get moved toward the front of the candidate list, a
-re-rank, never a filter — was evaluated as its own best-practice item via
-a three-arm comparison (baseline: unexpanded candidate pool, no re-rank;
-pool-only: expanded candidate pool, no re-rank; current system: expanded
-pool + re-rank), isolating the re-rank's own effect from the candidate-pool
-expansion it rides on. Metadata coverage is not a risk here: 100% (3,783/
+**Document re-ranking ablation (`_boost_by_country` in `search.py`).** I
+evaluated the existing country-metadata boost — chunks tagged with a
+query's detected country get moved toward the front of the candidate list,
+a re-rank, never a filter — as its own best-practice item via a three-arm
+comparison (baseline: unexpanded candidate pool, no re-rank; pool-only:
+expanded candidate pool, no re-rank; current system: expanded pool +
+re-rank), isolating the re-rank's own effect from the candidate-pool
+expansion it rides on. Metadata coverage isn't a risk here: 100% (3,783/
 3,783) of indexed chunks carry a non-empty `countries` field, so the
 re-rank's total-reorder mechanism has no chunk to wrongly demote out of
 `top_k`. On the 65-of-101 "firing" questions (query names a corpus country
@@ -171,72 +171,70 @@ Full methodology and numbers: `docs/retrieval-design.md` and
 
 ### LLM evaluation
 
-A claim-level citation-precision judge (`src/evaluation/judge.py`,
+I built a claim-level citation-precision judge (`src/evaluation/judge.py`,
 isolated-entailment protocol, three-way supported/partial/unsupported
-verdict) was built and run for real against 481 claims across 122
-questions (see
+verdict) and ran it for real against 481 claims across 122 questions (see
 `docs/adr/0010-citation-judge-protocol-and-contradiction-test-gap.md` and
 `0011-claim-level-precision-and-judge-validity-fallbacks.md` for the
-protocol design). Citation-precision confidence rests on three distinct
-sources — labeled explicitly below so none can be mistaken for another:
+protocol design). My confidence in the citation-precision number rests on
+three distinct sources — I've labeled them explicitly below so none gets
+mistaken for another:
 
-**1. AI Judge (`gpt-5.4-mini`, this project's actual evaluation
-mechanism) — 0.946 aggregate claim-level citation precision (v2),
-0.879 (v1, superseded).** The first real run scored **0.879** — a rubric
-audit later found the judge's `"partial"` catch-all clause was broad
-enough to absorb both one-step fact synthesis and unscored
-negation/absence claims as under-scored rather than "supported." The
-rubric was fixed and re-validated (cheap 47-row check, then a full
-481-claim re-run) before being adopted as the new default; full
-empirical justification, the exact prompt diff, and the validation
-results are in `reports.md` (2026-07-25) and
-`docs/adr/0014-judge-rubric-v2-headline-citation-precision.md`. **0.946
-is the headline figure reported going forward; 0.879 is disclosed here
-as the superseded original methodology, not deleted or silently
-dropped.**
+**1. AI Judge (`gpt-5.4-mini`, the actual evaluation mechanism) — 0.946
+aggregate claim-level citation precision (v2), 0.879 (v1, superseded).**
+My first real run scored **0.879** — when I audited the rubric later, I
+found the judge's `"partial"` catch-all clause was broad enough to absorb
+both one-step fact synthesis and unscored negation/absence claims as
+under-scored rather than "supported." I fixed and re-validated the rubric
+(cheap 47-row check, then a full 481-claim re-run) before adopting it as
+the new default; the full empirical justification, the exact prompt diff,
+and the validation results are in `reports.md` (2026-07-25) and
+`docs/adr/0014-judge-rubric-v2-headline-citation-precision.md`. **0.946 is
+the headline figure I'm reporting going forward; I've disclosed 0.879 here
+as the superseded original methodology, not deleted or silently dropped.**
 
-**2. AI Reviewer cross-check (a separate Claude instance, Cowork
-session) — 28.6% raw agreement with the judge (45 of 63 scored rows
-disagreed), 100% one-directional (the AI reviewer was never once
-*stricter* than the judge).** This is an AI-vs-AI comparison, not a
-human validation — an independent LLM instance, blind to the judge's
-verdicts, read the same 65-row calibration sample. It surfaced the
-rubric defect that led to v2 (above), but per ADR-0011's addendum, this
-kind of AI-vs-AI check cannot substitute for real human judgment: both
-raters can share the same reading-comprehension failure modes and are
-likeliest to agree exactly where the judge is actually wrong. Full
-framing: `docs/adr/0011-claim-level-precision-and-judge-validity-fallbacks.md`'s
+**2. AI Reviewer cross-check (a separate AI instance, blind to the
+judge's verdicts) — 28.6% raw agreement with the judge (45 of 63 scored
+rows disagreed), 100% one-directional (the AI reviewer was never once
+*stricter* than the judge).** This is an AI-vs-AI comparison, not a human
+validation — an independent LLM instance, blind to the judge's verdicts,
+read the same 65-row calibration sample. It surfaced the rubric defect
+that led to v2 (above), but per ADR-0011's addendum, this kind of AI-vs-AI
+check can't substitute for real human judgment: both raters can share the
+same reading-comprehension failure modes and are likeliest to agree
+exactly where the judge is actually wrong. Full framing:
+`docs/adr/0011-claim-level-precision-and-judge-validity-fallbacks.md`'s
 2026-07-25 addendum.
 
-**3. Human calibration (Sam, direct review) — PENDING, not yet
-performed.** No number is estimated or fabricated here. A redesigned
-review artifact (`data/eval/human_calibration_review_v2.html`, generated
-by `scripts/build_calibration_review_v2.py`) replaces an earlier
+**3. My own human calibration — PENDING, not yet performed.** I'm not
+estimating or fabricating a number here. I built a redesigned review
+artifact (`data/eval/human_calibration_review_v2.html`, generated by
+`scripts/build_calibration_review_v2.py`) to replace an earlier
 Excel-based attempt that hit a real wall — Excel's 409pt row-height cap
 truncated 41 of 47 long excerpts on-screen — with a plain HTML page
-covering all 65 rows, full verbatim claim and excerpt text, no length
-cap. Verdicts get recorded in a companion slim CSV
+covering all 65 rows, full verbatim claim and excerpt text, no length cap.
+I'll record my verdicts in a companion slim CSV
 (`data/eval/human_calibration_v2_verdicts.csv`), not in the HTML itself.
 
-**Neither AI source above has been checked against independent human
-judgment.** That calibration step (ADR-0011) never happened as designed,
-and the AI-reviewer cross-check and the resulting rubric fix narrow a
-documented AI-vs-AI disagreement — neither substitutes for human
-validation. Judge-validity remains an open, disclosed limitation
-regardless of which rubric version is reported (see
+**Neither AI source above has been checked against my own independent
+judgment yet.** That calibration step (ADR-0011) hasn't happened as
+designed, and the AI-reviewer cross-check and the resulting rubric fix
+narrow a documented AI-vs-AI disagreement — neither substitutes for a real
+human calibration pass. I'm treating judge-validity as an open, disclosed
+limitation regardless of which rubric version I report (see
 [Limitations](#limitations)).
 
-**Two generation approaches compared, per the rubric's requirement
-(`src/evaluation/compare_prompts.py`, real run, 2026-07-25).** A rubric
-audit found the number above only ever evaluated one approach. A second,
-evidence-first prompt ("Prompt B": an explicit EVIDENCE-then-ANSWER
-two-phase structure, designed to fix two real precision failures a
-spot-check had found in the original prompt) was built and compared
-against the original ("Prompt A") on a stratified 40-question subset
-(preserving category proportions across general/multi_country/
-ooni_methodology/synthesis/refusal), with the model, temperature, and
-retrieved chunks all held identical between arms — only the system
-prompt differs — judged by the same unmodified judge.
+**I compared two generation approaches, per the rubric's requirement**
+(`src/evaluation/compare_prompts.py`, real run, 2026-07-25). When I
+audited against the rubric, I found the number above only ever evaluated
+one approach. I built a second, evidence-first prompt ("Prompt B": an
+explicit EVIDENCE-then-ANSWER two-phase structure, designed to fix two
+real precision failures I'd found in the original prompt during a
+spot-check) and compared it against the original ("Prompt A") on a
+stratified 40-question subset (preserving category proportions across
+general/multi_country/ooni_methodology/synthesis/refusal), holding the
+model, temperature, and retrieved chunks identical between arms — only the
+system prompt differs — judged by the same unmodified judge.
 
 | Metric | Prompt A | Prompt B |
 |---|---|---|
@@ -247,24 +245,24 @@ prompt differs — judged by the same unmodified judge.
 
 **Prompt A won and stays the default.** Its higher precision isn't a
 denominator artifact (it produces *more* claims per answer, not fewer)
-and its abstention behavior is essentially identical to Prompt B's.
-Manual spot-checking explains the gap: Prompt B's compact,
-one-line-per-fact EVIDENCE list repeatedly attributed several distinct
-facts — which actually span two adjacent, half-overlapping real chunks
-(this project's `chunk_size=1500`/`chunk_step=750` design) — to a single
-citation marker, a real citation-fidelity regression the original,
-more-verbose inline-citation style didn't exhibit in the same subset.
-Prompt B also cost ~1.7x the completion tokens for a worse result. This
-is a genuine, non-cosmetic comparison with a null (for Prompt B) result,
-not a relabeling — full numbers, the specific misattribution cases found,
-and the spot-check: `data/eval/prompt-comparison-report.md` and
-`reports.md` (2026-07-25).
+and its abstention behavior is essentially identical to Prompt B's. Manual
+spot-checking explains the gap: Prompt B's compact, one-line-per-fact
+EVIDENCE list repeatedly attributed several distinct facts — which
+actually span two adjacent, half-overlapping real chunks (my
+`chunk_size=1500`/`chunk_step=750` design) — to a single citation marker, a
+real citation-fidelity regression the original, more-verbose
+inline-citation style didn't exhibit in the same subset. Prompt B also
+cost ~1.7x the completion tokens for a worse result. This is a genuine,
+non-cosmetic comparison with a null (for Prompt B) result, not a
+relabeling — full numbers, the specific misattribution cases I found, and
+the spot-check: `data/eval/prompt-comparison-report.md` and `reports.md`
+(2026-07-25).
 
 ## Testing
 
-**No automated tests exist yet.** `pytest` is listed as a dev dependency
-in `pyproject.toml`, but no test files have been written. Stated here
-plainly rather than implied otherwise.
+**No automated tests exist yet.** I list `pytest` as a dev dependency in
+`pyproject.toml`, but I haven't written any test files yet. Stating this
+plainly rather than implying otherwise.
 
 ## Monitoring
 
@@ -295,15 +293,15 @@ python src/ingestion/pipeline.py     # build the corpus from corpus/sources/*.ya
 python src/retrieval/embed.py        # embed the corpus into data/index/
 ```
 
-Generation and evaluation are used as libraries, not scripts, from Python
-directly:
+I use generation and evaluation as libraries, not scripts, called directly
+from Python:
 
 ```python
 from src.generation.generate import answer
 result = answer("How does OONI detect Telegram blocking?")
 ```
 
-This will be replaced with a single interface command once Tier 2 of the
+I'll replace this with a single interface command once Tier 2 of my
 completion plan ships.
 
 ## Data and configuration
@@ -314,54 +312,55 @@ and needs no key).
 
 **Corpus sourcing:** `corpus/sources/*.yaml` — one manifest per
 organization (Access Now, CIPESA, Freedom House, OONI), declaring which
-documents are in scope and how they were acquired. `data/` itself
-(raw documents, extracted text, chunks, the vector index) is gitignored —
-see `docs/data_governance.md` for why — and not currently shipped as a
-downloadable artifact. Running `src/ingestion/pipeline.py` rebuilds it
-from the source manifests.
+documents are in scope and how I acquired them. `data/` itself (raw
+documents, extracted text, chunks, the vector index) is gitignored — see
+`docs/data_governance.md` for why — and I'm not currently shipping it as a
+downloadable artifact in full. Running `src/ingestion/pipeline.py` rebuilds
+it from the source manifests.
 
 **A real reproducibility constraint, disclosed rather than hidden:**
-OONI's source consistently returns HTTP 429 on scripted requests. OONI
-documents in this corpus were acquired manually (browser save), not by
-the automated `acquire.py` path the other three organizations use.
-Re-running ingestion end-to-end will hit this for OONI specifically —
-expected, not a bug in the pipeline.
+OONI's source consistently returns HTTP 429 on scripted requests. I
+acquired OONI documents in this corpus manually (browser save), not
+through the automated `acquire.py` path I use for the other three
+organizations. Re-running ingestion end-to-end will hit this for OONI
+specifically — expected, not a bug in the pipeline.
 
 **Processed corpus release, tiered by actual licensing risk (ADR-0013).**
-Freedom House (46% of the corpus) is not Creative-Commons licensed —
-their policy permits *sharing* already-published content but gates
-*reproduction/republishing* behind written permission, still pending as
-of this writing (requested 2026-07-13, followed up 2026-07-25). Access
-Now's report *text* specifically was never confirmed blanket-reusable
-either. Publishing the full processed corpus uniformly would mean
-bulk-republishing both organizations' complete reports in a different
-container, not citation-scale quotation — a real, if modest, licensing
-risk `docs/licensing.md` flags directly.
+Freedom House (46% of the corpus) isn't Creative-Commons licensed — their
+policy permits *sharing* already-published content but gates
+*reproduction/republishing* behind written permission, which I requested
+2026-07-13 and followed up on 2026-07-25 — still pending as of this
+writing. Access Now's report *text* specifically was never confirmed
+blanket-reusable either. Publishing the full processed corpus uniformly
+would mean bulk-republishing both organizations' complete reports in a
+different container, not citation-scale quotation — a real, if modest,
+licensing risk `docs/licensing.md` flags directly.
 
 The release (`scripts/build_release_artifact.py`, output:
-`dist/corpus-release-v1.zip`, attached by hand to a GitHub Release — not
-this project's own action to publish) splits accordingly:
+`dist/corpus-release-v1.zip`, which I attach by hand to a GitHub Release —
+not something this project's own code publishes automatically) splits
+accordingly:
 - **OONI and CIPESA — full chunk text**, each record carrying its actual
   license (`CC BY-NC-SA 4.0` / `CC BY 4.0`) explicitly.
 - **Freedom House and Access Now — metadata and a content hash only**
   (`doc_id`, source URL, chunk offsets, `content_sha256`). No chunk text,
   no embedding vector.
 
-A new `src/ingestion/rehydrate.py` reconstructs the restricted orgs' real
-text locally: `uv run python src/ingestion/rehydrate.py --org freedomhouse`
-(or `--org accessnow`) re-runs the existing acquire → extract → chunk
-stages for that org and verifies the result against the stored hash
-before accepting it — a mismatch is a hard failure, never a silent
-warning. This is a stronger reproducibility story than a raw text dump:
-a successful rehydration is independent proof the corpus matches what
-this project actually indexed, rather than trusting a static file. Full
+I built `src/ingestion/rehydrate.py` to reconstruct the restricted orgs'
+real text locally: `uv run python src/ingestion/rehydrate.py --org
+freedomhouse` (or `--org accessnow`) re-runs the existing acquire → extract
+→ chunk stages for that org and verifies the result against the stored
+hash before accepting it — a mismatch is a hard failure, never a silent
+warning. I think this is a stronger reproducibility story than a raw text
+dump: a successful rehydration is independent proof the corpus matches
+what I actually indexed, rather than trusting a static file. Full
 reasoning: `docs/adr/0013-tiered-corpus-release.md`.
 
 ## Deployment
 
 **Not deployed yet.** Planned: a cloud-hosted demo (Streamlit Community
-Cloud or Hugging Face Spaces), attempted only after the interface and
-containerization both exist to deploy — see
+Cloud or Hugging Face Spaces), which I'll attempt only after the interface
+and containerization both exist to deploy — see
 `docs/adr/0012-rubric-driven-completion-plan.md`, Tier 3.
 
 ## Architecture
@@ -393,7 +392,7 @@ flowchart LR
     end
 ```
 
-**Why it's shaped this way:**
+**Why I shaped it this way:**
 
 - **Ingestion is a fully automated Python pipeline**, not a notebook —
   `pipeline.py` is idempotent and re-runnable end to end
@@ -408,10 +407,10 @@ flowchart LR
   which `citations.py` then resolves mechanically. A fabricated citation
   (wrong title, wrong page, wrong URL) is structurally impossible, not
   just discouraged by prompting (`docs/adr/0009-generation-citation-protocol-and-evidence-flagging.md`).
-- **Evaluation judges citation precision at the claim level**, not per
-  raw citation marker — a claim citing multiple corroborating sources is
-  judged once against the union of those sources, not penalized for
-  being checked one source at a time
+- **Evaluation judges citation precision at the claim level**, not per raw
+  citation marker — a claim citing multiple corroborating sources is
+  judged once against the union of those sources, not penalized for being
+  checked one source at a time
   (`docs/adr/0011-claim-level-precision-and-judge-validity-fallbacks.md`).
 
 ## Project structure
@@ -439,8 +438,8 @@ corpus/
   sources/*.yaml    # per-organization acquisition manifests
 docs/
   *-design.md         # pre-implementation design reference, one per phase
-  adr/                 # architecture decision records (12 as of 2026-07-24)
-  readme-plan.md        # the plan this README is being built from
+  adr/                 # architecture decision records (14 as of 2026-07-25)
+  readme-plan.md        # the plan I built this README from
 data/                # gitignored — raw documents, chunks, vector index (see Data and configuration)
 ```
 
@@ -450,28 +449,28 @@ Python package (documented in `generate.py`'s own header comment).
 
 ## Decisions and trade-offs
 
-**In-memory vectors instead of a vector database.** Embeddings are a
-plain numpy array persisted to disk, not Qdrant/Pinecone/etc. Chosen
+**In-memory vectors instead of a vector database.** Embeddings are a plain
+numpy array persisted to disk, not Qdrant/Pinecone/etc. I chose this
 because the corpus (3,783 chunks) fits comfortably in memory and the
 course explicitly allows lightweight in-memory stores. The downside: this
-doesn't scale past a laptop-sized corpus without rework. Accepted because
-that's not a constraint this project actually has right now.
+doesn't scale past a laptop-sized corpus without rework. I accepted that
+because it's not a constraint this project actually has right now.
 
 **Hybrid search over pure text or pure vector, despite a real exception.**
 Hybrid (RRF k=10) wins on aggregate Hit Rate and MRR, and on two of three
 question categories outright — but loses to plain text search specifically
-on the `multi_country` slice. The default was still set to hybrid, not a
+on the `multi_country` slice. I still set the default to hybrid, not a
 per-category switch, because the aggregate and general-category gains
-outweigh one category's loss, and the loss was root-caused as a structural
-RRF property, not a fixable bug. Documented as a known, accepted
-limitation rather than hidden.
+outweigh one category's loss, and I root-caused the loss as a structural
+RRF property, not a fixable bug. I'm documenting it as a known, accepted
+limitation rather than hiding it.
 
 **Country-metadata re-rank kept on by default, despite a small effect
 size.** The three-arm ablation (see [Evaluation](#evaluation)) found the
 re-rank itself — isolated from the candidate-pool expansion it rides on —
 improves Hit Rate/MRR only modestly on the subset of questions where it
-can act at all (65/101), and is a no-op everywhere else by construction.
-Kept on anyway: the improvement is directionally consistent (3 wins, 0
+can act at all (65/101), and is a no-op everywhere else by construction. I
+kept it on anyway: the improvement is directionally consistent (3 wins, 0
 losses on the firing subset — no regressions found anywhere), 100% chunk
 metadata coverage means the flagged demotion risk doesn't materialize in
 this corpus, and the mechanism is a stable re-rank, not a filter, so its
@@ -481,44 +480,44 @@ questions can measure precisely.
 **Kept the original generation prompt over an evidence-first rewrite,
 after a real comparison found the rewrite worse, not better.** The
 evidence-first prompt was a genuine hypothesis, not a strawman — it
-directly targeted two real precision failures a spot-check had found in
-the original prompt. A stratified, retrieval-matched comparison (see
-[Evaluation](#evaluation)) found it lost on citation precision (0.869 vs
-0.893) with *more* claims per answer for the original prompt (ruling out
-a hedging/denominator explanation), and manual spot-checking found why:
-its compact EVIDENCE list repeatedly lumped facts spanning two adjacent,
-overlapping chunks under one citation marker — a new failure mode the
-extra structure introduced, not one it fixed. Kept the simpler, cheaper,
-more accurate original rather than switching on the strength of the
-hypothesis alone.
+directly targeted two real precision failures I'd found in the original
+prompt during a spot-check. A stratified, retrieval-matched comparison
+(see [Evaluation](#evaluation)) found it lost on citation precision (0.869
+vs 0.893) with *more* claims per answer for the original prompt (ruling
+out a hedging/denominator explanation), and manual spot-checking showed me
+why: its compact EVIDENCE list repeatedly lumped facts spanning two
+adjacent, overlapping chunks under one citation marker — a new failure
+mode the extra structure introduced, not one it fixed. I kept the simpler,
+cheaper, more accurate original rather than switching on the strength of
+the hypothesis alone.
 
 **Index-only citation protocol over free-text citations.** The LLM only
 ever picks `[n]` markers from a numbered list of already-retrieved
 excerpts; it never writes a title, page, or URL itself. This makes
-fabricated citation *metadata* structurally impossible. The downside:
-it constrains the prompt more than free-text citation would, and doesn't
-by itself prevent citing a real excerpt to support a claim that excerpt
-doesn't actually support — that's what the LLM-evaluation judge exists to
+fabricated citation *metadata* structurally impossible. The downside: it
+constrains the prompt more than free-text citation would, and doesn't by
+itself prevent citing a real excerpt to support a claim that excerpt
+doesn't actually support — that's what my LLM-evaluation judge exists to
 catch.
 
-**Claim-level (not per-marker) citation-precision judging.** An earlier
+**Claim-level (not per-marker) citation-precision judging.** My earlier
 design judged each cited chunk of a claim in isolation. A second review
 caught that this would wrongly score a well-corroborated, multi-source
 claim as "partial" for a measurement artifact, not a real precision
-failure — so claims with multiple markers are judged once, against the
-union of their cited chunks. The downside: slightly more complex claim
-extraction logic. Accepted because a wrong metric is worse than a slightly
-more complex one.
+failure — so I judge claims with multiple markers once, against the union
+of their cited chunks. The downside: slightly more complex claim
+extraction logic. I accepted that because a wrong metric is worse than a
+slightly more complex one.
 
 ## CI/CD
 
-**None yet.** No GitHub Actions workflow currently exists in this repo.
-Stated here rather than left to be discovered as an absence.
+**None yet.** I haven't set up a GitHub Actions workflow in this repo.
+Stating this here rather than leaving it to be discovered as an absence.
 
 ## Limitations
 
-- **English-only corpus** — a disclosed, non-neutral scope limitation,
-  not an oversight (`docs/adr/0001-english-only-corpus-disclosure.md`).
+- **English-only corpus** — a disclosed, non-neutral scope limitation, not
+  an oversight (`docs/adr/0001-english-only-corpus-disclosure.md`).
 - **Freedom House is 46% of the corpus** — a real source concentration,
   compounded by being the one organization whose redistribution licensing
   is still pending a reply (`docs/licensing.md`).
@@ -531,31 +530,31 @@ Stated here rather than left to be discovered as an absence.
 - **Prompt B's citation-fidelity regression, not deployed but worth
   remembering** — the compared evidence-first prompt measurably
   misattributed facts to the wrong citation marker across adjacent,
-  overlapping chunks more often than the deployed prompt does; it was not
-  shipped, but this is a concrete example of how a plausible-sounding
-  prompt change can regress citation fidelity, not just improve it — see
+  overlapping chunks more often than my deployed prompt does; I didn't
+  ship it, but it's a concrete example of how a plausible-sounding prompt
+  change can regress citation fidelity, not just improve it — see
   [Evaluation](#evaluation).
 - **Judge self-judging risk** — if the calibration judge model
   (`gpt-5.4`) isn't available and the code falls back to `gpt-5.4-mini`
   (the same model the generator uses), that's a disclosed limitation, not
   a silent one (`docs/adr/0011-claim-level-precision-and-judge-validity-fallbacks.md`).
 - **Citation-precision headline number superseded once, for a confirmed
-  rubric defect, not a re-run for a better number.** The original run
+  rubric defect, not a re-run for a better number.** My original run
   scored 0.879; a rubric audit confirmed (via an empirical claim-shape
   cross-check, not just diagnosis) that the judge's `"partial"` catch-all
   was absorbing both one-step fact synthesis and unscored negation/
-  absence claims. The rubric was fixed and validated in two stages before
-  being re-run on all 481 claims: **0.946 is now the headline number**,
+  absence claims. I fixed and validated the rubric in two stages before
+  re-running it on all 481 claims: **0.946 is now the headline number**,
   0.879 is disclosed as the superseded original
   (`docs/adr/0014-judge-rubric-v2-headline-citation-precision.md`,
   `reports.md`, 2026-07-25).
 - **Judge-validity against independent human judgment remains an open,
-  disclosed limitation for both numbers above.** The ADR-0011 human-
-  calibration check never happened as designed (see
+  disclosed limitation for both numbers above.** My ADR-0011 human-
+  calibration check hasn't happened as designed yet (see
   `docs/adr/0011-claim-level-precision-and-judge-validity-fallbacks.md`'s
   addendum); the rubric fix above narrows a documented AI-vs-AI
-  disagreement, it does not substitute for a real human calibration pass.
-  Neither 0.879 nor 0.946 should be read as human-validated.
+  disagreement, it doesn't substitute for a real human calibration pass.
+  Neither 0.879 nor 0.946 should be read as human-validated yet.
 - **No automated tests, no CI/CD** — see [Testing](#testing) and
   [CI/CD](#cicd).
 - **No public deployment yet** — see [Deployment](#deployment).
