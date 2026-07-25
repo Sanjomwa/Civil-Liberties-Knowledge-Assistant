@@ -34,6 +34,24 @@ from retrieval.search import search  # noqa: E402
 from citations import parse_citations, render_sources, sourcing_footer  # noqa: E402
 from prompts import SYSTEM_PROMPT, build_user_prompt  # noqa: E402
 
+# Prompt A/B comparison run 2026-07-25 (ADR-0012 Decision 2 / docs/
+# evaluation-design.md Decision 6, src/evaluation/compare_prompts.py) --
+# SYSTEM_PROMPT ("Prompt A") confirmed and KEPT as the default, not
+# replaced. Prompt B (prompts.SYSTEM_PROMPT_B, an evidence-first two-phase
+# design meant to fix two real Prompt A precision failures found by an
+# earlier spot-check) was real-run against a stratified 40-question subset
+# with retrieval held fixed and judged by the same unmodified judge.py.
+# Result: Prompt A won on citation precision (0.893 vs 0.869) with MORE
+# claims per answer (4.425 vs 4.000, so this isn't a hedging/denominator
+# artifact), similar abstention behavior, and lower token cost. Manual
+# spot-check found why: Prompt B's compact one-line-per-fact EVIDENCE list
+# repeatedly attributed several distinct facts -- which actually span two
+# adjacent, half-overlapping real chunks (this project's chunk_size=1500/
+# chunk_step=750 design) -- to a single marker number, a real citation-
+# fidelity regression, not a measurement artifact. Full numbers, the
+# specific misattribution cases, and the spot-check: reports.md (2026-07-25)
+# and data/eval/prompt-comparison-report.md.
+
 load_dotenv()
 
 # Matches ground_truth.py's already-established model choice for this

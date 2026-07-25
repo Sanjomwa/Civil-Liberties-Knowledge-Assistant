@@ -192,6 +192,48 @@ completion plan in ADR-0012.
   verification notes are in `reports.md`, 2026-07-24 — see that file and
   `docs/evaluation-design.md`/ADR-0010/ADR-0011 for the full design
   reasoning behind these numbers.
+  **CLOSED for real, 2026-07-25 (ADR-0012 Decision 2 / docs/
+  evaluation-design.md Decision 6): the rubric's actual gap -- only one
+  generation approach was ever compared -- is fixed.** New
+  `src/evaluation/compare_prompts.py` and `SYSTEM_PROMPT_B` in
+  `prompts.py` (copied verbatim from the design doc). Real run: a
+  stratified 40-question subset (largest-remainder allocation preserving
+  each of the 5 categories' real share of the 122-question set:
+  general 22, multi_country 7, ooni_methodology 4, synthesis_supplement
+  4, refusal 3), retrieval held fixed per question (one `search()` call
+  reused for both arms), judged by the same unmodified `judge.py`.
+  **Result: Prompt A won, kept as the default -- Prompt B did NOT win,
+  and that's the real, reported outcome, not a cherry-picked one.**
+  Precision: A 0.893 vs B 0.869 (177 vs 160 claims judged); A also
+  produced *more* claims per answer (4.43 vs 4.00), ruling out a
+  fewer-claims/hedging explanation for B's lower score. Abstention
+  rate near-identical (A 0.00, B 0.03 -- 1/40, a correct refusal-slice
+  decline). Token cost: B's completion tokens ran ~1.7x A's (235 vs 411
+  mean), for a worse result. Manual spot-check (7+ real cases read
+  directly against chunk text, both directions) found the concrete
+  mechanism: Prompt B's compact one-line-per-fact EVIDENCE list
+  repeatedly attributed several distinct facts -- which actually span two
+  adjacent, half-overlapping real chunks (chunk_size=1500/chunk_step=750)
+  -- to a single citation marker (e.g. `general-0068`: 6 distinct legal
+  penalties in Rwanda's penal code all attributed to one marker, when
+  Prompt A correctly split them across the real 2-3 chunks the passage
+  actually spans; `general-0065`: several named individuals' facts
+  attributed to the wrong marker number in a 19-line EVIDENCE list). No
+  restatement-laundering or over-abstention found in the spot-checked
+  supported/refusal cases -- those verdicts held up under direct
+  re-verification. **A real bug in this run's own harness was found and
+  fixed before reporting**: the first abstention-rate measurement reused
+  `evaluate_generation.py`'s `DECLINE_PHRASES` heuristic per-answer,
+  which that module's own docstring already caveats as needing a human
+  reader alongside it for the small refusal slice -- applied blindly here
+  it false-positived on 5 of Prompt A's fully substantive, cited answers
+  (each contained one bounded qualifier phrase like "do not provide a
+  specific penalty" inside an otherwise complete answer). Fixed to a
+  zero-citations-only definition, recomputed from already-persisted data
+  (no re-spend). `generate.py`'s `SYSTEM_PROMPT` usage is unchanged, with
+  a comment documenting the real decision (same discipline as every other
+  post-closure change). Full numbers and every spot-checked case:
+  `data/eval/prompt-comparison-report.md` and `reports.md`, 2026-07-25.
 
 **Known gap, now fixed by this update:** this file's own headline
 snapshot said "ingestion CLOSED, retrieval is next" from 2026-07-20 all
@@ -660,11 +702,23 @@ auto-vs-manual question; scaling further is future work, see Section 7),
   hasn't been a client since 2021, per Citizen Lab — disclosed in the
   README rather than smoothed over, and consistent with the 0.879 (not
   1.0) claim-precision score. Sources list pulled via the real
-  `citations.render_sources()` call, not hand-typed. **Still open:** the
-  LLM-evaluation half of Evaluation (blocked on the Prompt A/B
-  comparison), Monitoring, Deployment, the final Quickstart run command,
+  `citations.render_sources()` call, not hand-typed. **Still open:**
+  Monitoring, Deployment, the final Quickstart run command,
   Self-evaluation, and Future work (the last two deliberately held for
   submission time).
+- **DONE, 2026-07-25: LLM evaluation's rubric gap actually closed —
+  Prompt A/B comparison run for real (ADR-0012 Decision 2).** See the
+  Evaluation entry in Section 1 above for the full real-run detail
+  (`src/evaluation/compare_prompts.py`, stratified 40-question subset,
+  retrieval held fixed, judged by the unmodified `judge.py`). Real
+  result: **Prompt A won and stays the default** — Prompt B (the
+  evidence-first hypothesis) measured *worse* on citation precision
+  (0.869 vs 0.893) with a concrete, spot-check-confirmed mechanism
+  (marker misattribution across adjacent overlapping chunks), not a
+  cherry-picked or flattering outcome. `generate.py` updated with a
+  comment documenting the decision (no functional change, since the
+  existing prompt already won). README's LLM evaluation subsection and
+  Decisions-and-trade-offs section updated with the real numbers.
   **DONE, 2026-07-25: processed corpus shipped as a tiered release
   artifact (ADR-0013)** — see the Ingestion entry above in this section
   for the full real-run detail (rehydrate.py, the acquire.py bug fix,

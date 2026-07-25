@@ -171,23 +171,48 @@ Full methodology and numbers: `docs/retrieval-design.md` and
 
 ### LLM evaluation
 
-**In progress — currently one compared approach, not two.** A claim-level
-citation-precision judge (`src/evaluation/judge.py`, isolated-entailment
-protocol, three-way supported/partial/unsupported verdict) was built and
-run for real against 481 claims across 122 questions:
-**0.879 aggregate claim-level citation precision** for the current
-generation prompt.
-
-That number is real and the judge protocol is genuinely rigorous (see
+A claim-level citation-precision judge (`src/evaluation/judge.py`,
+isolated-entailment protocol, three-way supported/partial/unsupported
+verdict) was built and run for real against 481 claims across 122
+questions: **0.879 aggregate claim-level citation precision** for the
+generation prompt (see
 `docs/adr/0010-citation-judge-protocol-and-contradiction-test-gap.md` and
-`0011-claim-level-precision-and-judge-validity-fallbacks.md`), but a
-direct rubric audit found it only evaluates **one** generation approach —
-this project's own peer-review rubric requires comparing multiple
-approaches and picking a winner for full credit. A second prompt variant
-(evidence-first, with an explicit thin-evidence abstention clause) is
-being built to close this gap honestly, per
-`docs/adr/0012-rubric-driven-completion-plan.md`. This section will report
-both approaches' numbers side by side once that comparison is real.
+`0011-claim-level-precision-and-judge-validity-fallbacks.md` for the
+protocol design).
+
+**Two generation approaches compared, per the rubric's requirement
+(`src/evaluation/compare_prompts.py`, real run, 2026-07-25).** A rubric
+audit found the number above only ever evaluated one approach. A second,
+evidence-first prompt ("Prompt B": an explicit EVIDENCE-then-ANSWER
+two-phase structure, designed to fix two real precision failures a
+spot-check had found in the original prompt) was built and compared
+against the original ("Prompt A") on a stratified 40-question subset
+(preserving category proportions across general/multi_country/
+ooni_methodology/synthesis/refusal), with the model, temperature, and
+retrieved chunks all held identical between arms — only the system
+prompt differs — judged by the same unmodified judge.
+
+| Metric | Prompt A | Prompt B |
+|---|---|---|
+| Citation precision | **0.893** | 0.869 |
+| Claims per answer (mean) | 4.43 | 4.00 |
+| Abstention rate | 0.00 | 0.03 (1/40, a correct decline) |
+| Mean completion tokens | 235 | 411 |
+
+**Prompt A won and stays the default.** Its higher precision isn't a
+denominator artifact (it produces *more* claims per answer, not fewer)
+and its abstention behavior is essentially identical to Prompt B's.
+Manual spot-checking explains the gap: Prompt B's compact,
+one-line-per-fact EVIDENCE list repeatedly attributed several distinct
+facts — which actually span two adjacent, half-overlapping real chunks
+(this project's `chunk_size=1500`/`chunk_step=750` design) — to a single
+citation marker, a real citation-fidelity regression the original,
+more-verbose inline-citation style didn't exhibit in the same subset.
+Prompt B also cost ~1.7x the completion tokens for a worse result. This
+is a genuine, non-cosmetic comparison with a null (for Prompt B) result,
+not a relabeling — full numbers, the specific misattribution cases found,
+and the spot-check: `data/eval/prompt-comparison-report.md` and
+`reports.md` (2026-07-25).
 
 ## Testing
 
@@ -407,6 +432,20 @@ this corpus, and the mechanism is a stable re-rank, not a filter, so its
 downside is bounded even if the true effect is smaller than these 101
 questions can measure precisely.
 
+**Kept the original generation prompt over an evidence-first rewrite,
+after a real comparison found the rewrite worse, not better.** The
+evidence-first prompt was a genuine hypothesis, not a strawman — it
+directly targeted two real precision failures a spot-check had found in
+the original prompt. A stratified, retrieval-matched comparison (see
+[Evaluation](#evaluation)) found it lost on citation precision (0.869 vs
+0.893) with *more* claims per answer for the original prompt (ruling out
+a hedging/denominator explanation), and manual spot-checking found why:
+its compact EVIDENCE list repeatedly lumped facts spanning two adjacent,
+overlapping chunks under one citation marker — a new failure mode the
+extra structure introduced, not one it fixed. Kept the simpler, cheaper,
+more accurate original rather than switching on the strength of the
+hypothesis alone.
+
 **Index-only citation protocol over free-text citations.** The LLM only
 ever picks `[n]` markers from a numbered list of already-retrieved
 excerpts; it never writes a title, page, or URL itself. This makes
@@ -443,8 +482,13 @@ Stated here rather than left to be discovered as an absence.
   `ooni_methodology` retrieval-evaluation stratum sampled 0/20 as a
   result; a known, accepted gap, not a bug.
 - **The `multi_country` retrieval gap** — see [Evaluation](#evaluation).
-- **LLM evaluation currently compares one generation approach, not two**
-  — see [Evaluation](#evaluation); actively being closed.
+- **Prompt B's citation-fidelity regression, not deployed but worth
+  remembering** — the compared evidence-first prompt measurably
+  misattributed facts to the wrong citation marker across adjacent,
+  overlapping chunks more often than the deployed prompt does; it was not
+  shipped, but this is a concrete example of how a plausible-sounding
+  prompt change can regress citation fidelity, not just improve it — see
+  [Evaluation](#evaluation).
 - **Judge self-judging risk** — if the calibration judge model
   (`gpt-5.4`) isn't available and the code falls back to `gpt-5.4-mini`
   (the same model the generator uses), that's a disclosed limitation, not

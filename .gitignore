@@ -234,6 +234,16 @@ data/eval/generation_results.jsonl
 data/eval/judgments.jsonl
 data/eval/contradiction_search_results.json
 data/eval/*_full.csv
+# Added 2026-07-25, Prompt A/B comparison (compare_prompts.py): same
+# reasoning as generation_results.jsonl/judgments.jsonl above -- these
+# two also carry real cited/retrieved chunk excerpts. Found not yet
+# gitignored (existing entries only matched the two exact filenames
+# above, not these) before either was ever committed -- caught via
+# `git check-ignore` while writing this session's reports.md, not after
+# a push. The aggregate-only prompt-comparison-report.md IS committed,
+# same split as the original generation-evaluation-report.md.
+data/eval/prompt_comparison_results.jsonl
+data/eval/prompt_comparison_judgments.jsonl
 
 # Local-only orchestration files (Cowork <-> Claude Code in WSL workflow,
 # established 2026-07-20) — never committed, never authored from the

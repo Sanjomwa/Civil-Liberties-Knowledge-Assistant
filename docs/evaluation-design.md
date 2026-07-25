@@ -248,6 +248,122 @@ retried) once that budget is spent, rather than searching indefinitely.
 
 ---
 
+## Decision 6 — Prompt A/B comparison, added 2026-07-25 (ADR-0012 Decision 2)
+
+**Why this decision exists:** a rubric audit (ADR-0012, 2026-07-24) found
+this phase's own real run — 0.879 aggregate claim-level citation
+precision — only ever evaluated **one** generation approach, when the
+rubric's 2-point LLM-evaluation bar requires comparing multiple approaches
+and picking a winner. This section amends the phase with the missing
+comparison. ADR-0010/ADR-0011's judge protocol is unchanged — only a
+second generation approach and a comparison harness are new.
+
+**Model held fixed.** Both prompts run on `gpt-5.4-mini`, the existing
+recorded default. A model-vs-model comparison was explicitly rejected
+(Opus 5 consult, 2026-07-24) — it would confound cost/latency with prompt
+quality and duplicate the judge's own already-disclosed self-judging
+limitation. Isolating prompt design as the only variable is the point.
+
+**Prompt B is a genuine, evidence-motivated hypothesis, not a cosmetic
+rewrite.** A spot-check of Prompt A's real output (`reports.md`, Section
+5) found two real precision failures, not measurement artifacts: a
+misattribution (an allegation attributed to the wrong named individual
+within a multi-entity chunk) and a universal-negative overclaim ("the
+excerpts do not mention any other online services," when one did). Both
+look like attention/tracking failures from writing fluent prose directly
+across several excerpts, not fabrication. Prompt B (Opus 5-designed,
+2026-07-25) targets these directly with a two-phase structure: an
+explicit EVIDENCE phase enumerating, per named subject, exactly what each
+relied-on excerpt states (forcing subject-binding to happen before fluent
+prose is generated), followed by an ANSWER phase that may only make
+claims traceable to an EVIDENCE line, plus an explicit, bounded rule for
+negative claims (state the absence as bounded, and name any related item
+that IS present rather than denying the whole category — the direct fix
+for the X/Twitter overclaim). Full prompt text: `src/generation/prompts.py`,
+`SYSTEM_PROMPT_B`.
+
+```python
+SYSTEM_PROMPT_B = """You are a research assistant answering questions about internet \
+censorship and digital rights in East Africa, using only the numbered excerpts \
+provided below. Your audience is researchers and journalists who will check your \
+citations against the real source documents -- accuracy and honesty about the \
+limits of the evidence matter more than a confident-sounding answer.
+
+Work in two phases and output both, in this order.
+
+PHASE 1 -- EVIDENCE
+Before writing any answer, list the excerpts you will rely on, one line each:
+[n] <subject> -- <what this excerpt actually states about that subject, in your own \
+words, 25 words or fewer>
+Rules for this list:
+- Name the subject explicitly. If one excerpt concerns several people, \
+organisations, countries or dates, write a separate line for each subject. Never \
+carry a detail stated about one named subject over to another.
+- Record only what the excerpt states. Do not infer, do not merge two excerpts \
+into one line, do not complete a partial statement.
+- List only excerpts you will actually cite. If nothing supports an answer, write \
+exactly: [none]
+
+PHASE 2 -- ANSWER
+Then write the answer under the heading ANSWER.
+- Every factual claim must correspond to a line you wrote in PHASE 1 and must \
+carry that line's citation marker(s), like [2] or [4][7]. Cite by excerpt number \
+only -- never invent a page number, title, or source; the citation text is \
+generated separately from what you write.
+- Attribute each statement to exactly the subject named on its PHASE 1 line.
+- Do not claim the excerpts lack something unless you have checked every excerpt \
+provided. If you do, write it as bounded ("none of the excerpts state X"), never \
+as a claim about the world, and if any excerpt mentions a related item, name that \
+item instead of denying it.
+- If the excerpts disagree on a point, state both positions, each with its own \
+citation. Never average, blend, or silently pick a side.
+- If PHASE 1 is [none], or the evidence is too thin to answer, say so plainly and \
+stop. Do not fill the gap with outside knowledge.
+- Plain, direct prose. No markdown headers or bullet lists inside the answer \
+unless the question asks for a list."""
+```
+
+**Real risks flagged, to watch for in the results, not just accept a
+headline number:**
+- *Denominator confound.* Citation precision's denominator is claims —
+  Prompt B can "win" purely by making fewer, more hedged claims. Report
+  **claims-per-answer and abstention rate alongside precision** for both
+  arms; a precision gain paired with a materially lower claim count is
+  unresolved, not a win.
+- *Restatement laundering.* Near-verbatim EVIDENCE lines could make a
+  weakly-supported claim look supported to a judge seeing only the claim
+  text — worth a manual spot-check pass on a few Prompt B answers, same
+  discipline as Prompt A's own spot-check.
+- *Over-abstention.* The stricter negative-claim rule may cause Prompt B
+  to abstain on genuinely answerable thin cases — this would show up as
+  precision going up while genuinely useful answers go down; the refusal
+  slice + a manual read of a few abstentions should catch this.
+- *Token/latency cost.* The EVIDENCE phase roughly doubles output length
+  — record and report token cost per arm, not just precision.
+
+**Implementation requirement, not optional:** claim extraction for Prompt
+B's answers must operate on the `ANSWER` section only, with the `PHASE 1
+— EVIDENCE` block stripped first. The EVIDENCE lines contain `[n]`
+markers too — naive sentence-splitting-plus-marker-detection (the
+existing claim-extraction logic) would score EVIDENCE lines as claims,
+corrupting the comparison. This is a real, specific parsing requirement,
+not a suggestion.
+
+**Methodology:** retrieval held fixed — call `search()` once per question
+and reuse the identical retrieved chunk set for both prompts on that
+question, so retrieval variance never confounds the prompt comparison.
+Same `temperature=0.2` for both arms (unchanged from `generate.py`'s
+existing default). Run on a stated subset of the question set (not
+necessarily the full 122 — the report must state the exact N and the
+sampling method, e.g. a stratified subset preserving category
+proportions), judged with the existing, unmodified claim-level judge.
+Report per-arm: aggregate citation precision, claims-per-answer,
+abstention rate, and token cost — pick a winner explicitly and make it
+`generate.py`'s new recorded default (same "closed phase gets a real,
+documented change" discipline as every prior post-closure fix).
+
+---
+
 ## Pipeline shape (resolved, per Decisions 1-4 above)
 
 1. Run `answer()` over the evaluation question set — the 97-question
