@@ -37,13 +37,15 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from search import search  # noqa: E402 — needs sys.path set first
+from search import HYBRID_CANDIDATE_POOL, _detect_countries, search  # noqa: E402 — needs sys.path set first
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 EVAL_DIR = PROJECT_ROOT / "data" / "eval"
+CHUNKS_DIR = PROJECT_ROOT / "data" / "chunks"
 GROUND_TRUTH_PATH = EVAL_DIR / "ground_truth.json"
 FILTERED_GROUND_TRUTH_PATH = EVAL_DIR / "ground_truth_filtered.json"
 REPORT_PATH = EVAL_DIR / "evaluation-report.md"
+RERANK_REPORT_PATH = EVAL_DIR / "reranking-ablation-report.md"
 DEFAULT_METHOD_PATH = EVAL_DIR / "default_method.json"
 
 TOP_K = 10
@@ -229,6 +231,221 @@ def hit_rate_and_mrr(questions: list[dict], method: str, rrf_k: int | None) -> d
     }
 
 
+def country_metadata_coverage() -> tuple[int, int]:
+    """Fraction of indexed chunks (data/chunks/*/*.json, the same source
+    embed.py builds the index from) whose `countries` field is non-empty --
+    the real regression risk flagged for the P2 boost: `_boost_by_country`
+    is a total reorder, not a weighted one, so a relevant chunk missing
+    `countries` metadata gets demoted below every tagged chunk and could
+    fall out of top_k entirely. Reported regardless of the ablation's
+    outcome, per the re-ranking ablation design (2026-07-25)."""
+    total = 0
+    with_countries = 0
+    for chunk_path in CHUNKS_DIR.glob("*/*.json"):
+        with open(chunk_path, encoding="utf-8") as f:
+            record = json.load(f)
+        total += 1
+        if record["document_metadata"]["declared"].get("countries"):
+            with_countries += 1
+    return with_countries, total
+
+
+def run_reranking_ablation(questions: list[dict], rrf_k: int | None) -> dict:
+    """Three-arm ablation of the P2 country-metadata re-rank
+    (`_boost_by_country` in search.py), added 2026-07-25 to isolate the
+    re-rank's own effect from the candidate-pool-depth expansion it rides
+    on top of:
+
+      (a) baseline    — pool_k=top_k (unexpanded), boost_country=False.
+      (b) pool-only   — expanded (HYBRID_CANDIDATE_POOL-based) pool_k,
+                         boost_country=False. Isolates pool depth alone.
+      (c) current     — expanded pool_k, boost_country=True. Today's
+                         actual shipped behavior, unchanged.
+
+    (a) is obtained directly (search()'s own pool_k collapses to top_k
+    whenever boost_country=False, since detected_countries is then always
+    empty). (b) is obtained by calling search() with top_k=
+    HYBRID_CANDIDATE_POOL and boost_country=False, then truncating to
+    TOP_K ourselves -- this forces the same expanded RRF-combine depth the
+    current code always uses once a country is detected, with the boost
+    itself still definitionally off. (b)'s uncut pool doubles as the exact
+    candidate set `_boost_by_country` would reorder for arm (c), so it's
+    reused directly to define the "firing subset" below rather than
+    recomputed.
+
+    "Firing subset": questions where _detect_countries(query) is
+    non-empty AND at least one chunk in the (b)-arm candidate pool has
+    `countries` metadata overlapping the detected set -- i.e. neither of
+    `_boost_by_country`'s two no-op branches trigger. Firing-subset
+    numbers are the primary signal; full-set numbers are diluted by
+    questions where the boost can't possibly do anything.
+    """
+    per_question = []
+    for q in questions:
+        query = q["question"]
+        correct_id = q["correct_chunk_id"]
+        detected = _detect_countries(query)
+
+        pooled = search(
+            query, top_k=HYBRID_CANDIDATE_POOL, method="hybrid",
+            rrf_k=rrf_k, boost_country=False,
+        )
+        results_b = pooled[:TOP_K]
+        results_a = search(
+            query, top_k=TOP_K, method="hybrid", rrf_k=rrf_k, boost_country=False,
+        )
+        results_c = search(
+            query, top_k=TOP_K, method="hybrid", rrf_k=rrf_k, boost_country=True,
+        )
+
+        fires = bool(detected) and any(
+            detected & set(c.get("countries", [])) for c in pooled
+        )
+
+        per_question.append({
+            "question": query,
+            "category": q.get("category", "general"),
+            "correct_id": correct_id,
+            "fires": fires,
+            "ids_a": [r["chunk_id"] for r in results_a],
+            "ids_b": [r["chunk_id"] for r in results_b],
+            "ids_c": [r["chunk_id"] for r in results_c],
+        })
+
+    # Bit-identical assertion on the non-firing subset -- if the boost is
+    # definitionally a no-op there (nothing detected, or nothing in the
+    # pool matches), arms (b) and (c) MUST return exactly the same list.
+    # A mismatch here is a bug in the boost_country guard itself, not a
+    # research finding, and must be fixed before anything else is reported.
+    mismatches = [
+        pq for pq in per_question if not pq["fires"] and pq["ids_b"] != pq["ids_c"]
+    ]
+    if mismatches:
+        raise AssertionError(
+            f"{len(mismatches)} non-firing question(s) have arm (b) != arm (c) "
+            f"results -- this must be a bug in the boost_country guard, not a "
+            f"reportable finding. First mismatch: {mismatches[0]['question']!r} "
+            f"ids_b={mismatches[0]['ids_b']!r} ids_c={mismatches[0]['ids_c']!r}"
+        )
+
+    def _hit_and_rr(ids: list[str], correct_id: str) -> tuple[int, float]:
+        if correct_id in ids:
+            rank = ids.index(correct_id) + 1
+            return 1, 1.0 / rank
+        return 0, 0.0
+
+    def _arm_metrics(subset: list[dict], key: str) -> dict:
+        hits, rrs = [], []
+        for pq in subset:
+            hit, rr = _hit_and_rr(pq[key], pq["correct_id"])
+            hits.append(hit)
+            rrs.append(rr)
+        n = len(subset)
+        return {
+            "hit_rate": sum(hits) / n if n else 0.0,
+            "mrr": sum(rrs) / n if n else 0.0,
+            "n": n,
+        }
+
+    full = per_question
+    firing = [pq for pq in per_question if pq["fires"]]
+
+    arms = {"a_baseline": "ids_a", "b_pool_only": "ids_b", "c_current": "ids_c"}
+    metrics_full = {name: _arm_metrics(full, key) for name, key in arms.items()}
+    metrics_firing = {name: _arm_metrics(firing, key) for name, key in arms.items()}
+
+    wins = losses = ties = 0
+    for pq in firing:
+        _, rr_b = _hit_and_rr(pq["ids_b"], pq["correct_id"])
+        _, rr_c = _hit_and_rr(pq["ids_c"], pq["correct_id"])
+        if rr_c > rr_b:
+            wins += 1
+        elif rr_c < rr_b:
+            losses += 1
+        else:
+            ties += 1
+
+    return {
+        "metrics_full": metrics_full,
+        "metrics_firing": metrics_firing,
+        "n_full": len(full),
+        "n_firing": len(firing),
+        "win_loss_tie_c_vs_b": {"wins": wins, "losses": losses, "ties": ties},
+        "per_question_firing": firing,
+    }
+
+
+def write_reranking_ablation_report(
+    ablation: dict, coverage: tuple[int, int], ground_truth_path: Path,
+    rrf_k_used: int,
+) -> None:
+    with_countries, total_chunks = coverage
+    coverage_pct = (with_countries / total_chunks) if total_chunks else 0.0
+
+    def _row(label: str, m: dict) -> str:
+        return f"| {label} | {m['hit_rate']:.3f} | {m['mrr']:.3f} | {m['n']} |"
+
+    wlt = ablation["win_loss_tie_c_vs_b"]
+    lines = [
+        "# Document Re-Ranking Ablation Report\n",
+        f"Generated by evaluate.py's `run_reranking_ablation` against "
+        f"{ablation['n_full']} ground-truth question(s) "
+        f"({ground_truth_path.relative_to(PROJECT_ROOT)}). method=hybrid, "
+        f"rrf_k={rrf_k_used} (recorded default) for all three arms, "
+        f"top_k={TOP_K}. Evaluates the existing `_boost_by_country` "
+        f"country-metadata re-rank in `src/retrieval/search.py` as the "
+        f"rubric's document re-ranking best-practice point.\n",
+        f"**Metadata coverage check:** {with_countries}/{total_chunks} "
+        f"({coverage_pct:.1%}) indexed chunks carry a non-empty `countries` "
+        f"field. This is the real regression risk for a re-rank that is a "
+        f"total reorder, not a weighted one — a relevant chunk missing "
+        f"`countries` would be demoted below every tagged chunk and could "
+        f"fall out of top_k. At this coverage level that risk is "
+        + ("negligible (every chunk carries the field).\n" if with_countries == total_chunks
+           else "real — not every chunk carries the field.\n"),
+        "**Provenance / circularity check:** the ground-truth set "
+        "(`ground_truth_filtered.json`, mechanically filtered from a full "
+        "re-run of `ground_truth.py`) was generated and manually "
+        "circularity-reviewed entirely on 2026-07-22, one day *before* the "
+        "P2 country-metadata boost was added to `search.py` "
+        "(commit `756b28e`, 2026-07-23). `ground_truth.py` also never calls "
+        "`search()` itself — questions are generated straight from sampled "
+        "chunk text. So this ground truth was not created with knowledge "
+        "of the boost's existence; no circularity risk from this ablation "
+        "against this specific ground-truth set.\n",
+        "**Bit-identical assertion:** arms (b) pool-only and (c) current "
+        "were asserted programmatically identical on every non-firing "
+        "question (the boost is definitionally a no-op there) before this "
+        "report was written — passed, no mismatches.\n",
+        "## Full set (diluted — most questions never trigger the boost at all)\n",
+        "| Arm | Hit Rate | MRR | n |",
+        "|---|---|---|---|",
+        _row("(a) baseline (unexpanded pool, no boost)", ablation["metrics_full"]["a_baseline"]),
+        _row("(b) pool-only (expanded pool, no boost)", ablation["metrics_full"]["b_pool_only"]),
+        _row("(c) current system (expanded pool + boost)", ablation["metrics_full"]["c_current"]),
+        "\n## Firing subset (primary signal — boost demonstrably has candidates to act on)\n",
+        f"n={ablation['n_firing']} of {ablation['n_full']} full-set questions.\n",
+        "| Arm | Hit Rate | MRR | n |",
+        "|---|---|---|---|",
+        _row("(a) baseline (unexpanded pool, no boost)", ablation["metrics_firing"]["a_baseline"]),
+        _row("(b) pool-only (expanded pool, no boost)", ablation["metrics_firing"]["b_pool_only"]),
+        _row("(c) current system (expanded pool + boost)", ablation["metrics_firing"]["c_current"]),
+        "\n### Per-question win/loss/tie, arm (c) vs arm (b), firing subset only\n",
+        f"Given the firing subset's small n, this is reported alongside the "
+        f"aggregate MRR/Hit Rate delta above rather than relying on it "
+        f"alone: **{wlt['wins']} win(s), {wlt['losses']} loss(es), "
+        f"{wlt['ties']} tie(s)** for arm (c) vs arm (b) "
+        f"(reciprocal rank of the gold chunk; a win means the boost moved "
+        f"the gold chunk to a strictly better rank than pool depth alone "
+        f"would have).\n",
+    ]
+
+    EVAL_DIR.mkdir(parents=True, exist_ok=True)
+    with open(RERANK_REPORT_PATH, "w", encoding="utf-8") as f:
+        f.write("\n".join(lines) + "\n")
+    print(f"\n[ok] wrote {RERANK_REPORT_PATH.relative_to(PROJECT_ROOT)}")
+
+
 def run_all_methods(questions: list[dict]) -> dict:
     results = {}
     for method in ("text", "vector"):
@@ -349,10 +566,26 @@ def set_default_method(method: str, rrf_k: int | None) -> None:
     print(f"[ok] wrote {DEFAULT_METHOD_PATH.relative_to(PROJECT_ROOT)} — {config}")
 
 
+def _recorded_default_rrf_k_for_report() -> int:
+    """Reads data/eval/default_method.json directly (rather than importing
+    search.py's private cached resolver) purely so the ablation report can
+    print the actual k value used -- search() itself still resolves rrf_k
+    internally when passed None, this is only for the report's own text."""
+    with open(DEFAULT_METHOD_PATH, encoding="utf-8") as f:
+        config = json.load(f)
+    return config["rrf_k"]
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--set-default", choices=["text", "vector", "hybrid"])
     parser.add_argument("--rrf-k", type=int)
+    parser.add_argument(
+        "--rerank-ablation", action="store_true",
+        help="Run the three-arm (baseline/pool-only/current) ablation of "
+             "search.py's country-metadata re-rank instead of the method "
+             "comparison.",
+    )
     args = parser.parse_args()
 
     if args.set_default:
@@ -360,6 +593,14 @@ def main() -> None:
         return
 
     questions, ground_truth_path = load_ground_truth()
+
+    if args.rerank_ablation:
+        rrf_k_used = _recorded_default_rrf_k_for_report()
+        coverage = country_metadata_coverage()
+        ablation = run_reranking_ablation(questions, rrf_k=None)
+        write_reranking_ablation_report(ablation, coverage, ground_truth_path, rrf_k_used)
+        return
+
     results = run_all_methods(questions)
     write_report(results, len(questions), ground_truth_path)
 

@@ -5,20 +5,45 @@ year — this doc should let anyone picking it up, including the original
 author, resume without reconstructing context from memory or old history.
 Read this file first, in full, when resuming cold.
 
-Last updated: 2026-07-23 — brought current after a full documentation-sync
-pass covering the retrieval and generation phases (both were closed and
-built respectively without this file's headline snapshot being updated
-at the time — see the "known gap, now fixed" note at the end of this
-section) and the new evaluation-phase design.
+Last updated: 2026-07-24 (later same day) — a full rubric audit against
+the real, verbatim `project.md` Evaluation Criteria found the LLM
+evaluation phase is genuinely 1/2, not 2/2, despite feeling closed (only
+one generation approach was ever compared — see ADR-0012). An Opus 5
+consult produced a ranked completion plan now in force: a Prompt A/B
+comparison to fix LLM evaluation properly, a README rewrite per
+`docs/readme-plan.md`, a 2026-08-02 feature-freeze gate ahead of the
+confirmed 2026-08-11 02:00 deadline, and a posts-7+8 merge in the
+learning-in-public series. Full detail: ADR-0012 and `decisionlog.md`,
+2026-07-24. Prior update, same day, earlier: LLM evaluation phase built
+and real-run against the real corpus (0.879 aggregate claim-level
+citation precision); human-calibration review is still the one remaining
+step before that phase's own internal definition of done is met — that
+finding stands, it's just no longer the only open item on this phase (see
+ADR-0012's Decision 2). Prior update (2026-07-23) brought this file
+current after a full documentation-sync pass covering the retrieval and
+generation phases (both were closed and built respectively without this
+file's headline snapshot being updated at the time — see the "known gap,
+now fixed" note below).
 
 ---
 
 ## 1. Current state (snapshot)
 
-**Ingestion, retrieval, generation, and LLM-evaluation phases are all
-CLOSED/built and verified as of 2026-07-24 (evaluation phase). Nothing is
-actively in progress; the next phase (interface/monitoring) has not
-started.**
+**Ingestion, retrieval, and generation phases are CLOSED. LLM evaluation
+is built and real-run against the real corpus and API, verified
+2026-07-24 — one step short of fully closed: Sam's human-calibration
+review (`judge_calibration_sample_full.csv`) has not been done yet, so
+the judge-validity κ-or-fallback verdict from ADR-0011 doesn't exist yet
+either. Separately, and more consequentially: a full rubric audit
+(ADR-0012, 2026-07-24) found this phase is currently 1/2 against the
+real `project.md` grading criterion, not 2/2 — it judges one generation
+approach's citation precision, but the rubric's 2-point bar requires
+comparing multiple approaches and picking a winner. Both the
+human-calibration step AND a Prompt A/B comparison are now open before
+this phase is genuinely done — see ADR-0012 Decision 2.** The overall
+project plan (build order, timeline, README standard) now runs against
+`project.md`'s Evaluation Criteria explicitly, not informally — full
+completion plan in ADR-0012.
 
 - **Ingestion:** CLOSED 2026-07-20, verified clean. All six modules in
   `src/ingestion/` (`acquire.py`, `extract.py`, `validate.py`,
@@ -28,6 +53,45 @@ started.**
   to end after the end-of-ingestion-phase Opus+Fable review's six
   findings were fixed (ADR-0007, ADR-0008) — zero content-drift, zero
   cross-surface disagreement (`reconcile.py`).
+  **Post-closure addition, 2026-07-25 (ADR-0013): tiered corpus release +
+  `src/ingestion/rehydrate.py`, real run.** New module `rehydrate.py`
+  (`--org freedomhouse|accessnow`) re-runs acquire → extract → metadata →
+  chunk for one org's documents and verifies the result: `content_sha256`
+  for Freedom House (`raw_bytes_stable: false` — the org whose raw HTML is
+  CDN-randomized per request, so content_sha256 is the mechanism that
+  survives that noise), the existing raw-`sha256` gate for Access Now
+  (`raw_bytes_stable: true` by default — content_sha256 was never tracked
+  for it, by design, since stable raw bytes deterministically produce
+  stable text). Smoke-tested for real against one live Freedom House doc
+  and one live Access Now doc: genuine fresh re-download + re-extraction +
+  re-chunking reproduced byte-identical chunk text and the correct chunk
+  count both times (146 and 161 chunks respectively), and a deliberately
+  corrupted re-fetched text was correctly caught and raised loudly (not a
+  warning) in both a baseline-tampering test and a literal one-byte text
+  corruption test. **Real pre-existing bug found and fixed along the
+  way** (not something rehydrate.py introduced): `acquire.py`'s
+  `acquire_document()` gated a fresh Freedom House download against the
+  stale, historical `doc["sha256"]` value instead of accepting new bytes
+  under the trust-on-first-use policy `raw_bytes_stable: false` is
+  supposed to grant — this silently broke the exact fresh-clone/re-fetch
+  scenario rehydrate.py needs (proved live: deleting the local raw file
+  and re-running `acquire_document()` raised a false `AcquisitionFailure`
+  on a perfectly good download). Consulted Opus 5 before touching closed
+  ingestion code; fix moves the format check ahead of the checksum gate
+  (so a bot-challenge page still can't be recorded as a legitimate
+  baseline) and branches the gate itself on `raw_bytes_stable`, plus fixes
+  a second bug on the same lines (the returned row didn't carry the new
+  `sha256`, so a volatile org's rotated baseline never reached
+  `corpus/manifest.csv`/`corpus/checksums.sha256`). Verified: all three
+  scenarios pass (volatile+missing-file, volatile+corrupted-local/
+  redownload path, stable+real-mismatch-still-raises), `reconcile.py`
+  re-run clean after the fix. Release artifact built for real via new
+  `scripts/build_release_artifact.py` — `dist/corpus-release-v1.zip`
+  (gitignored, not published; Sam attaches it to a GitHub Release by
+  hand): 1,520 full-text chunks (OONI + CIPESA, 15 docs, license string
+  per record) + 2,263 metadata-only chunks (Freedom House + Access Now,
+  20 docs, `content_sha256` but no text/vector) = 3,783, matching the
+  full corpus exactly. Full reasoning: `docs/adr/0013-tiered-corpus-release.md`.
 - **Retrieval:** CLOSED 2026-07-23. `src/retrieval/{embed,search,
   ground_truth,evaluate}.py`. Recorded default: **hybrid search, RRF
   k=10** (`data/eval/default_method.json`), chosen for best-or-near-best
@@ -42,7 +106,23 @@ started.**
   agreement, not an embedding-smoothness defect) — documented as a known
   limitation, not resolved. A country-metadata boost (P2) was built and
   verified correct with zero regressions, but doesn't touch the actual
-  cause. Hybrid's narrower source-diversity@10 (vs. plain text search)
+  cause. **Re-ranking best-practice ablation done 2026-07-25** (real run,
+  `data/eval/reranking-ablation-report.md`): three-arm comparison
+  (unexpanded-pool/no-boost baseline vs. expanded-pool/no-boost vs.
+  today's expanded-pool+boost) against the 101-question filtered ground
+  truth, isolating the boost's own effect from the candidate-pool
+  expansion it rides on. Metadata coverage checked first: 100%
+  (3,783/3,783) chunks carry non-empty `countries`, so the flagged
+  demotion-risk regression doesn't materialize here. On the 65-of-101
+  "firing" subset (query names a country AND the candidate pool actually
+  has a matching chunk — the only questions the boost can affect): Hit
+  Rate 0.631→0.646, MRR 0.266→0.269, 3 wins/0 losses/62 ties per-question.
+  Full-set (diluted): 0.644→0.653 / 0.270→0.272. Bit-identical assertion
+  (arms b/c on the non-firing subset) passed with zero mismatches. Ground
+  truth was generated+circularity-reviewed 2026-07-22, one day before the
+  boost existed (`756b28e`, 2026-07-23) and never calls `search()` itself
+  — no circularity risk. Small, real, positive result with zero
+  regressions; kept as the shipped default. Hybrid's narrower source-diversity@10 (vs. plain text search)
   was **deliberately not retrieval-fixed** — explicitly deferred to the
   generation phase as "flag thin/single-sourced evidence is generation's
   job, not retrieval's."
@@ -160,9 +240,14 @@ Project folder now also contains:
   (Freedom House permission request still pending a reply — see Section 4).
 - `docs/corpus-inclusion-rubric.md` — concrete criteria for the semantic
   review stage (topic relevance, coverage contribution).
+- `docs/readme-plan.md` — **new, 2026-07-24.** Section-by-section README
+  rewrite spec (ADR-0012 Decision 4), mapping Alexey Grigorev's
+  README-structure article onto this project's real content per section,
+  flagging what's blocked on Tier 2/3 build items. Plan only — `README.md`
+  itself hasn't been rewritten yet.
 - `docs/PROJECT_CONTINUITY.md` — this file.
 - `docs/data_governance.md` — governance policy.
-- `docs/adr/` — **eleven** ADRs (see Section 5), plus `README.md` (process +
+- `docs/adr/` — **twelve** ADRs (see Section 5), plus `README.md` (process +
   example trigger thresholds).
 - `pyproject.toml` / `uv.lock` — Python dependencies declared and locked;
   updated for retrieval's `fastembed`/`minsearch`/`numpy` additions.
@@ -530,6 +615,80 @@ auto-vs-manual question; scaling further is future work, see Section 7),
 
 ## 7. Open action items (don't lose track of these)
 
+- **DONE, 2026-07-25: re-ranking best practice — ablation run for real,
+  Tier 1 item closed.** `search.py` gained a `boost_country: bool = True`
+  parameter (default True, shipped behavior unchanged) so `_detect_countries`
+  can be disabled per-call; `evaluate.py` gained `run_reranking_ablation()`
+  and a `--rerank-ablation` CLI flag. Real run against the 101-question
+  filtered ground truth (note: the prompt that specified this task said
+  "130-question set" — a stale figure from before the set was later
+  re-run to 150 and mechanically filtered to 101; corrected before running,
+  confirmed with Sam). Metadata coverage: 100% (3,783/3,783) chunks carry
+  non-empty `countries` — the flagged demotion-risk regression is
+  negligible in this corpus. On the 65-of-101 firing subset: Hit Rate
+  0.631→0.646, MRR 0.266→0.269, 3 wins/0 losses/62 ties (arm c vs b,
+  per-question). Full-set (diluted): 0.644→0.653 / 0.270→0.272. Arm (c)'s
+  full-set numbers exactly match the existing `evaluation-report.md`
+  hybrid(k=10) row (0.653/0.272/n=101) — a real cross-check that the
+  ablation harness genuinely reproduces shipped behavior. Bit-identical
+  assertion (arms b/c, non-firing subset) passed with zero mismatches, no
+  fix needed. Provenance checked: ground truth predates the boost
+  (generated+reviewed 2026-07-22, boost added 2026-07-23,
+  `ground_truth.py` never calls `search()`) — no circularity risk.
+  Small, real, positive result, zero regressions found; kept as default.
+  Full report: `data/eval/reranking-ablation-report.md`. README's
+  Evaluation/Retrieval and Decisions-and-trade-offs sections updated with
+  the real numbers.
+- **NEW, 2026-07-25: README Tier 1 pass done.** `README.md` rewritten with
+  real content per `docs/readme-plan.md` Stage 1 — title/description
+  (fixed the stale 2022–2025 date range), problem, architecture diagram,
+  project structure, decisions/trade-offs, data/config (OONI disclosure
+  included), retrieval half of evaluation, full limitations list. Testing
+  and CI/CD sections state their real absence (checked directly — no
+  `tests/`, no `.github/workflows/`) rather than being silently omitted.
+  **DONE, 2026-07-25: Demo section written for real.** Pulled question
+  `general-0094` ("What surveillance tools is the Rwandan government
+  known to use?") from `data/eval/generation_results.jsonl` — a
+  `general`-category, non-refusal, well-corroborated answer (4 documents,
+  2 orgs). All 8 citation markers ([1][2][3][5][6][8][9][10]) spot-checked
+  by hand against the real chunk text in `data/chunks/` before
+  publishing — every claim genuinely traces to its cited excerpt,
+  including [9]'s two distinct claims (SIM registration, 2021 Uganda
+  malware targeting) both confirmed in the same CIPESA chunk. One nuance
+  the answer doesn't surface (found during spot-checking, not a citation
+  error): marker [5]'s own excerpt also notes NSO Group said Rwanda
+  hasn't been a client since 2021, per Citizen Lab — disclosed in the
+  README rather than smoothed over, and consistent with the 0.879 (not
+  1.0) claim-precision score. Sources list pulled via the real
+  `citations.render_sources()` call, not hand-typed. **Still open:** the
+  LLM-evaluation half of Evaluation (blocked on the Prompt A/B
+  comparison), Monitoring, Deployment, the final Quickstart run command,
+  Self-evaluation, and Future work (the last two deliberately held for
+  submission time).
+  **DONE, 2026-07-25: processed corpus shipped as a tiered release
+  artifact (ADR-0013)** — see the Ingestion entry above in this section
+  for the full real-run detail (rehydrate.py, the acquire.py bug fix,
+  the release build). README's Data and configuration section updated
+  with the real tiered description.
+- **NEW, 2026-07-24: rubric-driven completion plan in force (ADR-0012) —
+  the real punch list for the ~17 days to the confirmed 2026-08-11 02:00
+  deadline.** In priority order: (1) README rewrite per
+  `docs/readme-plan.md` — Problem description 1→2, half of Reproducibility;
+  (2) ship the processed corpus/chunks + disclose the OONI 429/manual-
+  acquisition constraint explicitly; (3) label + evaluate the existing
+  `search.py` country re-rank as the rubric's re-ranking best practice;
+  (4) fix LLM evaluation from 1/2 to 2/2 — build Prompt B (evidence-first,
+  explicit thin-evidence abstention), judge it against the current Prompt A
+  with the existing claim-level judge on a stated subset, report both, pick
+  a winner, make it `generate.py`'s new default; (5) Streamlit interface +
+  thumbs up/down feedback (Interface 0→2, Monitoring 0→1 together); (6)
+  5-chart monitoring dashboard; (7) docker-compose for everything; (8) if
+  time allows past 2026-08-02: cloud deployment (2-point bonus + the
+  highest-value portfolio signal), then query rewriting. **Hard gate:
+  everything worth 2 points done by 2026-08-02, then 08-03–05 is a
+  clean-clone reproducibility dry run, 08-06–07 is buffer only.** Full
+  reasoning and the complete Opus 5 consult transcript in `decisionlog.md`
+  and ADR-0012, both 2026-07-24.
 - **NEW, 2026-07-20: end-of-ingestion-phase Opus+Fable review complete —
   both recommend moving to the next phase after a short pre-flight fix
   list, not a rebuild.** Six independently-converged findings (highest
@@ -805,9 +964,16 @@ auto-vs-manual question; scaling further is future work, see Section 7),
   response time isn't guaranteed ("we are unable to immediately respond to
   every permission request"). Until a reply arrives: current non-commercial
   course-project use stays low-risk per `docs/licensing.md`'s original
-  analysis; the still-open constraint is no CLIO-facing redistribution of
-  Freedom House content until permission is actually confirmed, not just
-  requested.
+  analysis; the still-open constraint is **no public-facing redistribution
+  of Freedom House content — through the CLIO API boundary or any other
+  channel, including this project's own GitHub Release** — until permission
+  is actually confirmed, not just requested. **Corrected 2026-07-25
+  (ADR-0013):** this line previously narrowed the constraint to
+  "CLIO-facing redistribution" only, which didn't match `docs/licensing.md`'s
+  actual broader wording — a real documentation-drift bug, caught before it
+  caused an actual mistake (the corpus-release task), not after. A follow-up
+  email to Freedom House was sent the same day (twelve days of silence on
+  the original request).
 - **OONI content-license variant unconfirmed.** `licensing.md` confirms
   OONI's measurement *data* is CC BY-NC-SA 4.0 but not the exact variant for
   their *content* (reports) specifically. Two-minute check before corpus
@@ -1173,6 +1339,37 @@ the empty `archituecture-new.docx` leftover from the same incident.
   the design is the deliverable of this pass, ready for a Claude Code
   handoff (prompt drafted, see below) whenever the next session starts
   implementation.**
+- **UPDATE, 2026-07-24: LLM evaluation phase built and run for real —
+  0.879 aggregate claim-level citation precision, one step short of
+  fully closed.** `src/evaluation/{run_answers,judge,
+  contradiction_search,evaluate_generation}.py` built and run against
+  the real corpus, real OpenAI API, 122 real questions, 481 real claims
+  judged. Full numbers, the judge-model fallback (`gpt-5.4` 403'd,
+  `gpt-5.4-mini` used, self-judging disclosed), the contradiction-search
+  result (none found in the real corpus, mechanism verified via
+  synthetic fixture), and the refusal-slice review are all in Section 1
+  above and `reports.md`, 2026-07-24 — not restated here. **A real
+  process gap surfaced and was fixed**: the handoff prompt incorrectly
+  asked Claude Code to update `decisionlog.md`, a file that structurally
+  cannot sync to WSL (lives outside `repo/` by design) — Claude Code
+  correctly refused to guess and reported the gap in `reports.md`
+  Section 0 instead of fabricating an entry; the real decisionlog entry
+  was written from the Cowork side afterward. **What's left before this
+  phase is fully closed:** Sam fills in `human_verdict` in
+  `data/eval/judge_calibration_sample_full.csv` (real chunk text
+  included, local-only, gitignored), then runs
+  `uv run python src/evaluation/evaluate_generation.py --score-review`
+  for the confusion matrix / raw agreement / Cohen's κ-or-ADR-0011-fallback
+  verdict. `data/eval/deployment_review_sample_full.csv` is separately
+  ready for the deployment citation-precision review
+  `evaluation_checklist.md` calls for, independent of the calibration
+  step. **Known, deliberately-unfixed asymmetry, flagged for a future
+  call:** `data/eval/eval_supplement_questions.json` (real, curated
+  question-set substance, committed to the real git repo) never reaches
+  the Cowork mirror via `sync.sh push`, since `push` excludes all of
+  `data/` by design — unlike `corpus/sources/*.yaml`, a comparably
+  curated artifact that does sync. Not fixed this pass; Sam's call
+  whether it's worth a future revision.
 - **UPDATE, 2026-07-22, later same day: `src/ingestion/chunk.py` itself
   fixed (Sam's call), not yet re-run against the real corpus.** The
   `chunking` block now gets stamped into `metadata` before any chunk

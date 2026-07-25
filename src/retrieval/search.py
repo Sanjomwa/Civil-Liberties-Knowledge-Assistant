@@ -247,6 +247,7 @@ def search(
     method: str = "hybrid",
     lifecycle_status: str | None = "active",
     rrf_k: int | None = None,
+    boost_country: bool = True,
 ) -> list[dict]:
     """
     Args:
@@ -260,18 +261,24 @@ def search(
             data/eval/default_method.json (see _recorded_default_rrf_k) --
             explicitly pass a value to override it for one call, e.g. during
             evaluate.py's own k-sweep.
+        boost_country: whether to run the P2 country-metadata re-rank at
+            all. Defaults to True (unchanged shipped behavior). Set False
+            to disable country detection entirely -- added 2026-07-25 to
+            make an honest before/after ablation of the boost possible
+            (see evaluate.py's re-ranking ablation), since without this
+            flag there was no way to run search() with the boost off.
 
     Returns:
         list of chunk dicts (chunk_id, doc_id, text, pages, organization,
         countries, publication_date, lifecycle_status), ranked best-first.
         If the query names one of the five corpus countries (P2, see
-        COUNTRY_KEYWORDS), chunks tagged with that country are boosted
-        toward the front of the returned list -- a re-rank, not a filter,
-        so results are never dropped by this step.
+        COUNTRY_KEYWORDS) and boost_country is True, chunks tagged with
+        that country are boosted toward the front of the returned list --
+        a re-rank, not a filter, so results are never dropped by this step.
     """
     _check_index_freshness()
 
-    detected_countries = _detect_countries(query)
+    detected_countries = _detect_countries(query) if boost_country else set()
     # Pull a deeper candidate pool than top_k whenever a boost might apply,
     # so there's actually something lower-ranked-but-country-matching for
     # _boost_by_country to promote -- boosting within an already-truncated

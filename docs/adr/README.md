@@ -80,7 +80,34 @@ observable condition, not just a feeling that something isn't working.
 
 ## Status
 
-**Eleven ADRs exist as of 2026-07-23 (architecture doc still at v1.9 —
+**Thirteen ADRs exist as of 2026-07-25.**
+`0013-tiered-corpus-release.md` — found, before executing ADR-0012's
+"ship the processed corpus" Tier 1 item, that this project's own two
+governance documents disagreed on the scope of Freedom House's
+permission-gate (`docs/licensing.md`'s broader "any public-facing
+redistribution" vs. a narrowed "CLIO-facing" restatement in
+`docs/PROJECT_CONTINUITY.md`) — resolved toward the stricter original
+reading. Consulted Opus 5 given the compliance stakes; adopted a tiered
+release (full chunk text for OONI/CIPESA, hash-verified metadata-only +
+a new `rehydrate.py` for Freedom House/Access Now) that solves the
+reproducibility rubric criterion without redistributing permission-gated
+text. A follow-up email to Freedom House was sent the same day.
+
+**Twelve ADRs existed as of 2026-07-24.**
+`0012-rubric-driven-completion-plan.md` — a full rubric audit against the
+real, verbatim `project.md` Evaluation Criteria (fetched and checked
+directly, not assumed) found LLM evaluation is genuinely 1/2 despite feeling
+closed (only one generation approach was ever compared), plus real gaps in
+Problem description/Reproducibility (a 306-byte README) and confirmed 0/2 on
+Interface/Containerization. An Opus 5 consult produced a ranked completion
+plan: a Prompt A/B comparison to fix LLM evaluation properly, a
+README rewrite per Alexey Grigorev's README-structure article
+(`docs/readme-plan.md`), a 2026-08-02 feature-freeze gate ahead of the
+confirmed 2026-08-11 02:00 deadline, and a posts-7+8 merge in the
+learning-in-public series. Architecture doc stays at v1.9 — this is a
+completion-plan/methodology decision, not an architecture-document change.
+
+**Eleven ADRs existed as of 2026-07-23 (architecture doc still at v1.9 —
 ADR-0011, like ADR-0010, is a methodology decision, not an architecture-
 document change).**
 `0001-english-only-corpus-disclosure.md`,

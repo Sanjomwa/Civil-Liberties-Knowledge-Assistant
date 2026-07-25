@@ -630,15 +630,11 @@ def acquire_document(org: str, doc: dict):
     tmp_path = dest.with_suffix(dest.suffix + ".tmp")
     tmp_path.write_bytes(content)
 
-    actual_sha256 = sha256_of(tmp_path)
-    if actual_sha256 != expected_sha256:
-        tmp_path.unlink()
-        raise AcquisitionFailure(
-            f"checksum mismatch: expected {expected_sha256}, got "
-            f"{actual_sha256}. The source file may have changed since it "
-            f"was selected, or the download was corrupted. Not writing to "
-            f"data/raw/ — investigate before re-running."
-        )
+    # Format check moved ahead of the checksum gate (bug fix, 2026-07-25,
+    # found while building rehydrate.py/ADR-0013): for a volatile-bytes org
+    # this is the only backstop against recording a bot-challenge page as
+    # a legitimate new baseline, so it must run before anything gets
+    # trusted or written, not after.
     ok, reason = looks_like_declared_format(tmp_path, doc["source_format"], title)
     if not ok:
         tmp_path.unlink()
@@ -649,9 +645,41 @@ def acquire_document(org: str, doc: dict):
             f"the real file. Not writing to data/raw/."
         )
 
+    actual_sha256 = sha256_of(tmp_path)
+    # Bug fix, 2026-07-25 (found building rehydrate.py/ADR-0013): this used
+    # to gate on `actual_sha256 != expected_sha256` unconditionally, which
+    # is only correct for raw_bytes_stable orgs. For a volatile-bytes org
+    # (raw_bytes_stable: false — Freedom House currently), a fresh
+    # download's raw bytes are *never* expected to match any previously-
+    # recorded value (that's the entire premise of `raw_bytes_stable:
+    # false`) — gating on it here raised a false AcquisitionFailure on
+    # every genuinely successful, unmodified re-download once a baseline
+    # already existed (the exact fresh-clone/re-fetch scenario
+    # rehydrate.py needs). Reached from two call sites: the missing-file
+    # path above, and the `[redownload]` disk-rot path a few lines above
+    # this block — both converge here, so the fix lives in one place.
+    # Live-source content fidelity for a volatile org is content_sha256's
+    # job (extract.py), not this raw-byte check's.
+    if raw_bytes_stable:
+        if actual_sha256 != expected_sha256:
+            tmp_path.unlink()
+            raise AcquisitionFailure(
+                f"checksum mismatch: expected {expected_sha256}, got "
+                f"{actual_sha256}. The source file may have changed since it "
+                f"was selected, or the download was corrupted. Not writing to "
+                f"data/raw/ — investigate before re-running."
+            )
+    else:
+        write_derived_checksum(org, doc_id, "sha256", actual_sha256)
+
     tmp_path.rename(dest)
     print(f"[ok] {doc_id} — downloaded and verified ({len(content)} bytes)")
-    return {**doc, "org": org, "local_path": str(dest.relative_to(PROJECT_ROOT))}
+    # sha256 included explicitly (bug fix, 2026-07-25): for a volatile org
+    # this used to be silently absent from the returned row, so a fresh
+    # rotated baseline never actually reached corpus/manifest.csv or
+    # corpus/checksums.sha256 — those would keep asserting the stale
+    # value against bytes that no longer match it.
+    return {**doc, "org": org, "sha256": actual_sha256, "local_path": str(dest.relative_to(PROJECT_ROOT))}
 
 
 def write_manifest(rows: list[dict]) -> None:
