@@ -1,0 +1,30 @@
+# Dockerfile.grafana.cloud -- Cloud Run's Grafana image. Per ADR-0016 /
+# docs/deployment-design.md Decision 5.
+#
+# Not private/sensitive (unlike Dockerfile.cloud) -- this only bakes in
+# dashboard/datasource provisioning config, no corpus content, no
+# secrets. Safe to commit/publish.
+#
+# Locally, docker-compose.yml bind-mounts ./grafana/provisioning and
+# ./grafana/dashboards into the stock grafana/grafana:latest image --
+# Cloud Run has no bind-mount equivalent, so this COPYs the equivalent
+# directories in at build time instead. Same base image, same
+# anonymous-Viewer auth (set via GF_AUTH_ANONYMOUS_ENABLED/
+# GF_AUTH_ANONYMOUS_ORG_ROLE env vars on the Cloud Run service itself, not
+# baked here, so it stays consistent with how docker-compose.yml already
+# sets them).
+#
+# Datasource provisioning is NOT a straight copy of the local one: Cloud
+# SQL needs a Unix-socket path, not the `postgres:5432` docker-compose
+# hostname -- see grafana/provisioning-cloud/datasources/postgres.yml for
+# the real reasoning (explicitly flagged there as unverified until the
+# first real deploy). Dashboard provisioning + the dashboard JSON itself
+# have no per-environment differences, so those two are a straight copy.
+#
+# Build/push: deploy/gcp-deploy.sh (drafted, not run this session).
+
+FROM grafana/grafana:latest
+
+COPY grafana/provisioning/dashboards /etc/grafana/provisioning/dashboards
+COPY grafana/provisioning-cloud/datasources /etc/grafana/provisioning/datasources
+COPY grafana/dashboards /var/lib/grafana/dashboards

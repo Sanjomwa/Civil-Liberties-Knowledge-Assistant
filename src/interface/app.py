@@ -114,8 +114,13 @@ def _run_query(query: str) -> None:
     # Independent second search() call, same pattern run_answers.py
     # already uses, purely for the on-screen "retrieved excerpts +
     # scores" expander -- the interactions table itself never stores
-    # excerpt text (Decision 4), only this UI-only display does.
-    display_chunks = search(query, top_k=TOP_K)
+    # excerpt text (Decision 4), only this UI-only display does. Uses
+    # result["rewritten_query"] (ADR-0017), not the raw `query` --
+    # answer() itself now searches with the rewritten query internally,
+    # so reconstructing with the raw query here would risk a different
+    # top-10 set than the one the citations in the answer actually came
+    # from, silently mismatching the displayed excerpts.
+    display_chunks = search(result["rewritten_query"], top_k=TOP_K)
 
     total_tokens = result["usage"]["total_tokens"] if result["usage"] else None
     prompt_tokens = result["usage"]["prompt_tokens"] if result["usage"] else None
@@ -133,6 +138,7 @@ def _run_query(query: str) -> None:
 
     interaction_id = insert_interaction(
         query=query,
+        rewritten_query=result["rewritten_query"],
         answer_markdown=result["answer_markdown"],
         latency_ms=latency_ms,
         retrieval_ms=result["timings"]["retrieval_ms"],

@@ -1,0 +1,42 @@
+apiVersion: 1
+
+# Cloud-specific variant of grafana/provisioning/datasources/postgres.yml
+# (the local docker-compose one, untouched). Per ADR-0016 / docs/
+# deployment-design.md Decision 2: Cloud Run has no `postgres:5432`
+# hostname to resolve (that's docker-compose's own internal DNS) --
+# Cloud SQL is reached via a Unix-socket path, `/cloudsql/PROJECT:REGION:
+# INSTANCE`, mounted automatically by Cloud Run's `--add-cloudsql-instances`
+# flag (deploy/gcp-deploy.sh).
+#
+# EXPLICITLY UNVERIFIED, per deployment-design.md's own "Open items for
+# implementation" list: "Verifying Grafana's Cloud SQL socket-path
+# datasource config... empirically on the first real deploy -- stated as
+# the expected mechanism, not yet confirmed against a real Cloud Run
+# instance." This file is that stated mechanism, drafted, not yet tested
+# against a live Cloud SQL instance -- confirm this actually connects on
+# the first real deploy before trusting it, and fix here (not by
+# reverting to a workaround) if it doesn't.
+#
+# Uses Grafana's own provisioning env-var expansion (`${VAR}` syntax,
+# resolved from the container's real environment at Grafana startup) for
+# both the connection name and the password, rather than baking either
+# into this file -- CLOUDSQL_CONNECTION_NAME and POSTGRES_PASSWORD are
+# both set on the Cloud Run service at deploy time (the latter via
+# --set-secrets, per ADR-0016 Decision 3), never committed here.
+datasources:
+  - name: Interactions Postgres
+    type: postgres
+    uid: postgres-interactions
+    access: proxy
+    url: /cloudsql/${CLOUDSQL_CONNECTION_NAME}
+    database: interactions
+    user: postgres
+    secureJsonData:
+      password: ${POSTGRES_PASSWORD}
+    jsonData:
+      database: interactions
+      sslmode: disable
+      postgresVersion: 1600
+      timescaledb: false
+    isDefault: true
+    editable: false

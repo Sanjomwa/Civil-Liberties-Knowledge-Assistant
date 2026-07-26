@@ -266,6 +266,24 @@ data/eval/judgments_v2.jsonl
 # judge_calibration_sample.csv vs. judge_calibration_sample_full.csv.
 data/eval/human_calibration_review_v2.html
 
+# ADR-0016 (GCP cloud deployment, 2026-07-26): Dockerfile.cloud, when
+# built, bakes Freedom House + Access Now's real rehydrated text directly
+# into an image -- unlike the public Dockerfile (repo root), which only
+# ever bakes the licensing-clear 54% tiered baseline (ADR-0013). Freedom
+# House's permission request is still open (ADR-0013's own revisit
+# condition) -- this must never reach the public repo or any release
+# artifact, only a private Artifact Registry repo in Sam's own GCP
+# project (deploy/gcp-deploy.sh). Flagged explicitly in reports.md,
+# 2026-07-26, for a second look -- this is a judgment call (the file
+# itself carries no corpus text, only instructions to fetch it at build
+# time), not a certainty.
+#
+# src/interface/entrypoint.cloud.sh and Dockerfile.grafana.cloud are
+# deliberately NOT listed here -- neither bakes or references any
+# rehydrated content or secret; they're just the cloud runtime command
+# and Grafana provisioning config, safe to stay public.
+Dockerfile.cloud
+
 # Local-only orchestration files (Cowork <-> Claude Code in WSL workflow,
 # established 2026-07-20) — never committed, never authored from the
 # Cowork side, so also excluded from the Cowork-to-WSL rsync direction

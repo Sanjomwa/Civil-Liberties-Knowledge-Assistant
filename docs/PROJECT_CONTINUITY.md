@@ -728,7 +728,34 @@ auto-vs-manual question; scaling further is future work, see Section 7),
 
 ## 7. Open action items (don't lose track of these)
 
-**NEWEST OF ALL, 2026-07-26 — ADR-0015 line of work fully CLOSED, all
+**NEWEST OF ALL, 2026-07-26 (latest) — Tier 3 design done: GCP cloud
+deployment + query rewriting, both via a single deep Fable consult, not
+yet implemented.** Sam picked GCP and made a deliberate process call
+for this phase only: one elaborate Fable design pass instead of the
+usual Opus-does-design default (testing the open 2026-07-22 hypothesis
+that Fable's strength is narrative, not architecture — in the untested
+direction), with Opus reserved for implementation-time consults instead
+and Fable's own further calls on Tier 3 limited to the final evaluation,
+the corresponding LinkedIn post pass, or genuine difficulty. Two new
+ADRs written from that consult: **ADR-0016** (Cloud Run for app+Grafana,
+Cloud SQL for Postgres, Secret Manager for the API key; the real design
+problem — a 15-minute unconditional corpus rehydration on every
+container start colliding with scale-to-zero billing — resolved by
+moving rehydration to a private, deploy-time-only image, leaving the
+public repo/image and ADR-0013's tiered-release policy completely
+untouched; cost shape ~$10-15/month) and **ADR-0017** (a single,
+unconditional, fail-open query-rewrite step before `search()`,
+evaluated via a regression gate plus a new degraded-query adversarial
+set; a decisive position that query decomposition will NOT overturn the
+`multi_country` "non-fixable" finding, for a structural reason tied to
+how that category is defined, not a hedge). Two matching pre-
+implementation design docs (`docs/deployment-design.md`,
+`docs/query-rewriting-design.md`) mirror the existing
+retrieval/generation/evaluation/interface-design.md pattern. **Nothing
+implemented yet** — next step is a Claude Code handoff building both.
+Full detail: `decisionlog.md`, 2026-07-26.
+
+**PRIOR, 2026-07-26 — ADR-0015 line of work fully CLOSED, all
 four rounds.** Round 4 implemented both fixes: `--judge-version` CLI flag
 on `evaluate_generation.py` (default now `v2`, matching ADR-0014's
 adopted headline; `prompt_version` also now recorded per judgment row to

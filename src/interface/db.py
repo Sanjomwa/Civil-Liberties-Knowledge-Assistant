@@ -60,6 +60,16 @@ CREATE TABLE IF NOT EXISTS interactions (
 );
 """
 
+# ADR-0017 (query rewriting): one additive column, not a schema redesign.
+# CREATE TABLE IF NOT EXISTS above is a no-op against an already-existing
+# interactions table (every dev/deployed Postgres volume so far), so this
+# ALTER is what actually makes the new column show up there -- IF NOT
+# EXISTS keeps it idempotent and safe to run on every startup, same as
+# the CREATE TABLE above.
+ADD_REWRITTEN_QUERY_COLUMN_SQL = """
+ALTER TABLE interactions ADD COLUMN IF NOT EXISTS rewritten_query TEXT;
+"""
+
 # Explicit per-model $-per-1k-token rate table. Raises on an unknown
 # model rather than silently writing 0/None -- this project's own
 # 05-monitoring/notes/03_common_pitfalls.md #2 names silent zero-cost for
@@ -105,12 +115,14 @@ def init_db() -> None:
     with get_conn() as conn:
         with conn.cursor() as cur:
             cur.execute(SCHEMA_SQL)
+            cur.execute(ADD_REWRITTEN_QUERY_COLUMN_SQL)
         conn.commit()
 
 
 def insert_interaction(
     *,
     query: str,
+    rewritten_query: str | None = None,
     answer_markdown: str,
     latency_ms: int | None = None,
     retrieval_ms: int | None = None,
@@ -143,13 +155,13 @@ def insert_interaction(
             cur.execute(
                 """
                 INSERT INTO interactions (
-                    query, answer_markdown, latency_ms, retrieval_ms, llm_ms,
+                    query, rewritten_query, answer_markdown, latency_ms, retrieval_ms, llm_ms,
                     prompt_tokens, completion_tokens, total_tokens, model, est_cost_usd,
                     retrieval_method, top_k, n_chunks, retrieval_scores, citations_summary,
                     source_orgs, citation_count, sourcing_status, distinct_org_count,
                     distinct_doc_count, invalid_marker_count, unsupported_paragraph_count
                 ) VALUES (
-                    %s, %s, %s, %s, %s,
+                    %s, %s, %s, %s, %s, %s,
                     %s, %s, %s, %s, %s,
                     %s, %s, %s, %s, %s,
                     %s, %s, %s, %s,
@@ -158,7 +170,7 @@ def insert_interaction(
                 RETURNING id
                 """,
                 (
-                    query, answer_markdown, latency_ms, retrieval_ms, llm_ms,
+                    query, rewritten_query, answer_markdown, latency_ms, retrieval_ms, llm_ms,
                     prompt_tokens, completion_tokens, total_tokens, model, est_cost_usd,
                     retrieval_method, top_k, n_chunks,
                     json.dumps(retrieval_scores) if retrieval_scores is not None else None,

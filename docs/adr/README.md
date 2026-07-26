@@ -80,6 +80,27 @@ observable condition, not just a feeling that something isn't working.
 
 ## Status
 
+**Seventeen ADRs exist as of 2026-07-26 (later, Tier 3 design).**
+`0016-gcp-cloud-deployment-architecture.md` and
+`0017-query-rewriting-design.md` — the first real design pass for
+ADR-0012's Tier 3 (cloud deployment + query rewriting), and a deliberate
+process departure: both came from a single deep Fable design consult
+rather than the usual Opus-does-design pattern (Sam's explicit,
+one-time test of Fable's technical-design capability, scoped to this
+phase only — see this project's `CLAUDE.md` Section 3). ADR-0016:
+Cloud Run (app + Grafana as two services) + Cloud SQL + Secret Manager,
+with the real design problem (a 15-minute unconditional rehydration on
+every container start vs. scale-to-zero) resolved by moving corpus
+rehydration from a runtime step to a private, deploy-time-only image —
+the public repo/image/tiered-release policy (ADR-0013) is untouched.
+ADR-0017: a single unconditional query-rewrite step before `search()`,
+fail-open on any error, evaluated via a regression gate plus a new
+degraded-query adversarial set — and a decisive, undodged position that
+query decomposition will NOT overturn the `multi_country` "non-fixable"
+finding, for a structural (metric-definition) reason, not a hedge.
+Neither ADR is implemented yet — both are the design, ready for a
+Claude Code handoff.
+
 **Fifteen ADRs exist as of 2026-07-26.**
 `0015-corpus-scope-prompt-card-and-behavioral-test-suite.md` — a real
 user query ("what countries are under this corpus's scope?") surfaced a

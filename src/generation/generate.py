@@ -179,12 +179,77 @@ def _needs_time_fact_append(query: str, answer_text: str) -> bool:
     return not ("2022" in answer_text and "2026" in answer_text)
 
 
+# ADR-0017 / docs/query-rewriting-design.md: normalizes a raw, possibly
+# colloquial user query into the corpus's own report-style vocabulary
+# before retrieval -- expanding abbreviations, making an implied country
+# explicit, stripping conversational filler. This is the one Tier-3
+# best-practice item (ADR-0012) not yet attempted; hybrid search and the
+# P2 country-boost re-rank are both already shipped.
+#
+# Model choice: gpt-5.4-mini, not a smaller/cheaper model invented for
+# this -- this account has only ever confirmed gpt-5.4 and gpt-5.4-mini
+# enabled (gpt-4o-mini returns 403 model_not_found, per generate.py's own
+# LLM_MODEL comment and ground_truth.py); gpt-5.4-mini is already this
+# project's established cheap-classification-call model
+# (contradiction_search.py's DISAGREEMENT_MODEL), so reusing it here
+# rather than guessing at an unconfirmed model name.
+REWRITE_MODEL = LLM_MODEL
+REWRITE_MAX_COMPLETION_TOKENS = 150  # strict low budget, not the main answer's budget
+REWRITE_TIMEOUT_SECONDS = 2.0
+
+REWRITE_SYSTEM_PROMPT = """Rewrite the user's question into a single, clear search \
+query for a corpus of internet-censorship and digital-rights reports about Kenya, \
+Uganda, Tanzania, Ethiopia, and Rwanda.
+
+- Expand abbreviations (e.g. "gov" -> "government", "reg" -> "registration").
+- If a country is clearly implied but not named, make it explicit.
+- Strip conversational filler ("hey", "can you tell me", "I was wondering", \
+"so basically").
+- Keep every specific fact, name, date, and detail from the original question. \
+Do not add information that wasn't there, and do not answer the question.
+
+Output ONLY the rewritten query on a single line -- no preamble, no quotation \
+marks, no explanation."""
+
+
+def rewrite_query(query: str, client: OpenAI | None = None) -> str:
+    """One small-model LLM call that normalizes `query` into corpus
+    report-vocabulary before retrieval. Fails open to the original,
+    unmodified `query` on ANY error -- timeout, API error, or an empty/
+    malformed response -- per ADR-0017's fail-safe requirement: this step
+    must never be able to block or degrade an answer, only help retrieval
+    or be a no-op. Same discipline as the out-of-scope disclosure and
+    org/time fallback above (additive, never a point of failure for the
+    base path)."""
+    client = client or OpenAI()
+    try:
+        response = client.chat.completions.create(
+            model=REWRITE_MODEL,
+            messages=[
+                {"role": "system", "content": REWRITE_SYSTEM_PROMPT},
+                {"role": "user", "content": query},
+            ],
+            max_completion_tokens=REWRITE_MAX_COMPLETION_TOKENS,
+            temperature=0,
+            timeout=REWRITE_TIMEOUT_SECONDS,
+        )
+        rewritten = response.choices[0].message.content
+        if not rewritten or not rewritten.strip():
+            return query
+        return rewritten.strip()
+    except Exception:  # noqa: BLE001 -- fail-open by design, any error whatsoever
+        return query
+
+
 def answer(query: str, client: OpenAI | None = None) -> dict:
     """Runs the full generation pipeline for one query.
 
     Returns:
         {
             "query": str,
+            "rewritten_query": str,        -- ADR-0017: rewrite_query()'s output,
+                fed to search() instead of `query`; equals `query` unchanged
+                whenever the rewrite call fails or times out (fail-open).
             "answer_markdown": str,        -- the model's raw answer, [n] markers intact
                 -- may have a fixed, code-authored out-of-scope disclosure
                 sentence prepended (ADR-0015 round 3, see
@@ -221,13 +286,25 @@ def answer(query: str, client: OpenAI | None = None) -> dict:
     """
     client = client or OpenAI()
 
+    # ADR-0017: rewrite feeds search() only -- everything downstream that
+    # reflects the user's actual intent (the prompt shown to the model,
+    # out-of-scope-country detection, the org/time meta-question fallback,
+    # and the returned "query" field) keeps using the original `query`
+    # unchanged. search() itself takes one query string for both hybrid
+    # legs (no separate BM25-only parameter exists, and search() is not
+    # modified per ADR-0017/the design doc), so the rewritten query feeds
+    # both legs of hybrid search, not just BM25 -- the only option that
+    # doesn't require reimplementing search()'s own RRF merge outside it.
+    rewritten_query = rewrite_query(query, client=client)
+
     retrieval_start = time.monotonic()
-    chunks = search(query, top_k=TOP_K)
+    chunks = search(rewritten_query, top_k=TOP_K)
     retrieval_ms = int((time.monotonic() - retrieval_start) * 1000)
 
     if not chunks:
         return {
             "query": query,
+            "rewritten_query": rewritten_query,
             "answer_markdown": "No relevant evidence was found in the corpus for this question.",
             "citations": [],
             "invalid_markers": [],
@@ -284,6 +361,7 @@ def answer(query: str, client: OpenAI | None = None) -> dict:
 
     return {
         "query": query,
+        "rewritten_query": rewritten_query,
         "answer_markdown": answer_text,
         "citations": parsed["citations"],
         "invalid_markers": parsed["invalid_markers"],

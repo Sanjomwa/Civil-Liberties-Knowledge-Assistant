@@ -108,7 +108,13 @@ def run_one(item: dict) -> dict:
     """Runs answer() and an independent search() call for one question,
     combining both into one persisted result record."""
     result = answer(item["question"])
-    chunks = search(item["question"], top_k=SEARCH_TOP_K, method="hybrid")
+    # ADR-0017: reconstructs with result["rewritten_query"], not the raw
+    # question -- answer() now searches internally with the rewritten
+    # query, so reconstructing with the raw question would no longer
+    # reliably return the same top-10 set whenever rewriting actually
+    # changes the query (breaking this module's own documented assumption
+    # that search() is deterministic given "the same query").
+    chunks = search(result["rewritten_query"], top_k=SEARCH_TOP_K, method="hybrid")
     chunk_text_map = {c["chunk_id"]: c["text"] for c in chunks}
 
     record = {

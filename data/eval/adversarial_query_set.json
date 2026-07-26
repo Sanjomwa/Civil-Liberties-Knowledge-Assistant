@@ -1,0 +1,324 @@
+{
+  "questions": [
+    {
+      "question": "which countries were cited as examples of where AI tools or bots were being used to deal w/ online falsehoods or monitor election-related content?",
+      "original_question": "Which countries were cited as examples of where AI tools or bots were being used to address online falsehoods or monitor election-related content?",
+      "correct_chunk_id": "cipesa-africa-2025-sifa-ai-chunk-0184",
+      "doc_id": "cipesa-africa-2025-sifa-ai",
+      "organization": "CIPESA",
+      "category": "multi_country"
+    },
+    {
+      "question": "what kinda military actions were linked to the internet outages in Myanmar in 2023?",
+      "original_question": "What kinds of military actions were linked to the internet outages recorded in Myanmar in 2023?",
+      "correct_chunk_id": "accessnow-africa-2023-keepiton-shutdowns-chunk-0124",
+      "doc_id": "accessnow-africa-2023-keepiton-shutdowns",
+      "organization": "Access Now",
+      "category": "multi_country"
+    },
+    {
+      "question": "which of the study countries had the highest purchasing-power-adjusted income in 2025?",
+      "original_question": "Which of the study countries had the highest purchasing-power-adjusted income in 2025?",
+      "correct_chunk_id": "cipesa-africa-2025-sifa-ai-chunk-0057",
+      "doc_id": "cipesa-africa-2025-sifa-ai",
+      "organization": "CIPESA",
+      "category": "multi_country"
+    },
+    {
+      "question": "what effect do these tactics have on public participation, oversight institutions, and the quality of elections in the countries mentioned?",
+      "original_question": "What effect do these tactics have on public participation, oversight institutions, and the quality of elections in the countries mentioned?",
+      "correct_chunk_id": "cipesa-africa-2024-sifa-elections-chunk-0284",
+      "doc_id": "cipesa-africa-2024-sifa-elections",
+      "organization": "CIPESA",
+      "category": "multi_country"
+    },
+    {
+      "question": "what kinda impact can it have if the media and election authorities dont fix false election claims fast enough on political stability and election results?",
+      "original_question": "What impact can the failure of media and election authorities to quickly correct false election claims have on political stability and election results?",
+      "correct_chunk_id": "cipesa-africa-2024-sifa-elections-chunk-0191",
+      "doc_id": "cipesa-africa-2024-sifa-elections",
+      "organization": "CIPESA",
+      "category": "multi_country"
+    },
+    {
+      "question": "which court case challenged that twitter ban and said it was unlawful?",
+      "original_question": "Which court case challenged Nigeria’s Twitter ban and found it unlawful?",
+      "correct_chunk_id": "accessnow-africa-2023-keepiton-shutdowns-chunk-0246",
+      "doc_id": "accessnow-africa-2023-keepiton-shutdowns",
+      "organization": "Access Now",
+      "category": "multi_country"
+    },
+    {
+      "question": "which african countries’ AI policy docs are listed in the refs?",
+      "original_question": "Which African countries’ AI policy documents are listed in the references?",
+      "correct_chunk_id": "cipesa-africa-2025-sifa-ai-chunk-0256",
+      "doc_id": "cipesa-africa-2025-sifa-ai",
+      "organization": "CIPESA",
+      "category": "multi_country"
+    },
+    {
+      "question": "which groups got singled out by the authorities w/ internet shutdowns during protest movements, and what happened to their activism even w/ all that repression?",
+      "original_question": "Which groups were singled out by authorities through internet shutdowns during protest movements, and what happened to their activism despite the repression?",
+      "correct_chunk_id": "accessnow-africa-2024-keepiton-shutdowns-chunk-0019",
+      "doc_id": "accessnow-africa-2024-keepiton-shutdowns",
+      "organization": "Access Now",
+      "category": "multi_country"
+    },
+    {
+      "question": "which countries were first recorded as blocking online platforms in 2023 and like what services got hit in each case?",
+      "original_question": "Which countries were first recorded as blocking online platforms in 2023, and which services were affected in each case?",
+      "correct_chunk_id": "accessnow-africa-2023-keepiton-shutdowns-chunk-0067",
+      "doc_id": "accessnow-africa-2023-keepiton-shutdowns",
+      "organization": "Access Now",
+      "category": "multi_country"
+    },
+    {
+      "question": "what limits did the researchers point out about the URL lists, website coverage, and network coverage in their Tanzania analysis?",
+      "original_question": "What limitations did the researchers identify about the URL lists, website coverage, and network coverage in their Tanzania analysis?",
+      "correct_chunk_id": "ooni-tz-2024-lgbtiq-censorship-chunk-0015",
+      "doc_id": "ooni-tz-2024-lgbtiq-censorship",
+      "organization": "OONI",
+      "category": "ooni_methodology"
+    },
+    {
+      "question": "how did OONI figure out if Telegram was getting blocked in places where internet providers used stuff other than the usual DNS or block-page tricks?",
+      "original_question": "How did OONI determine whether Telegram was being blocked in countries where internet providers used methods other than the usual DNS or block-page techniques?",
+      "correct_chunk_id": "ooni-ke-2025-telegram-kcse-blocking-chunk-0019",
+      "doc_id": "ooni-ke-2025-telegram-kcse-blocking",
+      "organization": "OONI",
+      "category": "ooni_methodology"
+    },
+    {
+      "question": "what evidence suggested facebook access in ethiopia was getting messed with thru interference w/ the TLS handshake?",
+      "original_question": "What evidence suggested that Facebook access in Ethiopia was being disrupted through interference with the TLS handshake?",
+      "correct_chunk_id": "ooni-et-2023-social-media-blocking-chunk-0001",
+      "doc_id": "ooni-et-2023-social-media-blocking",
+      "organization": "OONI",
+      "category": "ooni_methodology"
+    },
+    {
+      "question": "so like what kinds of OONI measurements and time period were used in that Tanzania study, and what main limitations did the researchers say about how far their findings actually go?",
+      "original_question": "What kinds of OONI measurements and time period were used in the Tanzania study, and what main limitations did the researchers note about the scope of their findings?",
+      "correct_chunk_id": "ooni-tz-2024-lgbtiq-censorship-chunk-0013",
+      "doc_id": "ooni-tz-2024-lgbtiq-censorship",
+      "organization": "OONI",
+      "category": "ooni_methodology"
+    },
+    {
+      "question": "so like what share of women and men were mobile internet users in the 2023 GSMA survey over there?",
+      "original_question": "What share of women and men in Kenya were mobile internet users in the 2023 GSMA survey?",
+      "correct_chunk_id": "freedomhouse-ke-2024-fotn-chunk-0015",
+      "doc_id": "freedomhouse-ke-2024-fotn",
+      "organization": "Freedom House",
+      "category": "general"
+    },
+    {
+      "question": "so like what’s been causing internet service disruptions and outages in that country?",
+      "original_question": "What factors have caused internet service disruptions and outages in Kenya?",
+      "correct_chunk_id": "freedomhouse-ke-2023-fotn-chunk-0006",
+      "doc_id": "freedomhouse-ke-2023-fotn",
+      "organization": "Freedom House",
+      "category": "general"
+    },
+    {
+      "question": "how has that ruling party used coordinated online supporters and state-linked programs to go after critics on social media?",
+      "original_question": "How has Rwanda’s ruling party used coordinated online supporters and state-linked programs to target critics on social media?",
+      "correct_chunk_id": "freedomhouse-rw-2022-fotn-chunk-0039",
+      "doc_id": "freedomhouse-rw-2022-fotn",
+      "organization": "Freedom House",
+      "category": "general"
+    },
+    {
+      "question": "what criminal penalties does that 2018 cybersecurity law impose for publishing rumors or using a website linked to a terrorist group?",
+      "original_question": "What criminal penalties does Rwanda’s 2018 cybersecurity law impose for publishing rumors or for using a website linked to a terrorist group?",
+      "correct_chunk_id": "freedomhouse-rw-2022-fotn-chunk-0053",
+      "doc_id": "freedomhouse-rw-2022-fotn",
+      "organization": "Freedom House",
+      "category": "general"
+    },
+    {
+      "question": "so how did the govt there respond to online journalists and media workers during that period covered?",
+      "original_question": "How did the Ethiopian government respond to online journalists and media workers during the period covered?",
+      "correct_chunk_id": "freedomhouse-et-2024-fotn-chunk-0097",
+      "doc_id": "freedomhouse-et-2024-fotn",
+      "organization": "Freedom House",
+      "category": "general"
+    },
+    {
+      "question": "what kinds of abuse and retaliation did youtube commentators and journalists report after criticizing the govt or talking about sensitive historical events?",
+      "original_question": "What kinds of abuse and retaliation did YouTube commentators and journalists report after criticizing the government or discussing sensitive historical events?",
+      "correct_chunk_id": "freedomhouse-rw-2023-fotn-chunk-0094",
+      "doc_id": "freedomhouse-rw-2023-fotn",
+      "organization": "Freedom House",
+      "category": "general"
+    },
+    {
+      "question": "what kinds of online harassment and influence ops have been used to support the rwandan govt and go after its critics?",
+      "original_question": "What kinds of online harassment and influence operations have been used to support the Rwandan government and target its critics?",
+      "correct_chunk_id": "freedomhouse-rw-2024-fotn-chunk-0045",
+      "doc_id": "freedomhouse-rw-2024-fotn",
+      "organization": "Freedom House",
+      "category": "general"
+    },
+    {
+      "question": "what kinda barriers make it hard for different internet or telecom providers to operate in that country?",
+      "original_question": "What kinds of barriers make it difficult for different internet or telecom providers to operate in Ethiopia?",
+      "correct_chunk_id": "freedomhouse-et-2023-fotn-chunk-0024",
+      "doc_id": "freedomhouse-et-2023-fotn",
+      "organization": "Freedom House",
+      "category": "general"
+    },
+    {
+      "question": "what kinda legal penalties does that country impose for lawful online expression?",
+      "original_question": "What kinds of legal penalties does Rwanda impose for lawful online expression?",
+      "correct_chunk_id": "freedomhouse-rw-2022-fotn-chunk-0052",
+      "doc_id": "freedomhouse-rw-2022-fotn",
+      "organization": "Freedom House",
+      "category": "general"
+    },
+    {
+      "question": "so like what id requirements do mobile subscribers gotta meet in that country, and how have sim card rules been tightened since 2018?",
+      "original_question": "What identity requirements must mobile subscribers meet in Uganda, and how have SIM card rules been tightened since 2018?",
+      "correct_chunk_id": "freedomhouse-ug-2023-fotn-chunk-0108",
+      "doc_id": "freedomhouse-ug-2023-fotn",
+      "organization": "Freedom House",
+      "category": "general"
+    },
+    {
+      "question": "what kinda speech and online stuff are restricted under that country's penal code and ICT law, and like what penalties can they carry?",
+      "original_question": "What kinds of speech and online behavior are restricted under Rwanda’s penal code and ICT law, and what penalties can they carry?",
+      "correct_chunk_id": "freedomhouse-rw-2023-fotn-chunk-0059",
+      "doc_id": "freedomhouse-rw-2023-fotn",
+      "organization": "Freedom House",
+      "category": "general"
+    },
+    {
+      "question": "so like how did that country's data pricing and taxes mess with lower-income ppl trying to get on the internet?",
+      "original_question": "How did Kenya’s data pricing and taxation affect the ability of lower-income people to access the internet?",
+      "correct_chunk_id": "freedomhouse-ke-2023-fotn-chunk-0012",
+      "doc_id": "freedomhouse-ke-2023-fotn",
+      "organization": "Freedom House",
+      "category": "general"
+    },
+    {
+      "question": "so like what happened to the 3 Iwacu TV journalists who got arrested in 2018 over stuff tied to their reporting and online content?",
+      "original_question": "What happened to the three Iwacu TV journalists who were arrested in 2018 on charges related to their reporting and online content?",
+      "correct_chunk_id": "freedomhouse-rw-2023-fotn-chunk-0066",
+      "doc_id": "freedomhouse-rw-2023-fotn",
+      "organization": "Freedom House",
+      "category": "general"
+    },
+    {
+      "question": "what kinds of AI-driven tactics have been used in kenya to spread false info and kinda discourage public protest?",
+      "original_question": "What kinds of AI-driven tactics have been used in Kenya to spread false information and discourage public protest?",
+      "correct_chunk_id": "cipesa-ke-2025-sifa-ai-country-chunk-0048",
+      "doc_id": "cipesa-ke-2025-sifa-ai-country",
+      "organization": "CIPESA",
+      "category": "general"
+    },
+    {
+      "question": "what kind of online abuse did women in politics face during the COVID-19 pandemic?",
+      "original_question": "What kind of online abuse did women in Kenyan politics face during the COVID-19 pandemic?",
+      "correct_chunk_id": "freedomhouse-ke-2022-fotn-chunk-0117",
+      "doc_id": "freedomhouse-ke-2022-fotn",
+      "organization": "Freedom House",
+      "category": "general"
+    },
+    {
+      "question": "what happened to journalists and activists during that emergency crackdown on media?",
+      "original_question": "What happened to journalists and activists during the emergency crackdown on media?",
+      "correct_chunk_id": "freedomhouse-et-2024-fotn-chunk-0090",
+      "doc_id": "freedomhouse-et-2024-fotn",
+      "organization": "Freedom House",
+      "category": "general"
+    },
+    {
+      "question": "so like what changes did that country make to its computer misuse law in 2022 and 2023, and what penalties does the amended law put on certain online offenses?",
+      "original_question": "What changes did Uganda make to its computer misuse law in 2022 and 2023, and what penalties does the amended law impose for certain online offenses?",
+      "correct_chunk_id": "freedomhouse-ug-2023-fotn-chunk-0003",
+      "doc_id": "freedomhouse-ug-2023-fotn",
+      "organization": "Freedom House",
+      "category": "general"
+    },
+    {
+      "question": "so like what national internet infra and connectivity stuff was that gov and comms authorities working on between 2018 and 2027?",
+      "original_question": "What national internet infrastructure and connectivity initiatives were Kenya’s government and communications authorities working on between 2018 and 2027?",
+      "correct_chunk_id": "freedomhouse-ke-2024-fotn-chunk-0010",
+      "doc_id": "freedomhouse-ke-2024-fotn",
+      "organization": "Freedom House",
+      "category": "general"
+    },
+    {
+      "question": "what makes net access so hard for a lotta ppl in Rwanda, esp outside Kigali?",
+      "original_question": "What factors make internet access difficult for many people in Rwanda, especially outside Kigali?",
+      "correct_chunk_id": "freedomhouse-rw-2023-fotn-chunk-0011",
+      "doc_id": "freedomhouse-rw-2023-fotn",
+      "organization": "Freedom House",
+      "category": "general"
+    },
+    {
+      "question": "which kenyan activist was reported missing after like an abduction in june 2024?",
+      "original_question": "Which Kenyan activist was reported missing after an abduction in June 2024?",
+      "correct_chunk_id": "freedomhouse-ke-2025-fotn-chunk-0007",
+      "doc_id": "freedomhouse-ke-2025-fotn",
+      "organization": "Freedom House",
+      "category": "general"
+    },
+    {
+      "question": "so what did researchers find about the scale n organization of online activism supporting Tigray?",
+      "original_question": "What did researchers find about the scale and organization of online activism supporting Tigray?",
+      "correct_chunk_id": "freedomhouse-et-2023-fotn-chunk-0083",
+      "doc_id": "freedomhouse-et-2023-fotn",
+      "organization": "Freedom House",
+      "category": "general"
+    },
+    {
+      "question": "so like what concerns have ppl raised about govt advertising and media independence over there in Kenya?",
+      "original_question": "What concerns have been raised about government advertising and media independence in Kenya?",
+      "correct_chunk_id": "freedomhouse-ke-2024-fotn-chunk-0078",
+      "doc_id": "freedomhouse-ke-2024-fotn",
+      "organization": "Freedom House",
+      "category": "general"
+    },
+    {
+      "question": "what barriers have limited competition among telecom providers over there in Ethiopia?",
+      "original_question": "What barriers have limited competition among telecommunications providers in Ethiopia?",
+      "correct_chunk_id": "freedomhouse-et-2023-fotn-chunk-0025",
+      "doc_id": "freedomhouse-et-2023-fotn",
+      "organization": "Freedom House",
+      "category": "general"
+    },
+    {
+      "question": "what legal protections in that country give ppl rights over decisions made by automated systems and like require human review?",
+      "original_question": "What legal protections in Kenya give people rights over decisions made by automated systems and require human review?",
+      "correct_chunk_id": "cipesa-ke-2025-sifa-ai-country-chunk-0065",
+      "doc_id": "cipesa-ke-2025-sifa-ai-country",
+      "organization": "CIPESA",
+      "category": "general"
+    },
+    {
+      "question": "what kinda obstacles do stakeholders say are in the way of effective AI gov in that country?",
+      "original_question": "What kinds of obstacles do stakeholders say are standing in the way of effective AI governance in Ethiopia?",
+      "correct_chunk_id": "cipesa-et-2025-sifa-ai-country-chunk-0065",
+      "doc_id": "cipesa-et-2025-sifa-ai-country",
+      "organization": "CIPESA",
+      "category": "general"
+    },
+    {
+      "question": "what did that film board do to Badhaai Do and I Am Samuel, and why’d they say they werent ok for local viewers?",
+      "original_question": "What action did Kenya’s film board take against the movies Badhaai Do and I Am Samuel, and why did it say they were unsuitable for local viewers?",
+      "correct_chunk_id": "freedomhouse-ke-2024-fotn-chunk-0047",
+      "doc_id": "freedomhouse-ke-2024-fotn",
+      "organization": "Freedom House",
+      "category": "general"
+    },
+    {
+      "question": "so like what factors have made journalists, LGBT+ ppl, and regular social media users in Uganda hold back from speaking openly online?",
+      "original_question": "What factors have caused journalists, LGBT+ people, and ordinary social media users in Uganda to hold back from speaking openly online?",
+      "correct_chunk_id": "freedomhouse-ug-2023-fotn-chunk-0059",
+      "doc_id": "freedomhouse-ug-2023-fotn",
+      "organization": "Freedom House",
+      "category": "general"
+    }
+  ]
+}
