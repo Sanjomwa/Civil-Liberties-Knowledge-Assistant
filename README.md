@@ -10,12 +10,11 @@ flagged rather than smoothed into a confident-sounding narrative.
 
 Built for DataTalksClub's LLM Zoomcamp 2026 capstone project.
 
-> **Status, 2026-07-25:** I've built and verified ingestion, retrieval, and
-> generation. LLM evaluation is built and real-run, with one known gap I'm
-> actively closing (see [Evaluation](#evaluation) and
-> [Limitations](#limitations)). Interface, monitoring, containerization,
-> and deployment aren't built yet — I've stated plainly, section by
-> section, what exists today versus what I still have in progress, per
+> **Status, 2026-07-26:** I've built and verified ingestion, retrieval,
+> generation, LLM evaluation, interface, monitoring, and containerization
+> (see [Quickstart](#quickstart), [Monitoring](#monitoring)). Deployment
+> is the one piece still not built (Tier 3). I've stated plainly, section
+> by section, what exists today versus what I still have in progress, per
 > [`docs/adr/0012-rubric-driven-completion-plan.md`](docs/adr/0012-rubric-driven-completion-plan.md).
 
 ## Contents
@@ -266,43 +265,80 @@ plainly rather than implying otherwise.
 
 ## Monitoring
 
-**Not built yet.** Planned: user feedback capture (thumbs up/down) and a
-dashboard with at least 5 charts (feedback over time, latency, retrieval
-score distribution, source-org mix, token/cost), reusing the pattern from
-this course's own Module 5 (Postgres + Grafana). Tracked in
-`docs/adr/0012-rubric-driven-completion-plan.md`.
+**Built.** Every real query through the Streamlit app (`src/interface/app.py`)
+writes one row to Postgres (`src/interface/db.py`, schema in
+`docs/interface-design.md` Decision 4) — timings, token usage and
+estimated cost, retrieval scores, a citation summary (marker/doc/org/
+score, never excerpt text), and thumbs up/down feedback captured without
+a second `answer()` call.
+
+**Streamlit-native dashboard** (`src/interface/pages/dashboard.py`, a
+second page auto-discovered alongside the main app) is the guaranteed
+deliverable, built and verified first: 6 charts reading directly from
+the `interactions` table — feedback over time, latency (retrieval vs
+LLM, stacked), retrieval score distribution, source-org mix, token/cost
+over time, and citation data-quality (invalid-marker/unsupported-
+paragraph rate — free, since `citations.py` already computes both
+counts).
+
+**Grafana, additive** (`docker-compose.yml`'s third service): the same
+Postgres datasource, provisioned automatically (`grafana/provisioning/`,
+`grafana/dashboards/interactions.json`) with 5 of the 6 panels above,
+anonymous Viewer access so no admin login is needed, and a pinned
+datasource UID matched identically across every panel. Verified against
+real seeded rows before relying on it — every panel query executes
+successfully against the live datasource.
+
+**Feedback vs. the offline judge — different signals, not in tension.**
+Claim-level citation precision (0.946, [Evaluation](#evaluation)) and
+live thumbs up/down measure different things, and live feedback volume
+will realistically be single digits. A handful of live downvotes isn't
+evidence against the offline number, and vice versa — stated here so
+neither gets over-read against the other.
 
 ## Quickstart
 
 ```bash
 git clone https://github.com/Sanjomwa/Civil-Liberties-Knowledge-Assistant.git
 cd Civil-Liberties-Knowledge-Assistant
-uv sync
 cp .env.example .env   # add your OPENAI_API_KEY
+docker compose up --build
 ```
 
-Prerequisites: Python 3.10–3.12, [`uv`](https://docs.astral.sh/uv/) for
-dependency management.
+That's the single end-to-end run command now. Open
+`http://localhost:8501` for the app (the monitoring dashboard is a second
+page in the same app) and `http://localhost:3000` for Grafana.
 
-**No single end-to-end run command yet** — there's no interface to launch
-(see [Monitoring](#monitoring) and [Deployment](#deployment)). Today, the
-pipeline runs as separate scripts, phase by phase:
+**The first startup takes longer than later ones — this is expected, not
+a hang.** The build always bakes a tiered public release of the corpus
+(OONI + CIPESA full text, ~54%) so the stack works unconditionally, with
+no dependency on Freedom House/Access Now's servers being reachable.
+Once the container starts, it makes one attempt to fetch Freedom House
+and Access Now's real text directly from their own servers (hash-
+verified against what this project actually indexed) and re-embeds the
+full corpus if that succeeds — usually a few extra minutes on top of the
+build. If that fetch can't complete (no network, upstream error, hash
+mismatch), the app logs it plainly and keeps serving the 54% baseline
+without crashing — see [Limitations](#limitations) for why this is a
+deliberate design, not a gap.
+
+Prerequisites: Docker and Docker Compose. `uv` and Python 3.10–3.12 are
+only needed if you want to run pipeline scripts directly instead of
+through the container:
 
 ```bash
+uv sync
 python src/ingestion/pipeline.py     # build the corpus from corpus/sources/*.yaml
 python src/retrieval/embed.py        # embed the corpus into data/index/
 ```
 
-I use generation and evaluation as libraries, not scripts, called directly
-from Python:
+Generation and evaluation remain usable as libraries too, not just
+through the app:
 
 ```python
 from src.generation.generate import answer
 result = answer("How does OONI detect Telegram blocking?")
 ```
-
-I'll replace this with a single interface command once Tier 2 of my
-completion plan ships.
 
 ## Data and configuration
 
@@ -555,6 +591,27 @@ Stating this here rather than leaving it to be discovered as an absence.
   addendum); the rubric fix above narrows a documented AI-vs-AI
   disagreement, it doesn't substitute for a real human calibration pass.
   Neither 0.879 nor 0.946 should be read as human-validated yet.
+- **The Docker build ships 54% of the corpus by default; 100% requires a
+  real, disclosed rehydration step, not a hidden gap.** Freedom House
+  and Access Now's licensing doesn't clearly permit bulk republication
+  of their full text (`docs/licensing.md`, ADR-0013), so
+  `dist/corpus-release-v1.zip` — the artifact the Docker build always
+  fetches, checksummed and unconditionally available — carries only
+  OONI and CIPESA's full text; Freedom House/Access Now are
+  metadata-and-hash only. On first container start, `rehydrate.py`
+  fetches their real text directly from their own servers (the same
+  acquisition act their policy already permits, done by whoever runs the
+  container, not by me redistributing it at scale) and re-embeds the
+  full corpus if that succeeds. If it can't reach them — no network,
+  upstream error, hash mismatch — the app logs it plainly and keeps
+  serving the 54% baseline, deliberately, rather than crashing or
+  silently guessing. Verified both paths in a real clean-clone rehearsal
+  (network reachable: confirmed real Freedom-House-only content becomes
+  retrievable; network blocked: confirmed clean fallback, no crash).
+- **Live feedback and the offline judge measure different things** — see
+  [Monitoring](#monitoring). A handful of live thumbs-down votes isn't
+  evidence against the 0.946 claim-level precision number, and vice
+  versa.
 - **No automated tests, no CI/CD** — see [Testing](#testing) and
   [CI/CD](#cicd).
 - **No public deployment yet** — see [Deployment](#deployment).

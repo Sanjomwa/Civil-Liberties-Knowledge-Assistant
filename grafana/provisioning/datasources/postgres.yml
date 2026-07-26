@@ -1,0 +1,21 @@
+apiVersion: 1
+
+datasources:
+  - name: Interactions Postgres
+    type: postgres
+    # Decision 7 (docs/interface-design.md): pin this UID identically here
+    # and in every panel JSON that references it -- a mismatch renders
+    # "datasource not found" in a fresh container.
+    uid: postgres-interactions
+    access: proxy
+    url: postgres:5432
+    database: interactions
+    user: postgres
+    secureJsonData:
+      password: postgres
+    jsonData:
+      sslmode: disable
+      postgresVersion: 1600
+      timescaledb: false
+    isDefault: true
+    editable: false

@@ -1,0 +1,89 @@
+{
+  "title": "Civil Liberties Knowledge Assistant — Monitoring",
+  "uid": "interactions-monitoring",
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "time": {
+    "from": "now-30d",
+    "to": "now"
+  },
+  "panels": [
+    {
+      "id": 1,
+      "title": "Feedback over time",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "datasource": { "type": "postgres", "uid": "postgres-interactions" },
+      "targets": [
+        {
+          "datasource": { "type": "postgres", "uid": "postgres-interactions" },
+          "format": "time_series",
+          "rawSql": "SELECT date_trunc('day', ts) AS time, SUM(CASE WHEN feedback = 1 THEN 1 ELSE 0 END) AS \"up\", SUM(CASE WHEN feedback = -1 THEN 1 ELSE 0 END) AS \"down\" FROM interactions WHERE feedback IS NOT NULL AND $__timeFilter(ts) GROUP BY 1 ORDER BY 1",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Latency (retrieval vs LLM, ms)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "datasource": { "type": "postgres", "uid": "postgres-interactions" },
+      "targets": [
+        {
+          "datasource": { "type": "postgres", "uid": "postgres-interactions" },
+          "format": "time_series",
+          "rawSql": "SELECT ts AS time, retrieval_ms, llm_ms FROM interactions WHERE $__timeFilter(ts) ORDER BY ts",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Retrieval score distribution",
+      "type": "histogram",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "datasource": { "type": "postgres", "uid": "postgres-interactions" },
+      "targets": [
+        {
+          "datasource": { "type": "postgres", "uid": "postgres-interactions" },
+          "format": "table",
+          "rawSql": "SELECT (elem)::float AS score FROM interactions, jsonb_array_elements_text(retrieval_scores) AS elem WHERE $__timeFilter(ts)",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Source-org mix",
+      "type": "piechart",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "datasource": { "type": "postgres", "uid": "postgres-interactions" },
+      "targets": [
+        {
+          "datasource": { "type": "postgres", "uid": "postgres-interactions" },
+          "format": "table",
+          "rawSql": "SELECT unnest(source_orgs) AS org, COUNT(*) AS count FROM interactions WHERE $__timeFilter(ts) GROUP BY 1 ORDER BY 2 DESC",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Tokens and estimated cost over time",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 16 },
+      "datasource": { "type": "postgres", "uid": "postgres-interactions" },
+      "targets": [
+        {
+          "datasource": { "type": "postgres", "uid": "postgres-interactions" },
+          "format": "time_series",
+          "rawSql": "SELECT ts AS time, total_tokens, est_cost_usd::float AS est_cost_usd FROM interactions WHERE $__timeFilter(ts) ORDER BY ts",
+          "refId": "A"
+        }
+      ]
+    }
+  ]
+}
