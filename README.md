@@ -419,7 +419,7 @@ flowchart LR
     subgraph Generation
         J --> K[generate.py<br/>prompts.py]
         K --> L[LLM call]
-        L --> M[citations.py<br/>parses [n] markers]
+        L --> M["citations.py<br/>parses [n] markers"]
     end
     subgraph Evaluation
         M --> N[run_answers.py]

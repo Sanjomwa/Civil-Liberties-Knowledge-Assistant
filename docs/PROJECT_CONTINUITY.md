@@ -58,10 +58,32 @@ fixed via history rewrite, confirmed clean. A port-exposure incident
 during testing was fixed (`127.0.0.1` binding); its real-world severity
 is genuinely unresolved (Sam suspects it may have been his own testing,
 not an external actor — not confirmed either way). Full detail:
-`reports.md` and `decisionlog.md`, 2026-07-26. **Session paused here for
-the day** — a closing verification prompt was sent to Claude Code to
-confirm final git/container state before Sam commits via VS Code; see
-Section 7's newest entry for exactly what's still open.
+`reports.md` and `decisionlog.md`, 2026-07-26. **CONFIRMED LIVE ON
+GITHUB, same day:** the repo's homepage view initially looked stale (2
+commits, minimal file tree) — this was GitHub's anonymous-viewer edge
+cache, not a real problem. Direct fetch of
+`raw.githubusercontent.com/.../main/src/interface/app.py` returned the
+real current file, byte-for-byte matching what was built — independent
+confirmation the push is genuinely live. Tier 2 is closed, verified two
+ways (git-level re-fetch by Claude Code, and an independent raw-file
+fetch from Cowork), 7 days ahead of the 2026-08-02 feature-freeze gate.
+
+**FURTHER CONFIRMED, same day, on a genuinely independent machine:** after
+a Docker Desktop registry-corruption reinstall, the full stack was rebuilt
+and verified end to end on a clean install — 100% corpus rehydration on a
+real first run (Freedom House 16/16, Access Now 4/4, both hash-verified),
+a real question driven through an actual headless-browser session against
+the running app with a correctly-cited answer confirmed logged in
+Postgres. **Two real bugs found, root-caused, not yet fixed:** (1) Grafana
+dashboard panels fail at render time (`grafana/grafana:latest` resolved to
+13.1.1, whose Postgres plugin needs `jsonData.database`, not the legacy
+top-level `database:` field the provisioning YAML uses — provisioning
+itself is clean, only panel queries fail); (2) `README.md`'s architecture
+diagram doesn't render at all — node `M`'s label has an unescaped nested
+`[n]` inside its outer `[...]` node definition, breaking the whole
+mermaid parse. Both fixes are known and scoped (add `jsonData.database`;
+quote node `M`'s label), handed to Claude Code as a follow-up prompt,
+2026-07-26. Full detail: `decisionlog.md`, same date.
 
 **Ingestion, retrieval, and generation phases are CLOSED. LLM evaluation
 is built and real-run against the real corpus and API — both rubric gaps
@@ -706,21 +728,37 @@ auto-vs-manual question; scaling further is future work, see Section 7),
 
 ## 7. Open action items (don't lose track of these)
 
-**NEWEST, 2026-07-26 — Tier 2 done for the day; session closed on a
-verification prompt, not a build task.** With Steps 1-7 complete and
-the git-history incident resolved, the only thing sent to Claude Code
-before stopping was a close-out/verification prompt (not new build
-work): confirm exact current `git status`/`git log` state, stop and
-tear down any still-running rehearsal Docker containers (relevant given
-the port-exposure incident above), remove the scratch clean-clone
-rehearsal directory if it's just a disposable test artifact, and report
-back plainly rather than leaving anything running unattended overnight.
-**Next session starts from whatever that report says** — likely: Sam
-commits the Tier 2 work via VS Code (two commit messages already
-drafted, security-fix isolated from the feature commit), then Tier 3
-(cloud deployment, query rewriting, only if still on schedule per
-ADR-0012) or back to the still-pending human-calibration review /
-paused dlt workshop, Sam's call. Nothing was left mid-task.
+**NEWEST STILL, 2026-07-26 — two real, scoped bugs open, both root-caused,
+neither fixed yet.** (1) Grafana dashboard panels fail at render time
+(`"no default database configured"`) — `docker-compose.yml`'s unpinned
+`grafana/grafana:latest` resolved to 13.1.1, whose Postgres plugin needs
+`jsonData.database` in `grafana/provisioning/datasources/postgres.yml`,
+not the legacy top-level `database:` field currently there. (2)
+`README.md`'s architecture diagram (a mermaid flowchart) doesn't render at
+all — node `M`'s label (`citations.py<br/>parses [n] markers`) has an
+unescaped `[n]` nested inside the outer node's `[...]` brackets, breaking
+mermaid's parse for the whole diagram, not just that node. Fix: quote the
+label (`M["citations.py<br/>parses [n] markers"]`). Both found during the
+same real-machine build verification that otherwise fully succeeded (100%
+rehydration, a real browser-driven question answered and confirmed in
+Postgres). Follow-up Claude Code prompt drafted same session — see
+`decisionlog.md`, 2026-07-26, for full detail on both.
+
+**NEWEST, 2026-07-26 — Tier 2 confirmed live on GitHub; genuinely
+closed, not just believed closed.** Following the close-out
+verification prompt, Sam confirmed the repo directly in his own
+browser, and Cowork independently confirmed via a raw-file fetch of
+`src/interface/app.py` from `main` — real, current content, not a
+cached artifact. Two commit messages were drafted (security-fix
+isolated from the feature commit) for whenever Sam commits the
+remaining working-tree state via VS Code, if anything is still
+uncommitted beyond the two rewritten rehearsal commits (Claude Code's
+own `git status`/`git log` report from the close-out prompt is the
+source of truth on that, not assumed here). **Next session starts
+from:** Tier 3 (cloud deployment, query rewriting — only if still on
+schedule per ADR-0012, and Tier 2 landing 7 days early makes that more
+likely) or back to the still-pending human-calibration review / paused
+dlt workshop — Sam's call. Nothing was left mid-task.
 
 **Doc-pruning audit, 2026-07-25:** this section was read in full alongside
 `decisionlog.md` against the same preservation constraint (context, real

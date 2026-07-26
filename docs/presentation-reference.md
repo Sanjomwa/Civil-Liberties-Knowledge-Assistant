@@ -8,8 +8,9 @@ has to be re-derived or re-tested to find; if a number below and one of those
 files ever disagree, the dated ADR/PROJECT_CONTINUITY entry wins, not this
 page — flag the drift rather than trusting this copy.
 
-Last built: 2026-07-25. Rebuild by re-reading `decisionlog.md` in full
-whenever a phase closes or a headline number changes.
+Last built: 2026-07-26 (Tier 2 section added). Rebuild by re-reading
+`decisionlog.md` in full whenever a phase closes or a headline number
+changes.
 
 ---
 
@@ -41,7 +42,7 @@ course-management site multiple times, not assumed).
 | Generation | CLOSED | 2026-07-24 | ADR-0009 |
 | LLM evaluation | Built, ONE step open (human calibration) | — | ADR-0010, 0011, 0014 |
 | Rubric completion (Tier 1) | DONE | 2026-07-25 | ADR-0012 |
-| Rubric completion (Tier 2) | Prompt A/B done; interface/monitoring/docker NOT started | — | ADR-0012 |
+| Rubric completion (Tier 2) | DONE — interface, Postgres, Grafana, Docker, both rehearsal directions verified, confirmed live on GitHub | 2026-07-26 | `interface-design.md`, `reports.md` |
 | Rubric completion (Tier 3) | Not started, contingent on schedule | — | ADR-0012 |
 
 ---
@@ -209,6 +210,80 @@ course-management site multiple times, not assumed).
   ~51,150 output tokens, low single-digit dollars on `gpt-5.4-mini`
   pricing. Token volume, not call count, is the real cost driver.
 
+## Tier 2 — interface, monitoring, containerization — real numbers
+
+- **Streamlit interface** (`src/interface/app.py`): single page, wraps the
+  existing `answer()` unchanged. 4 real example questions (pulled from the
+  filtered ground truth, not invented), sourcing-status split
+  (`st.warning` for thin/none, `st.info` for broad/single-org), a
+  retrieved-excerpts+scores expander, thumbs up/down feedback, 20-query
+  session cap, 500-char input cap.
+- **Postgres logging** (`src/interface/db.py`): one `interactions` table,
+  reduced projection (never raw citation excerpt text). `est_cost_usd()`
+  raises `UnknownModelError` on an unrecognized model rather than silently
+  logging 0 — confirmed to actually raise, not just documented to.
+- **Dashboard** (`src/interface/pages/dashboard.py`): 6 charts, Streamlit-
+  native, no external dependency to view — feedback over time, latency
+  (stacked retrieval/LLM), retrieval-score distribution, source-org mix,
+  token/cost over time, citation data-quality rate.
+- **Docker + rehydrate-on-first-run** (ADR-0013's tiered release,
+  `docs/interface-design.md` Decision 8): build time always bakes the
+  54%-public-text release (1,520 chunks, OONI+CIPESA) so `docker compose
+  up` unconditionally works; first container start attempts
+  `rehydrate.py` against Freedom House + Access Now's own servers to
+  reach the full 3,783-chunk corpus, re-embeds only on full success,
+  degrades gracefully to the 54% baseline on any failure (logged
+  plainly, never a crash). **Both directions verified for real**, not
+  assumed: network-reachable rehearsal reached 100% coverage and a real
+  generation call cited real rehydrated Freedom House text; network-
+  blocked rehearsal failed cleanly (`0/16`, `0/4`), no re-embed
+  attempted, confirmed via a live `search()` call that the container
+  correctly held at the 1,520-chunk baseline with zero drift.
+- **Grafana**: third compose service, `GF_AUTH_ANONYMOUS_ENABLED=true`
+  (Viewer role), provisioned Postgres datasource + 5-panel dashboard
+  (datasource UID pinned identically everywhere it's referenced).
+  Verified against real seeded data through Grafana's own
+  `/api/ds/query` endpoint — landed clean, the "fall back to Streamlit-
+  only" stop condition never triggered.
+- **Real incident, disclosed not smoothed over**: during testing,
+  `docker-compose.yml` published the app port on all host interfaces
+  (`8501:8501`), and Streamlit's dev server logged an external URL on
+  the host's public IP. Three real queries appeared in Postgres that the
+  tester didn't ask, ~$0.006 in real OpenAI cost — caught by noticing
+  unexplained rows, not an alert. **Severity genuinely unresolved**: Sam
+  suspects it may have been his own testing rather than an outside
+  party; not confirmed either way. Fix applied regardless of cause:
+  `"8501:8501"` → `"127.0.0.1:8501:8501"`.
+- **Git-attribution incident, found and fully resolved same day**: a
+  local rehearsal commit carried Claude Code's identity/AI-attribution
+  trailer and was pushed to public GitHub history — caught, diagnosed
+  (two commits affected), fixed via `git commit-tree` rebuild + tagged
+  backup + `git push --force-with-lease`, confirmed clean. A strict
+  standing rule (real git identity, no AI trailer, verify before
+  reporting done) was added to `claude-code-wsl-CLAUDE.md` v5 to prevent
+  recurrence.
+- **Confirmed live on GitHub, 2026-07-26**: `main`'s homepage view
+  initially looked stale (2 commits, old file tree) — traced to GitHub's
+  anonymous-viewer edge cache, not a real problem. Direct fetch of
+  `raw.githubusercontent.com/.../main/src/interface/app.py` returned the
+  real, current file byte-for-byte — independent proof the push is
+  genuinely live, not just locally believed to be.
+- **Confirmed on a second, independent machine, same day**: after a
+  Docker Desktop reinstall (unrelated Windows registry corruption), the
+  full stack was built and verified end to end from a genuine clean
+  state — 100% corpus rehydration on a real first run (both orgs
+  hash-verified), a real question driven through an actual headless
+  browser against the running app with a correctly-cited answer
+  confirmed logged in Postgres afterward via direct query. **Two real
+  bugs found, root-caused, not yet fixed**: Grafana panels fail at query
+  time because the unpinned `grafana/grafana:latest` tag resolved to a
+  version needing `jsonData.database` instead of the provisioning YAML's
+  legacy top-level `database:` field; the README's mermaid architecture
+  diagram fails to render at all because one node label has an unescaped
+  `[n]` nested inside its own `[...]` brackets, breaking the whole
+  diagram's parse. Both fixes are known, scoped, and handed to Claude
+  Code as a follow-up.
+
 ## Rubric audit — what's actually earned vs. still open
 
 Checked directly against `DataTalksClub/llm-zoomcamp`'s real `project.md`
@@ -223,15 +298,19 @@ Evaluation Criteria (fetched verbatim, not assumed), against real code:
   documentation alone (a 306-byte one-sentence README) — fixed via the
   Tier 1 README rewrite + shipping the processed corpus + disclosing
   OONI's manual-acquisition/429 constraint explicitly.
-- **Interface and Containerization: still 0/2** — no CLI/UI/Dockerfile/
-  compose anywhere in `src/` as of 2026-07-25. This is Tier 2's main
-  remaining work, against the **2026-08-02 feature-freeze gate**.
+- **Interface and Containerization: now built — 2/2 achievable**, built
+  and verified 2026-07-26, well ahead of the 2026-08-02 feature-freeze
+  gate. Streamlit UI + feedback, Postgres-backed 6-chart dashboard +
+  additive Grafana, Docker with a real rehydrate-on-first-run mechanism
+  verified both directions. See the Tier 2 section above for detail.
 - Completion plan (ADR-0012, Opus 5 consult): Tier 1 (by 7/27, done) —
-  README, corpus release, re-rank evaluation. Tier 2 (by 8/2) — Prompt A/B
-  (done), Streamlit + thumbs up/down feedback, a 5-chart monitoring
-  dashboard, docker-compose. Tier 3 (8/3–05, only if on schedule) — cloud
-  deployment (highest-value portfolio item, the link recruiters actually
-  click), query rewriting if time remains. 8/6–07 is buffer, not build.
+  README, corpus release, re-rank evaluation. **Tier 2 (target 8/2, done
+  early 7/26)** — Prompt A/B (done), Streamlit + thumbs up/down feedback,
+  monitoring dashboard, docker-compose, all done. Tier 3 (8/3–05, only if
+  on schedule) — cloud deployment (highest-value portfolio item, the link
+  recruiters actually click), query rewriting if time remains. 8/6–07 is
+  buffer, not build. **Ahead of schedule as of 2026-07-26** — Tier 2
+  closed 7 days before its own gate.
 
 ## Build-in-public (LinkedIn series)
 
