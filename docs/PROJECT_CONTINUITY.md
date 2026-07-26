@@ -728,21 +728,121 @@ auto-vs-manual question; scaling further is future work, see Section 7),
 
 ## 7. Open action items (don't lose track of these)
 
-**NEWEST STILL, 2026-07-26 — two real, scoped bugs open, both root-caused,
-neither fixed yet.** (1) Grafana dashboard panels fail at render time
-(`"no default database configured"`) — `docker-compose.yml`'s unpinned
-`grafana/grafana:latest` resolved to 13.1.1, whose Postgres plugin needs
-`jsonData.database` in `grafana/provisioning/datasources/postgres.yml`,
-not the legacy top-level `database:` field currently there. (2)
-`README.md`'s architecture diagram (a mermaid flowchart) doesn't render at
-all — node `M`'s label (`citations.py<br/>parses [n] markers`) has an
-unescaped `[n]` nested inside the outer node's `[...]` brackets, breaking
-mermaid's parse for the whole diagram, not just that node. Fix: quote the
-label (`M["citations.py<br/>parses [n] markers"]`). Both found during the
-same real-machine build verification that otherwise fully succeeded (100%
-rehydration, a real browser-driven question answered and confirmed in
-Postgres). Follow-up Claude Code prompt drafted same session — see
-`decisionlog.md`, 2026-07-26, for full detail on both.
+**NEWEST OF ALL, 2026-07-26 — round 4: Sam chose to fix both flagged
+gaps now; Fable rules against a code classifier for Q12/Q15, prescribes
+a structural (labeled fact block) prompt fix with a pre-approved
+append-only fallback.** Gap 2 (judge-harness default) needs no
+consult — mechanical fix: add `--judge-version` to
+`evaluate_generation.py`, default `v2` (ADR-0014's adopted headline, not
+the superseded v1). Gap 1 (Q12/Q15) got a fourth Fable consult: the
+country fix's proper-noun detection had near-zero false-positive cost;
+an org/time-period meta-question detector would collide with genuine
+in-scope questions using the same words, and a false positive would
+replace a real answer with boilerplate — worse than today's gap. Ruled:
+restructure the scope card from one sentence (countries as grammatical
+head, orgs/dates as trailing modifiers) into a labeled fact block
+(countries / sources / time window) plus an explicit line naming the
+real failure mode (retrieved excerpts are always a strict subset of the
+corpus, never its scope) — a structural fix, not a fifth wording
+iteration. Explicit pre-approved fallback if that's still not enough:
+an append-only footer (detect the meta-question, check the answer for
+completeness, append missing facts — never replace), mirroring the
+country fix's own append-only discipline. Not yet implemented — next
+step is a Claude Code handoff doing both fixes, then a narrow re-test of
+Q11-15 across all three rounds' phrasings. Full detail:
+`decisionlog.md`, 2026-07-26.
+
+**PRIOR, 2026-07-26 — ADR-0015 CLOSED: round 3 (code-level fix)
+succeeded, 14/14, full re-evaluation clean, 0.946 confirmed unaffected.**
+The deterministic out-of-scope disclosure (detected in `generate.py`, a
+keyword list grounded in real corpus text, `\b`-bounded regex to avoid
+Niger-in-Nigeria/Mali-in-Somalia false positives) fixed both of round 2's
+real failures (Q16, Q19) with no over-firing on Q11's clean scope answer.
+Full re-evaluation (122 questions, 496 claims) was run fresh, and a real
+methodology bug was caught before being reported as a false regression:
+`evaluate_generation.py` silently defaults to the superseded v1 judge
+rubric, not the adopted v2 headline. Correctly re-computed both
+methodology-matched comparisons: v1-vs-v1 moved 1.0 point, v2-vs-v2 moved
+1.44 points — both within the task's own ~2-point tolerance. **0.946
+stands, unchanged, not touched in README.md or presentation-reference.md.**
+Two smaller follow-up gaps found and explicitly flagged, not fixed here
+(correctly not bundled into an already-closing task): (1) the same
+concrete-evidence-over-scope-card preference that caused the original
+incident also affects two other scope-card sub-facets — Q12 answers only
+2 of the real 4 source organizations, Q15 computes a narrower time
+range than the stated 2022-2026, both because the model infers from
+retrieved evidence rather than reciting the fixed scope-card facts,
+neither ever flagged by the automated checker across all three rounds
+until read manually; (2) `evaluate_generation.py` has no CLI flag to
+select the judge rubric version, so any future "run the existing
+harness" instruction will keep silently producing a v1 number unless a
+`--judge-version` flag is added or the default is deliberately changed to
+v2. Full detail: `reports.md` and `decisionlog.md`, 2026-07-26. Sam's
+call on what's next: fix the two flagged gaps in one more small round,
+or move on (Tier 3, the paused human-calibration review, or the dlt
+workshop).
+
+**PRIOR, 2026-07-26 — round 2 of the ADR-0015 fix hit a real regression;
+Fable round 3 said stop patching the prompt, move the check into code.** Round 2's disclose-don't-refuse wording (previous entry
+below) was applied verbatim and re-tested against the narrow Q11-20/
+22-25 set: real result 12/14. Three (Q17/Q18/Q20) produced a correct
+disclosure in their own wording — automated-checker false negatives.
+**Q19 still fails** (confident Egypt answer, no disclosure). **Q16 is a
+genuine regression** — passed clean in round 1, now answers Nigeria's
+shutdowns with zero disclosure, indistinguishable from an in-scope
+answer. Real pattern found: both failures are the two out-of-scope
+questions where the model had one confident, well-supported citation;
+the three passes all had evidence the model was already hedging about
+for unrelated reasons — working hypothesis that the disclosure only
+surfaces when the model already feels uncertain, not reliably from rule
+2 itself. A third Fable consult (fresh call, no continuation available)
+**ruled against a fourth prompt-wording attempt** — a conditional
+mid-prompt rule structurally competes with generation confidence and
+loses exactly when confidence is high — and recommended moving the
+out-of-scope disclosure to a **deterministic code-level check** (detect
+the country, prepend a fixed non-generated sentence) rather than relying
+on the LLM to self-regulate, explicitly drawing the parallel to how this
+project already treats citation markers as structurally
+non-fabricable (ADR-0009). Grounding check against the real repo:
+`src/retrieval/search.py` already has this exact pattern
+(`COUNTRY_KEYWORDS`/`_detect_countries`) for the five *in-scope*
+countries (P2, 2026-07-22) — no equivalent exists yet for out-of-scope
+countries, and it's not yet confirmed whether existing chunk `countries`
+metadata can be reused or a parallel keyword list needs building from
+what CIPESA/Access Now's pan-continental documents actually name. **Not
+yet implemented** — next step is a Claude Code handoff moving the
+disclosure to code (`generate.py`), re-testing the same narrow set, then
+Step 3 once clean. Full detail: `decisionlog.md`, 2026-07-26 (two
+consecutive same-day entries).
+
+**PRIOR, 2026-07-26 (round 1) — ADR-0015 Steps 1-2 run for real: 23/25,
+two genuine failures, resolved by a follow-up Fable ruling.** The
+scope-card + soft-boundary prompt change was implemented and tested
+against the real 25-question suite: 23/25 passed (after correcting a
+false-positive in the automated checker), with the original incident
+itself confirmed fixed (Q11 and all meta/boundary questions pass clean).
+Two real failures — Q18 (Kenya vs. Nigeria) and Q19 (Egypt surveillance
+tech) — both got real, validly-cited answers instead of the required
+plain decline, because CIPESA's/Access Now's pan-continental reports
+genuinely, substantively cover those countries. A follow-up Fable
+consult ruled the test suite's pass condition was wrong, not the prompt
+— forcing a decline would assert a false statement about real evidence.
+Fable's round-2 fix (disclose, don't refuse) is the wording that then
+hit the round-2 regression described above. Full detail:
+`docs/adr/0015-corpus-scope-prompt-card-and-behavioral-test-suite.md`,
+`reports.md`, and `decisionlog.md`, 2026-07-26.
+
+**RESOLVED, 2026-07-26 — the two real Grafana/README bugs below are now
+fixed and verified, not open.** (1) Grafana panels: `docker-compose.yml`'s
+`grafana/grafana:latest` (resolved to 13.1.1) needed `jsonData.database`
+in `grafana/provisioning/datasources/postgres.yml`, not just the legacy
+top-level `database:` field — added, verified via a real browser check (4
+panels rendering real data, 1 correctly "No data," no error). (2)
+`README.md`'s mermaid diagram: node `M`'s unescaped nested `[n]` inside
+its own `[...]` bracket broke the whole parse — fixed by quoting the label
+(`M["citations.py<br/>parses [n] markers"]`); all 16 nodes re-checked
+directly, only `M` had the problem. Both confirmed fixed via `reports.md`
+and a commit message provided same session.
 
 **NEWEST, 2026-07-26 — Tier 2 confirmed live on GitHub; genuinely
 closed, not just believed closed.** Following the close-out

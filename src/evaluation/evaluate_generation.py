@@ -114,7 +114,7 @@ def build_pending_judgments(records: list[dict], done_ids: set[str]) -> list[dic
     return pending
 
 
-def run_judging(limit: int | None, resume: bool) -> None:
+def run_judging(limit: int | None, resume: bool, judge_version: str = "v2") -> None:
     records = load_results()
     done_ids = load_done_judgment_ids() if resume else set()
     pending = build_pending_judgments(records, done_ids)
@@ -127,17 +127,23 @@ def run_judging(limit: int | None, resume: bool) -> None:
         return
 
     info = get_judge_model()
-    print(f"[judge model] {info['model']} (fallback used: {info['used_fallback']})")
+    print(f"[judge model] {info['model']} (fallback used: {info['used_fallback']}), "
+          f"prompt_version={judge_version}")
 
     total_calls = 0
     with open(JUDGMENTS_PATH, "a", encoding="utf-8") as f:
         for i, item in enumerate(pending, start=1):
             try:
-                verdict = judge(item["claim_text"], item["cited_chunk_texts"])
+                verdict = judge(item["claim_text"], item["cited_chunk_texts"],
+                                 prompt_version=judge_version)
             except Exception as e:  # noqa: BLE001 -- one bad claim shouldn't kill the whole run
                 print(f"[FAIL] {item['judgment_id']} -- {e}", file=sys.stderr)
                 continue
-            record = {**item, **verdict}
+            # Recorded per-row (not just printed) so --resume can never
+            # silently mix rubric versions in one judgments.jsonl without it
+            # being visible in the data itself -- this is exactly the kind
+            # of silent default this flag exists to stop happening again.
+            record = {**item, **verdict, "prompt_version": judge_version}
             f.write(json.dumps(record, ensure_ascii=False) + "\n")
             f.flush()
             total_calls += 1
@@ -410,6 +416,17 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--limit", type=int, default=None)
     parser.add_argument("--resume", action="store_true")
+    parser.add_argument("--judge-version", choices=["v1", "v2"], default="v2",
+                        help="Judge rubric version passed to judge()'s own prompt_version "
+                             "parameter (src/evaluation/judge.py). Defaults to v2 -- the "
+                             "ADR-0014-adopted headline methodology -- not judge()'s own "
+                             "default of v1 (the original, defect-confirmed rubric it "
+                             "superseded). Round 3 (2026-07-26) found this script previously "
+                             "called judge() with no prompt_version at all, silently "
+                             "inheriting v1 and producing a number that looked comparable to "
+                             "the frozen 0.946 headline but wasn't -- this flag/default exists "
+                             "so that can't happen silently again. Pass --judge-version v1 "
+                             "explicitly to reproduce the original, superseded methodology.")
     parser.add_argument("--score-review", action="store_true",
                         help="Join the calibration sample's human_verdict column back on "
                              "judgment_id and compute the confusion matrix/kappa/fallback.")
@@ -439,7 +456,7 @@ def main() -> None:
         write_report(judgment_agg, mechanical_agg, refusal_review, review_score, judge_info)
         return
 
-    run_judging(limit=args.limit, resume=args.resume)
+    run_judging(limit=args.limit, resume=args.resume, judge_version=args.judge_version)
 
     records = load_results()
     judgments = load_judgments()

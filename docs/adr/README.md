@@ -80,6 +80,23 @@ observable condition, not just a feeling that something isn't working.
 
 ## Status
 
+**Fifteen ADRs exist as of 2026-07-26.**
+`0015-corpus-scope-prompt-card-and-behavioral-test-suite.md` — a real
+user query ("what countries are under this corpus's scope?") surfaced a
+genuine gap: the app answered from whatever was retrieved (a ~38-country
+list from CIPESA's pan-continental reports) instead of the true 5-country
+curated scope, because curation facts aren't stated in any document's
+text. Fable consulted (Sam's explicit choice this instance) — **disagreed
+with the blunt "5 countries only, say I don't know otherwise" fix Sam
+first proposed**, since a hard country filter would strip real, cited,
+useful comparative context and wouldn't fix the actual problem (a
+category of question evidence-only retrieval can't answer). Adopted
+instead: a small scope-card addition to `SYSTEM_PROMPT` plus a soft
+out-of-scope-country rule, no retrieval changes, a new 25-question
+behavioral test suite (`docs/behavioral-test-suite.md`), and a mandatory
+full re-evaluation run since this touches the already-measured (0.946)
+generation phase.
+
 **Fourteen ADRs exist as of 2026-07-25 (later same day).**
 `0014-judge-rubric-v2-headline-citation-precision.md` — the human-
 calibration check ADR-0011 requires never happened as designed (an
