@@ -728,7 +728,26 @@ auto-vs-manual question; scaling further is future work, see Section 7),
 
 ## 7. Open action items (don't lose track of these)
 
-**NEWEST OF ALL, 2026-07-26 — round 4: Sam chose to fix both flagged
+**NEWEST OF ALL, 2026-07-26 — ADR-0015 line of work fully CLOSED, all
+four rounds.** Round 4 implemented both fixes: `--judge-version` CLI flag
+on `evaluate_generation.py` (default now `v2`, matching ADR-0014's
+adopted headline; `prompt_version` also now recorded per judgment row to
+prevent silent rubric-mixing on `--resume`), and the Fable-prescribed
+scope-card restructure (labeled fact block). Canonical Q11/12/14/15: 4/4
+pass. Phrasing-variance testing (per the task's own instruction) found
+two real gaps ("what are your data sources" / "what is the date range of
+the evidence"), which correctly triggered the pre-approved append-only
+fallback (no new consult needed) — built exactly to Fable's spec,
+verified to fire only when actually needed, zero false positives across
+all other 20 test questions. **One small, honestly-disclosed residual
+gap remains:** those exact two paraphrasings aren't caught by the
+fallback's own literal keyword list (extra words break the substring
+match) — deliberately not patched unprompted, since the
+narrow-list/accept-some-false-negatives tradeoff was Fable's explicit
+design choice, not Claude Code's to expand. Low-stakes, not urgent.
+Full detail: `reports.md` and `decisionlog.md`, 2026-07-26.
+
+**PRIOR, 2026-07-26 — round 4: Sam chose to fix both flagged
 gaps now; Fable rules against a code classifier for Q12/Q15, prescribes
 a structural (labeled fact block) prompt fix with a pre-approved
 append-only fallback.** Gap 2 (judge-harness default) needs no
