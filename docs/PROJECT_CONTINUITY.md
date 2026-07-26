@@ -47,6 +47,22 @@ the tooling level; Sam's call whether that's worth automating.
 
 ## 1. Current state (snapshot)
 
+**UPDATED 2026-07-26 — Tier 2 (ADR-0012) is built and verified:
+Streamlit interface, Postgres logging, Grafana dashboard, Docker with
+rehydrate-on-first-run.** Both clean-clone rehearsal directions run for
+real (network-reachable: 100% corpus coverage reached and proven via a
+real citation from rehydrated Freedom House text; network-blocked:
+clean fallback to the 54% baseline, zero drift). A real git-attribution
+incident (Claude Code's identity in pushed GitHub history) was found and
+fixed via history rewrite, confirmed clean. A port-exposure incident
+during testing was fixed (`127.0.0.1` binding); its real-world severity
+is genuinely unresolved (Sam suspects it may have been his own testing,
+not an external actor — not confirmed either way). Full detail:
+`reports.md` and `decisionlog.md`, 2026-07-26. **Session paused here for
+the day** — a closing verification prompt was sent to Claude Code to
+confirm final git/container state before Sam commits via VS Code; see
+Section 7's newest entry for exactly what's still open.
+
 **Ingestion, retrieval, and generation phases are CLOSED. LLM evaluation
 is built and real-run against the real corpus and API — both rubric gaps
 identified in the 2026-07-24 audit (ADR-0012) are now addressed.** The
@@ -689,6 +705,22 @@ auto-vs-manual question; scaling further is future work, see Section 7),
 `check_drift.py` (still no corpus version change to detect drift against).
 
 ## 7. Open action items (don't lose track of these)
+
+**NEWEST, 2026-07-26 — Tier 2 done for the day; session closed on a
+verification prompt, not a build task.** With Steps 1-7 complete and
+the git-history incident resolved, the only thing sent to Claude Code
+before stopping was a close-out/verification prompt (not new build
+work): confirm exact current `git status`/`git log` state, stop and
+tear down any still-running rehearsal Docker containers (relevant given
+the port-exposure incident above), remove the scratch clean-clone
+rehearsal directory if it's just a disposable test artifact, and report
+back plainly rather than leaving anything running unattended overnight.
+**Next session starts from whatever that report says** — likely: Sam
+commits the Tier 2 work via VS Code (two commit messages already
+drafted, security-fix isolated from the feature commit), then Tier 3
+(cloud deployment, query rewriting, only if still on schedule per
+ADR-0012) or back to the still-pending human-calibration review /
+paused dlt workshop, Sam's call. Nothing was left mid-task.
 
 **Doc-pruning audit, 2026-07-25:** this section was read in full alongside
 `decisionlog.md` against the same preservation constraint (context, real
