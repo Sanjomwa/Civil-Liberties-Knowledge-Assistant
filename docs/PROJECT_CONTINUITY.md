@@ -759,7 +759,67 @@ auto-vs-manual question; scaling further is future work, see Section 7),
 
 ## 7. Open action items (don't lose track of these)
 
-**NEWEST OF ALL, 2026-07-27 — Tier 3 cloud deployment is LIVE and
+**NEWEST OF ALL, 2026-07-28 (later) — ADR-0019 fully closed: Grafana
+at real 6-of-6 panel parity, docs accurate, local rehearsal clean.
+One real gap left, called out on purpose: the live `app-cloud` Cloud
+Run service still runs the old image with the dashboard page baked
+in.** The missing 6th panel (citation data quality) was added to
+`grafana/dashboards/interactions.json`, required a real image
+rebuild+redeploy (dashboard JSON is baked in at build time, a plain
+redeploy doesn't pick it up — same lesson as the earlier database-name
+fix), confirmed via direct `/api/ds/query` calls against the live
+service returning real data, not just the UI. `README.md`/`docs/
+presentation-reference.md` now describe Grafana as the sole 6-panel
+dashboard, matching reality. A full local `docker compose up --build`
+rehearsal (first run, real 45-minute rehydration) confirmed the
+dashboard nav tab is gone at the filesystem level, then drove a real
+question through `app.py` via Streamlit's own `AppTest` headless
+harness (Playwright's Chromium couldn't launch locally — missing a
+system library, not worked around by installing packages outside
+scope), confirmed logged in Postgres, confirmed rendering in local
+Grafana's own 6 panels too. **Not yet done: redeploying `app-cloud`
+itself** — only `grafana-cloud` was touched this round, so the live
+app still serves the old image with the dashboard page baked in. A
+quick standalone rebuild+redeploy (same pattern as Grafana's) closes
+this; offered to Sam, not yet run.
+
+**PRIOR, 2026-07-28 — Freedom House replied; Sam confirmed
+non-commercial/educational use, reply sent.** Freedom House's Press
+Team responded to the 2026-07-13 permission request asking to confirm
+the project is "non-commercial use of Freedom House data ... for
+educational purposes." Sam sent a confirming reply the same day,
+additionally describing the actual technical mechanism (not just
+intent) so there's no ambiguity about their real gate (reproduction/
+republishing, per `docs/licensing.md`): the public repo/release ships
+only a metadata+hash reference to Freedom House content, never the
+text itself; each person who runs the project fetches Freedom House's
+own pages directly from freedomhouse.org at runtime
+(`rehydrate.py`, ADR-0013), and the assistant only ever shows short,
+attributed excerpts with a citation and a link back to the original
+report. **Still awaiting their substantive permission decision** —
+this reply confirmed intent/purpose, not yet a granted permission.
+Redistribution through any public-facing channel beyond the current
+tiered/rehydrate mechanism stays gated until an actual yes arrives, per
+`docs/licensing.md`'s original analysis.
+
+**PRIOR, 2026-07-27 (later) — ADR-0019: Streamlit-native dashboard
+removal in progress, a real gap found mid-implementation, not yet
+closed.** Sam asked to remove the redundant Streamlit monitoring
+dashboard now that Grafana is confirmed live — `docs/interface-
+design.md` Decision 2 built it as a hedge against Grafana risk that has
+since resolved. Claude Code deleted `src/interface/pages/dashboard.py`
+cleanly, but correctly stopped before editing `README.md`/`docs/
+presentation-reference.md`: it found `grafana/dashboards/
+interactions.json` only has 5 panels, not 6 — the citation
+data-quality chart (invalid markers/unsupported paragraphs) was only
+ever in the deleted Streamlit page, never added to Grafana. Rather than
+quietly document a 5-of-6 permanent reduction, the fix is to add the
+missing panel to Grafana so real 6-of-6 parity is reached before the
+doc updates describe it that way — follow-up handoff sent, not yet
+run. `docs/adr/0019-remove-streamlit-native-dashboard.md` updated with
+a "Correction, found during implementation" section documenting this.
+
+**PRIOR, 2026-07-27 — Tier 3 cloud deployment is LIVE and
 verified end to end, real bugs found and fixed along the way.** Sam ran
 GCP account setup via Claude Code CLI assistance (`gcloud auth login`
 and `application-default login` as his own interactive steps; an

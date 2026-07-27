@@ -80,6 +80,16 @@ observable condition, not just a feeling that something isn't working.
 
 ## Status
 
+**Nineteen ADRs exist as of 2026-07-27.**
+`0019-remove-streamlit-native-dashboard.md` — with Grafana now live and
+verified against real production data (the actual Tier 3 deploy,
+2026-07-27), the Streamlit-native dashboard `docs/interface-design.md`
+Decision 2 deliberately built as a hedge against Grafana risk is
+removed; that risk resolved favorably. Grafana is now the sole
+monitoring surface. No advisor consult sought — a low-complexity
+removal once its own triggering condition resolved, same class as
+ADR-0004.
+
 **Eighteen ADRs exist as of 2026-07-26 (later still, a real-cost
 correction).** `0018-neon-serverless-postgres-replaces-cloud-sql.md`
 amends ADR-0016: real GCP pricing showed Cloud SQL costing ~$9-11/month

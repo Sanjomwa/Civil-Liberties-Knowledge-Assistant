@@ -272,22 +272,18 @@ estimated cost, retrieval scores, a citation summary (marker/doc/org/
 score, never excerpt text), and thumbs up/down feedback captured without
 a second `answer()` call.
 
-**Streamlit-native dashboard** (`src/interface/pages/dashboard.py`, a
-second page auto-discovered alongside the main app) is the guaranteed
-deliverable, built and verified first: 6 charts reading directly from
-the `interactions` table — feedback over time, latency (retrieval vs
-LLM, stacked), retrieval score distribution, source-org mix, token/cost
-over time, and citation data-quality (invalid-marker/unsupported-
-paragraph rate — free, since `citations.py` already computes both
-counts).
-
-**Grafana, additive** (`docker-compose.yml`'s third service): the same
-Postgres datasource, provisioned automatically (`grafana/provisioning/`,
-`grafana/dashboards/interactions.json`) with 5 of the 6 panels above,
-anonymous Viewer access so no admin login is needed, and a pinned
-datasource UID matched identically across every panel. Verified against
-real seeded rows before relying on it — every panel query executes
-successfully against the live datasource.
+**Grafana** (`docker-compose.yml`'s third service locally, the
+`grafana-cloud` Cloud Run service in production) is the sole monitoring
+dashboard: 6 panels reading directly from the `interactions` table via
+a pinned Postgres datasource UID matched identically across every panel
+(`grafana/provisioning/`, `grafana/dashboards/interactions.json`) —
+feedback over time, latency (retrieval vs LLM), retrieval score
+distribution, source-org mix, token/cost over time, and citation
+data-quality (invalid-marker/unsupported-paragraph rate — free, since
+`citations.py` already computes both counts). Anonymous Viewer access
+so no admin login is needed. Verified against real production data:
+every panel query, including citation data-quality, executes
+successfully and returns real rows against the live datasource.
 
 **Feedback vs. the offline judge — different signals, not in tension.**
 Claim-level citation precision (0.946, [Evaluation](#evaluation)) and
@@ -306,8 +302,8 @@ docker compose up --build
 ```
 
 That's the single end-to-end run command now. Open
-`http://localhost:8501` for the app (the monitoring dashboard is a second
-page in the same app) and `http://localhost:3000` for Grafana.
+`http://localhost:8501` for the app and `http://localhost:3000` for the
+Grafana monitoring dashboard.
 
 **The first startup takes longer than later ones — this is expected, not
 a hang.** The build always bakes a tiered public release of the corpus

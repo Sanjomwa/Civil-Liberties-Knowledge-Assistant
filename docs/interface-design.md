@@ -64,7 +64,12 @@ instead of one, and matches what `README.md`'s Monitoring section already
 commits to.
 
 **2. Dashboard: Streamlit-native page built first, Grafana additive
-second — not the reverse.** Postgres is the load-bearing piece (pays
+second — not the reverse.** **Superseded 2026-07-27, ADR-0019**: once
+Grafana was confirmed working end to end against real production data,
+the Streamlit-native dashboard this decision hedged with was removed —
+the risk it hedged against had resolved. This decision's reasoning was
+correct under the real uncertainty at the time it was written; kept
+here as the historical record, not rewritten. Postgres is the load-bearing piece (pays
 twice: README promise + compose service count); Grafana is the
 highest-risk, lowest-marginal-point piece. Building the ~1-hour
 Streamlit dashboard first banks the monitoring points immediately;
@@ -140,7 +145,9 @@ unrecognized models) is exactly the failure mode to not repeat here.
 by `citations.py` for free — a sixth chart no other cohort project is
 likely to have.
 
-**5. The five committed charts, plus a sixth:** feedback over time
+**5. The five committed charts, plus a sixth.** **Superseded 2026-07-27,
+ADR-0019**: these six charts now live in Grafana only, not duplicated
+in a Streamlit-native page — see Decision 2's superseded-note above. feedback over time
 (daily up/down counts); latency (split by `retrieval_ms` vs `llm_ms`,
 stacked); retrieval score distribution (histogram over the flattened
 `retrieval_scores` array); source-org mix (count by `source_orgs`);

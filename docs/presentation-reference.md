@@ -222,10 +222,6 @@ course-management site multiple times, not assumed).
   reduced projection (never raw citation excerpt text). `est_cost_usd()`
   raises `UnknownModelError` on an unrecognized model rather than silently
   logging 0 — confirmed to actually raise, not just documented to.
-- **Dashboard** (`src/interface/pages/dashboard.py`): 6 charts, Streamlit-
-  native, no external dependency to view — feedback over time, latency
-  (stacked retrieval/LLM), retrieval-score distribution, source-org mix,
-  token/cost over time, citation data-quality rate.
 - **Docker + rehydrate-on-first-run** (ADR-0013's tiered release,
   `docs/interface-design.md` Decision 8): build time always bakes the
   54%-public-text release (1,520 chunks, OONI+CIPESA) so `docker compose
@@ -239,12 +235,15 @@ course-management site multiple times, not assumed).
   blocked rehearsal failed cleanly (`0/16`, `0/4`), no re-embed
   attempted, confirmed via a live `search()` call that the container
   correctly held at the 1,520-chunk baseline with zero drift.
-- **Grafana**: third compose service, `GF_AUTH_ANONYMOUS_ENABLED=true`
-  (Viewer role), provisioned Postgres datasource + 5-panel dashboard
-  (datasource UID pinned identically everywhere it's referenced).
-  Verified against real seeded data through Grafana's own
-  `/api/ds/query` endpoint — landed clean, the "fall back to Streamlit-
-  only" stop condition never triggered.
+- **Grafana, sole monitoring dashboard** (ADR-0019): third compose
+  service locally, the `grafana-cloud` Cloud Run service in production,
+  `GF_AUTH_ANONYMOUS_ENABLED=true` (Viewer role), provisioned Postgres
+  datasource + 6-panel dashboard — feedback over time, latency (retrieval
+  vs LLM), retrieval-score distribution, source-org mix, token/cost over
+  time, citation data-quality rate (datasource UID pinned identically
+  everywhere it's referenced). Verified against real production data
+  through Grafana's own `/api/ds/query` endpoint — every panel, including
+  citation data-quality, executes and returns real rows.
 - **Real incident, disclosed not smoothed over**: during testing,
   `docker-compose.yml` published the app port on all host interfaces
   (`8501:8501`), and Streamlit's dev server logged an external URL on
@@ -300,8 +299,8 @@ Evaluation Criteria (fetched verbatim, not assumed), against real code:
   OONI's manual-acquisition/429 constraint explicitly.
 - **Interface and Containerization: now built — 2/2 achievable**, built
   and verified 2026-07-26, well ahead of the 2026-08-02 feature-freeze
-  gate. Streamlit UI + feedback, Postgres-backed 6-chart dashboard +
-  additive Grafana, Docker with a real rehydrate-on-first-run mechanism
+  gate. Streamlit UI + feedback, Postgres-backed 6-panel Grafana
+  dashboard, Docker with a real rehydrate-on-first-run mechanism
   verified both directions. See the Tier 2 section above for detail.
 - Completion plan (ADR-0012, Opus 5 consult): Tier 1 (by 7/27, done) —
   README, corpus release, re-rank evaluation. **Tier 2 (target 8/2, done

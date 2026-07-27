@@ -84,6 +84,21 @@
           "refId": "A"
         }
       ]
+    },
+    {
+      "id": 6,
+      "title": "Citation data quality (invalid markers / unsupported paragraphs)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 24 },
+      "datasource": { "type": "postgres", "uid": "postgres-interactions" },
+      "targets": [
+        {
+          "datasource": { "type": "postgres", "uid": "postgres-interactions" },
+          "format": "time_series",
+          "rawSql": "SELECT ts AS time, invalid_marker_count, unsupported_paragraph_count FROM interactions WHERE $__timeFilter(ts) ORDER BY ts",
+          "refId": "A"
+        }
+      ]
     }
   ]
 }
