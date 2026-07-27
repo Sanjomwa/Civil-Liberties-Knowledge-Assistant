@@ -542,6 +542,37 @@ across them:
   future requirement, not built — nothing to build yet since the generation
   layer itself doesn't exist. Don't lose track of it once that layer starts.
 
+**Added 2026-07-27, post-Tier-3-deploy:**
+
+- **No CI/CD.** No GitHub Actions or equivalent — every check (syntax,
+  smoke tests, evaluation runs) has been manual/on-demand throughout
+  this project. Confirmed 0/2 on the rubric's Containerization-adjacent
+  automation criterion when this was last checked (ADR-0012).
+- **No automated tests.** No `tests/` directory, no `pytest` anywhere in
+  the repo (confirmed directly when `docs/readme-plan.md` was written,
+  ADR-0012) — correctness has been established via manual smoke tests
+  and real evaluation runs (0.946 citation precision, retrieval Hit
+  Rate/MRR), not unit/integration tests.
+- **Query rewriting (ADR-0017) unverified against the live cloud
+  deployment specifically.** It ships inside the deployed app image and
+  was smoke-tested + evaluated locally before deploy, but the live
+  Cloud Run instance hasn't had this path specifically exercised and
+  checked. Not a known problem — just an unverified gap, same category
+  as the other "explicitly unconfirmed until a real deploy" items
+  `docs/deployment-runbook.md` already listed going in.
+- **README still needs the deployment update** — it predates the live
+  Tier 2/Tier 3 URLs and Neon migration; needs the real App/Grafana
+  URLs, setup instructions reflecting the current (Neon, not Cloud SQL)
+  architecture, and the deployment section `docs/readme-plan.md`
+  originally scoped.
+- **A full technical-debt re-audit is still owed, not yet done.** These
+  four items were caught opportunistically, not from a systematic pass.
+  Sam's explicit call (2026-07-27): do a real audit later — inspect the
+  repo directly plus re-read the course's own project description/rubric
+  again, rather than relying on memory of what's already been checked —
+  likely surfaces more than these four. Not scheduled yet; next
+  session's call.
+
 ## 6a. First implementation milestone (walking skeleton)
 
 Defined 2026-07-11, before any code exists — the target to build against,
@@ -728,7 +759,46 @@ auto-vs-manual question; scaling further is future work, see Section 7),
 
 ## 7. Open action items (don't lose track of these)
 
-**NEWEST OF ALL, 2026-07-26 (later still) — Neon migration built and
+**NEWEST OF ALL, 2026-07-27 — Tier 3 cloud deployment is LIVE and
+verified end to end, real bugs found and fixed along the way.** Sam ran
+GCP account setup via Claude Code CLI assistance (`gcloud auth login`
+and `application-default login` as his own interactive steps; an
+existing project literally named `civil-liberties-observatory` was
+found but correctly not reused after its creation date checked out to
+6 months before this capstone's own timeline — a fresh
+`civil-liberties-kb-assistant` project was created instead), created a
+real Neon project himself, then ran the actual deploy. Two real,
+previously-undetectable-until-a-real-run bugs surfaced and were fixed:
+(1) Grafana's Cloud Run deploy failed outright — Grafana listens on
+port 3000 by default, nothing told Cloud Run that, fixed with one
+`--port=3000` flag on the deploy command, no image rebuild; (2) once
+Grafana deployed, its datasource was hardcoded to a database named
+`interactions` that doesn't exist on Sam's real Neon instance (the real
+name is `neondb`) — fixed by parameterizing to `${NEON_DATABASE}`
+(parsed from `DATABASE_URL`, same pattern as `NEON_HOST`/`NEON_USER`/
+`NEON_PASSWORD`), which required an extra rebuild+push of the Grafana
+image since that config is baked in at Dockerfile build time, not a
+deploy-time flag — a redeploy-only first attempt silently kept serving
+the old broken image, caught by actually re-testing rather than
+assuming the fix landed. **Real end-to-end confirmation, not assumed:**
+Sam opened the live app, asked "Is there documented internet
+suppression in Tanzania?", got a real cited answer, gave it a thumbs
+up — that exact interaction is now a real row in Neon
+(`SELECT count(*) FROM interactions` → 1) and renders correctly in
+Grafana's own "Feedback over time" panel (`up=1, down=0`). **App URL:
+https://app-cloud-616784610799.us-central1.run.app. Grafana URL:
+https://grafana-cloud-wphwnmh6wq-uc.a.run.app** (note: both Cloud Run
+services print a different, non-working URL in their own deploy stdout
+— the real working URL only comes from a separate
+`gcloud run services describe --format='value(status.url)'` call; this
+tripped up two different sessions before being caught and now
+documented here explicitly). Query rewriting (ADR-0017) is deployed as
+part of the same app image, unverified against the live deployment
+specifically (only smoke-tested and evaluated locally before this) —
+worth a real live check if it becomes a concern. Full detail:
+`decisionlog.md`, 2026-07-27.
+
+**PRIOR, 2026-07-26 (later still) — Neon migration built and
 verified clean, no real resources created yet.** Claude Code swapped
 every Cloud-SQL-specific artifact from the prior Tier 3 session to
 Neon: `db.py`'s `get_conn()` got the one real code change (a single
