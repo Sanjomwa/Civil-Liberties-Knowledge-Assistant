@@ -10,11 +10,17 @@ flagged rather than smoothed into a confident-sounding narrative.
 
 Built for DataTalksClub's LLM Zoomcamp 2026 capstone project.
 
-> **Status, 2026-07-26:** I've built and verified ingestion, retrieval,
-> generation, LLM evaluation, interface, monitoring, and containerization
-> (see [Quickstart](#quickstart), [Monitoring](#monitoring)). Deployment
-> is the one piece still not built (Tier 3). I've stated plainly, section
-> by section, what exists today versus what I still have in progress, per
+**Live demo:** [app](https://app-cloud-wphwnmh6wq-uc.a.run.app) ·
+[monitoring dashboard](https://grafana-cloud-wphwnmh6wq-uc.a.run.app)
+(both on Google Cloud Run, `min-instances=0` — a quiet period means the
+next request has a few seconds' cold start, not that the link is dead).
+
+> **Status, 2026-07-28:** I've built and verified ingestion, retrieval,
+> generation, LLM evaluation, interface, monitoring, containerization,
+> and cloud deployment (see [Quickstart](#quickstart),
+> [Monitoring](#monitoring), [Deployment](#deployment)). I've stated
+> plainly, section by section, what exists today versus what I still
+> have in progress, per
 > [`docs/adr/0012-rubric-driven-completion-plan.md`](docs/adr/0012-rubric-driven-completion-plan.md).
 
 ## Contents
@@ -61,14 +67,18 @@ intent.
 
 ## Demo
 
-**No live interface yet** (see [Limitations](#limitations)) — this is one
-real, verified question/answer pair I pulled directly from
+**Live demo:** [https://app-cloud-wphwnmh6wq-uc.a.run.app](https://app-cloud-wphwnmh6wq-uc.a.run.app)
+— ask a real question directly, no setup required.
+
+I'm keeping the static example below too, since a hosted demo can go
+down or need credentials later while a verified static example doesn't
+(the [article](https://alexeyondata.substack.com/p/how-to-write-a-good-readme)
+this README follows makes the same point). This is one real, verified
+question/answer pair I pulled directly from
 `data/eval/generation_results.jsonl` (question `general-0094`), not a
 constructed example. I spot-checked every `[n]` marker below by hand
 against the actual cited chunk text before including it here; all eight
-resolve to real supporting passages. I'll replace this with a screenshot/
-video of a live interface once one exists
-(`docs/adr/0012-rubric-driven-completion-plan.md`, Tier 2).
+resolve to real supporting passages.
 
 **Question:** What surveillance tools is the Rwandan government known to use?
 
@@ -390,10 +400,60 @@ reasoning: `docs/adr/0013-tiered-corpus-release.md`.
 
 ## Deployment
 
-**Not deployed yet.** Planned: a cloud-hosted demo (Streamlit Community
-Cloud or Hugging Face Spaces), which I'll attempt only after the interface
-and containerization both exist to deploy — see
-`docs/adr/0012-rubric-driven-completion-plan.md`, Tier 3.
+**Live on Google Cloud Run:**
+- App: [https://app-cloud-wphwnmh6wq-uc.a.run.app](https://app-cloud-wphwnmh6wq-uc.a.run.app)
+- Monitoring dashboard (Grafana): [https://grafana-cloud-wphwnmh6wq-uc.a.run.app](https://grafana-cloud-wphwnmh6wq-uc.a.run.app)
+
+**Where it's hosted, which services.** Two independent Cloud Run
+services (`app-cloud`, `grafana-cloud`), both `min-instances=0`
+(scale-to-zero — a quiet period means the next request has a cold start
+of a few seconds, not that anything is broken or idly billing).
+Postgres is [Neon](https://neon.tech) — a serverless Postgres provider
+with its own true scale-to-zero free tier, chosen specifically over
+Cloud SQL to avoid an always-on billed instance for a project with no
+revenue (`docs/adr/0018-neon-serverless-postgres-replaces-cloud-sql.md`).
+Container images live in a private Google Artifact Registry repository
+in my own GCP project (never public); `OPENAI_API_KEY` and the Neon
+connection string live in Secret Manager, never baked into an image or
+committed to this repo.
+
+**How the pieces connect.** The app writes every real interaction to
+Neon over a standard pooled Postgres connection string
+(`DATABASE_URL`); Grafana reads from that same Neon database through
+its own separate datasource connection. The two Cloud Run services are
+independent deployments, not one combined container — this is
+`docker-compose.yml`'s three local services (`app`, `grafana`,
+`postgres`) mapped onto two Cloud Run services plus one managed
+database, not three containers on one host.
+
+**How deployment actually works — the one real difference from local
+`docker compose up`, stated plainly, not just implied.** The public
+`Dockerfile` and `docker-compose.yml` are untouched: they still bake
+only the license-clear 54% tiered baseline (OONI + CIPESA) and
+rehydrate the rest (Freedom House, Access Now) at container start.
+Cloud Run's scale-to-zero model can't tolerate that ~15-minute runtime
+rehydration on every cold start, so a separate, private `Dockerfile.cloud`
+bakes the *full* rehydrated corpus in at build time instead, before the
+image is ever deployed
+(`docs/adr/0016-gcp-cloud-deployment-architecture.md`). **The live
+deployed app already serves 100% of the corpus; a fresh local
+`docker compose up` starts at 54% and rehydrates up to 100% on its own
+first run.** Both reach the same place, by different mechanisms, for
+different reasons — Cloud Run's cold-start economics versus a laptop's
+tolerance for a one-time wait.
+
+**Manual, not CI/CD.** There's no GitHub Actions workflow triggering any
+of this. `deploy/gcp-deploy.sh` is a real, working, standalone script I
+run by hand whenever a redeploy is needed — including whenever Freedom
+House or Access Now publish something new, since the private image only
+picks that up on a manual rebuild + repush, not automatically.
+
+**To deploy your own copy:** see `docs/deployment-runbook.md` for the
+full checklist — a GCP project with billing enabled, `gcloud auth
+login`, enabling three APIs (Cloud Run, Artifact Registry, Secret
+Manager), creating a free Neon project/database, setting
+`OPENAI_API_KEY` and `DATABASE_URL` in your shell, then running
+`deploy/gcp-deploy.sh`.
 
 ## Architecture
 
@@ -610,4 +670,8 @@ Stating this here rather than leaving it to be discovered as an absence.
   versa.
 - **No automated tests, no CI/CD** — see [Testing](#testing) and
   [CI/CD](#cicd).
-- **No public deployment yet** — see [Deployment](#deployment).
+- **Deployment is manual, not CI/CD-automated, and the private cloud
+  image needs a manual rebuild + repush whenever Freedom House or
+  Access Now publish something new** — a real, already-accepted cost
+  of baking the full corpus at deploy time rather than rehydrating on
+  every cold start, not an oversight — see [Deployment](#deployment).

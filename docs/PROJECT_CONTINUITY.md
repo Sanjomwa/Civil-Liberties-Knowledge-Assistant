@@ -759,7 +759,34 @@ auto-vs-manual question; scaling further is future work, see Section 7),
 
 ## 7. Open action items (don't lose track of these)
 
-**NEWEST OF ALL, 2026-07-28 (later) — ADR-0019 fully closed: Grafana
+**NEWEST OF ALL, 2026-07-28 (even later) — ADR-0019 fully closed end
+to end, `app-cloud` redeployed, live site now matches the repo.**
+Rebuilt the public baseline image (real rebuild, cache invalidated by
+the dashboard-file deletion), rebuilt the private `app-cloud` image
+(fresh rehydration of Freedom House 16/16 + Access Now 4/4, full
+3,783-chunk re-embed), and — before pushing anything — confirmed
+directly on the built image (`docker run --entrypoint ls ...
+src/interface/pages`) that the dashboard file is genuinely absent, not
+assumed from the Dockerfile. Pushed, redeployed with `--image` only,
+diffed the full `gcloud run services describe` output before/after to
+confirm secrets/resources/session-affinity were preserved. One real,
+flagged (not silently accepted) side effect: `maxScale` went from
+unset to `20` on both `app-cloud` and `grafana-cloud` after their
+respective `--image`-only redeploys — traced to the installed gcloud
+SDK's own default behavior on redeploy, not anything either task did
+on purpose; harmless at this traffic level, Sam's call if he wants it
+changed. Health check passed (`/_stcore/health` → `ok`). **One item
+correctly deferred to Sam**: driving a real question through the live
+URL needs a real browser (Streamlit's WebSocket-based widget
+interaction), which this sandbox still can't do (same missing
+`libnspr4.so` gap as before) — Sam needs to open the URL himself to
+close this out fully. One honest, self-reported mid-task mistake: an
+accidental `docker rmi` removed the local baseline image (unrelated
+stray command, not a task step) — no real impact, rebuilds cleanly on
+demand, flagged directly rather than found later. Full detail:
+`reports.md`, `decisionlog.md`, 2026-07-28.
+
+**PRIOR, 2026-07-28 (later) — ADR-0019 mostly closed, Grafana side: Grafana
 at real 6-of-6 panel parity, docs accurate, local rehearsal clean.
 One real gap left, called out on purpose: the live `app-cloud` Cloud
 Run service still runs the old image with the dashboard page baked

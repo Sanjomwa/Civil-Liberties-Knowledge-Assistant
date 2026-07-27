@@ -8,15 +8,17 @@ list. Explicitly left as honest placeholders, not written yet: the Demo
 section (needs one real verified example pulled from
 `data/eval/generation_results.jsonl`, which doesn't sync to Cowork — a
 WSL-side follow-up), the LLM-evaluation half (blocked on the Prompt A/B
-comparison, ADR-0012 Decision 2), Monitoring, Deployment, the final
-Quickstart run command, Self-evaluation, and Future work (the last two
-deliberately deferred to submission time per this plan's own build
-order). Testing and CI/CD were checked directly (no `tests/`, no
+comparison, ADR-0012 Decision 2), Monitoring, the final Quickstart run
+command, Self-evaluation, and Future work (the last two deliberately
+deferred to submission time per this plan's own build order).
+**Deployment written and verified live 2026-07-28** (ADR-0016/0018,
+`deploy/gcp-deploy.sh`) — removed from this placeholder list. Testing and CI/CD were checked directly (no `tests/`, no
 `.github/workflows/` found) and both sections state their absence
 plainly, per the article's own rule. Original plan, adopted 2026-07-24
 per
 ADR-0012, section-by-section, from Alexey Grigorev's "How to Write a Good
-README" (`alexeyondata.substack.com`, read 2026-07-24). Maps that article's
+README" (<https://alexeyondata.substack.com/p/how-to-write-a-good-readme>,
+read 2026-07-24, exact URL confirmed by Sam 2026-07-28). Maps that article's
 structure onto what actually exists in this project right now, so the
 rewrite (Tier 1, ADR-0012) starts from real content, not a blank template.
 Every section below states: what to write, the real source material for it
