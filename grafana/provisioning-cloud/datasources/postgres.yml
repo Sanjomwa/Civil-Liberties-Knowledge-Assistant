@@ -1,41 +1,48 @@
 apiVersion: 1
 
 # Cloud-specific variant of grafana/provisioning/datasources/postgres.yml
-# (the local docker-compose one, untouched). Per ADR-0016 / docs/
-# deployment-design.md Decision 2: Cloud Run has no `postgres:5432`
-# hostname to resolve (that's docker-compose's own internal DNS) --
-# Cloud SQL is reached via a Unix-socket path, `/cloudsql/PROJECT:REGION:
-# INSTANCE`, mounted automatically by Cloud Run's `--add-cloudsql-instances`
-# flag (deploy/gcp-deploy.sh).
+# (the local docker-compose one, untouched). Per ADR-0018 (amends
+# ADR-0016): Neon (serverless Postgres) replaces Cloud SQL -- this file
+# previously used the Cloud SQL Unix-socket path
+# (`/cloudsql/PROJECT:REGION:INSTANCE`); Neon is reached over a standard
+# host:port TCP connection instead, same as any regular managed Postgres,
+# with TLS required.
 #
-# EXPLICITLY UNVERIFIED, per deployment-design.md's own "Open items for
-# implementation" list: "Verifying Grafana's Cloud SQL socket-path
-# datasource config... empirically on the first real deploy -- stated as
-# the expected mechanism, not yet confirmed against a real Cloud Run
-# instance." This file is that stated mechanism, drafted, not yet tested
-# against a live Cloud SQL instance -- confirm this actually connects on
-# the first real deploy before trusting it, and fix here (not by
-# reverting to a workaround) if it doesn't.
+# EXPLICITLY UNVERIFIED, same as the Cloud SQL version before it, per
+# deployment-design.md's own "Open items for implementation" list: this
+# is the stated/expected mechanism, not yet confirmed against a real
+# Cloud Run + Neon instance -- confirm this actually connects on the
+# first real deploy before trusting it, and fix here (not by reverting to
+# a workaround) if it doesn't.
 #
 # Uses Grafana's own provisioning env-var expansion (`${VAR}` syntax,
 # resolved from the container's real environment at Grafana startup) for
-# both the connection name and the password, rather than baking either
-# into this file -- CLOUDSQL_CONNECTION_NAME and POSTGRES_PASSWORD are
-# both set on the Cloud Run service at deploy time (the latter via
-# --set-secrets, per ADR-0016 Decision 3), never committed here.
+# host, user, password, and database, rather than baking any of them into
+# this file -- same pattern as the Cloud SQL version's
+# CLOUDSQL_CONNECTION_NAME/POSTGRES_PASSWORD, renamed here to
+# NEON_HOST/NEON_USER/NEON_PASSWORD/NEON_DATABASE.
+# All four are set on the Grafana Cloud Run service at deploy time
+# (deploy/gcp-deploy.sh) -- NEON_HOST/NEON_USER/NEON_DATABASE as plain env
+# vars (an endpoint hostname, username, and database name aren't secret on
+# their own), NEON_PASSWORD via --set-secrets. None of the four are
+# committed here.
 datasources:
   - name: Interactions Postgres
     type: postgres
     uid: postgres-interactions
     access: proxy
-    url: /cloudsql/${CLOUDSQL_CONNECTION_NAME}
-    database: interactions
-    user: postgres
+    url: ${NEON_HOST}:5432
+    database: ${NEON_DATABASE}
+    user: ${NEON_USER}
     secureJsonData:
-      password: ${POSTGRES_PASSWORD}
+      password: ${NEON_PASSWORD}
     jsonData:
-      database: interactions
-      sslmode: disable
+      # Already-fixed setting from the earlier Grafana version-drift bug
+      # (Grafana 13.1.1's Postgres plugin reads the database name from
+      # jsonData, not the legacy top-level `database:` field above) --
+      # unchanged by this migration, per ADR-0018's own instruction.
+      database: ${NEON_DATABASE}
+      sslmode: require
       postgresVersion: 1600
       timescaledb: false
     isDefault: true

@@ -133,12 +133,43 @@ trivial compared to computing it.
 
 ### Cost shape
 
-Cloud SQL (`db-f1-micro`) is the only always-on cost, roughly
-$10-13/month. Cloud Run is effectively $0 at this traffic level
-(scale-to-zero, per-request billing). Artifact Registry and Secret
-Manager are pennies. **Overall shape: $10-15/month**, not a
-$100+/month shape — and GCP's standard free-trial credit covers this
-entirely through course submission and grading.
+**Corrected 2026-07-26 against real, official GCP pricing (not
+estimated) — Sam's billing account is a real, already-billed monthly
+account, not a free trial, so this needed verifying properly rather
+than assumed.** Source: `cloud.google.com/sql/pricing` and
+`cloud.google.com/run/pricing`, fetched directly.
+
+- **Cloud SQL `db-f1-micro`** (Iowa/`us-central1`): $0.0105/hour
+  instance cost × ~730 hours/month ≈ **$7.67/month**, plus SSD storage
+  at $0.000232877/GiB-hour — a 10 GB instance ≈ **$1.70/month**. **Real
+  total: ~$9.40-11/month**, the one always-on, non-negotiable cost.
+- **A real, avoidable cost gotcha, not previously flagged:** Cloud SQL
+  charges **$0.01/hour (~$7.30/month) for an idle public IPv4
+  address**. Since this design already connects via the Cloud SQL
+  Unix-socket path (`--add-cloudsql-instances`), the instance should be
+  created **with no public IP at all** (private-only) — this avoids
+  the charge entirely and is also better security practice. Must be
+  set explicitly at instance creation; confirm this in the deploy
+  script rather than assuming the default.
+- **Cloud Run**: free tier is 2 million requests, 360,000 GiB-seconds,
+  180,000 vCPU-seconds, and 1 GiB egress per month — at the traffic
+  level described (occasional demo visits), both services combined
+  should stay within this free tier, i.e. **effectively $0/month**.
+- **Artifact Registry, Secret Manager**: both have their own free
+  tiers (storage/version-count) large enough for this project's two
+  small images and two secrets — effectively **$0/month or pennies**.
+
+**Real overall shape: roughly $9-12/month, driven entirely by Cloud
+SQL** — assuming the no-public-IP setting is applied. **This is not
+covered by any free trial** — Sam's account is billed monthly already,
+so this is real recurring spend from day one, not a one-time credit
+being drawn down. A practical cost lever Sam has, if he wants finer
+control: Cloud SQL can be **manually stopped** between periods when no
+demo visits are expected (compute charges stop while stopped; storage
+charges continue) and restarted in roughly a minute when the link is
+being shared again — unlike the app's own corpus rehydration, this is
+unrelated to the 15-minute cold-start problem this ADR already solved,
+so stopping/restarting Cloud SQL is safe and doesn't reintroduce it.
 
 ## Consequences
 

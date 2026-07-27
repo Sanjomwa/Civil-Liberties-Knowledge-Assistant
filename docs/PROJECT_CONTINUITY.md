@@ -728,7 +728,88 @@ auto-vs-manual question; scaling further is future work, see Section 7),
 
 ## 7. Open action items (don't lose track of these)
 
-**NEWEST OF ALL, 2026-07-26 (latest) — Tier 3 design done: GCP cloud
+**NEWEST OF ALL, 2026-07-26 (later still) — Neon migration built and
+verified clean, no real resources created yet.** Claude Code swapped
+every Cloud-SQL-specific artifact from the prior Tier 3 session to
+Neon: `db.py`'s `get_conn()` got the one real code change (a single
+retry on `psycopg.Error`, catching the specific occasional post-
+autosuspend connection drop, not a general resilience feature);
+`grafana/provisioning-cloud/datasources/postgres.yml` moved from a
+Cloud SQL Unix-socket path to Neon's host:port + `sslmode=require`
+(templated `user`/`password` now, since Neon assigns its own username
+rather than a `postgres` superuser); `deploy/gcp-deploy.sh` dropped the
+Cloud SQL instance-creation step, both `--add-cloudsql-instances`
+flags, and `sqladmin.googleapis.com`, and simplified the app's secret
+from a split `DATABASE_URL`+`PGPASSWORD` workaround (needed for Cloud
+SQL's socket path) down to one self-contained Neon connection string —
+Secret Manager goes from 2 secrets to 3 total (a third, Grafana-only
+password, is derived programmatically from the one URL Sam provides,
+never typed twice); `docs/deployment-runbook.md` updated to the Neon
+console/CLI project-creation step, explicitly calling out the pooled
+(`pgbouncer`) endpoint. A real miss was caught and fixed during the
+sanity check, not just confirmed clean: a stale "Cloud SQL needs a
+Unix-socket path" comment in `Dockerfile.grafana.cloud`, missed by a
+naive single-line grep because the phrase was split across a
+line-wrap, found by a cross-line-aware re-check and corrected. Grep
+confirmed clean across all touched files afterward — every remaining
+`cloudsql`/`sqladmin` match is explanatory/historical, not functional.
+**Not touched, correctly:** `Dockerfile.cloud`, `entrypoint.cloud.sh`,
+`insert_interaction()`/`record_feedback()`'s SQL, local
+`docker-compose.yml`, ADR-0016's Cloud Run/Artifact Registry/Secret
+Manager compute decisions. **Sam has now created the real Neon project
+and has the pooled connection string saved** — still needed: the real
+GCP account setup (`claude_code_gcp_setup.md`, already corrected to
+drop `sqladmin.googleapis.com` from its API-enable list) and then an
+actual `deploy/gcp-deploy.sh` run with both the GCP project/region and
+the Neon connection string filled in. Full detail: `decisionlog.md`,
+2026-07-26.
+
+**PRIOR, 2026-07-26 — real cost check killed Cloud
+SQL; Neon (serverless Postgres) replaces it, ADR-0018.** Before running
+the GCP setup handoff, Sam asked for real cost numbers first. Verified
+pricing showed Cloud SQL at ~$9-11/month always-on — the one
+non-serverless cost in the design — against a prior GCP project of
+Sam's that costs under $2.50/month. Sam's explicit, final call: redesign
+to serverless rather than accept an always-on billed instance with no
+usage ceiling on a zero-revenue project. A follow-up Fable consult
+(one of the three named "genuine difficulty" checkpoints from the
+Tier 3 process exception, not a lapse of it) picked **Neon** over
+BigQuery/Firestore — grounded in the real schema and all 5 real
+Grafana SQL queries, Neon is the only option serving both real access
+patterns (append-only inserts, and feedback's later per-row UPDATE by
+primary key) while letting every existing query and `db.py` function
+port with zero logic change, only a connection string. New cost shape:
+effectively $0/month. Supabase was considered and rejected (manual
+resume after idle — real risk of a dead demo link). **Not yet
+implemented** — next step is a Claude Code follow-up swapping the
+already-built Cloud-SQL-specific artifacts (Grafana datasource,
+`deploy/gcp-deploy.sh`, the runbook) to Neon, plus a small retry-wrapper
+addition to `db.py`. Sam has not yet run the GCP account setup handoff.
+Full detail: `decisionlog.md`, 2026-07-26.
+
+**PRIOR, 2026-07-26 — Tier 3 Part A (query rewriting)
+DONE and evaluated; Part B (GCP) scaffolded, paused cleanly at Sam's
+gate.** `rewrite_query()` built and evaluated per ADR-0017: regression
+gate passes (CIs overlap, deltas within noise); the 40-question
+adversarial set shows a small, directionally-positive, but
+not-statistically-significant result at n=40 — reported honestly as a
+genuine near-null, not reframed as a win. Caught and fixed a real bug
+along the way: `app.py`/`run_answers.py` both independently re-ran
+`search()` assuming query-determinism, which `answer()`'s new internal
+use of the rewritten query would have silently broken — fixed both to
+use the rewritten query, restoring the invariant. GCP scaffolding
+(Part B) built everything not needing Sam's credentials — private
+`Dockerfile.cloud` (gitignored), cloud entrypoint, a Cloud-SQL-aware
+Grafana datasource config (caught a real `postgres:5432`
+docker-compose-only-hostname bug before it shipped), `PGPASSWORD`-based
+secret handling (`db.py` needed zero changes), a drafted-not-run
+`deploy/gcp-deploy.sh`, and `docs/deployment-runbook.md` — then stopped
+cleanly at its own pause point. **Nothing in GCP has been touched.**
+Sam's real next action: create/confirm a GCP project with billing,
+authenticate `gcloud`, enable 4 APIs, confirm project ID/region. Full
+detail: `reports.md` and `decisionlog.md`, 2026-07-26.
+
+**PRIOR, 2026-07-26 — Tier 3 design done: GCP cloud
 deployment + query rewriting, both via a single deep Fable consult, not
 yet implemented.** Sam picked GCP and made a deliberate process call
 for this phase only: one elaborate Fable design pass instead of the

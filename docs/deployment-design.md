@@ -28,13 +28,19 @@ services, `min-instances=0`. `docker-compose`'s multi-container shape
 does not port directly — Cloud Run runs one container per service, no
 compose file support. Rationale and cost comparison: ADR-0016.
 
-**2. Database: Cloud SQL (`db-f1-micro`), not a self-hosted Postgres
-container.** Both Cloud Run services (`app`, `grafana`) connect via
-`--add-cloudsql-instances` and the Cloud SQL unix-socket path
-(`/cloudsql/PROJECT:REGION:INSTANCE`), not a TCP host:port. This is the
-one component needing durable, managed storage — the interaction log
-is the monitoring story this project already built (Tier 2); losing it
-on every cold start isn't acceptable.
+**2. Database: Neon (serverless Postgres), not Cloud SQL.** **Amended
+2026-07-26, ADR-0018** — Cloud SQL's real cost (~$9-11/month, always-on,
+no usage ceiling) was rejected once checked for real, for a
+zero-revenue project. Neon is wire-compatible Postgres with a true
+scale-to-zero free tier (no credit card, throttles rather than
+overbills) — chosen over BigQuery/Firestore specifically because it's
+the only option that serves both real access patterns this schema
+needs (append-only inserts *and* a later per-primary-key UPDATE for
+feedback) and lets all 5 existing Grafana SQL queries port verbatim.
+Both Cloud Run services connect via a standard Postgres connection
+string (Neon's pooled endpoint), not the Cloud SQL unix-socket path —
+`--add-cloudsql-instances` and the Cloud SQL Admin API are no longer
+needed anywhere in this design. Full reasoning: ADR-0018.
 
 **3. Secrets: GCP Secret Manager for `OPENAI_API_KEY` and the Postgres
 password.** Neither value is baked into any image or committed to the
@@ -97,8 +103,23 @@ Opus if genuinely stuck, not by improvising a silent default:
 
 ## Cost shape
 
-Cloud SQL (`db-f1-micro`) is the only always-on cost, ~$10-13/month.
-Cloud Run is ~$0 at the expected traffic level (scale-to-zero,
-per-request billing). Artifact Registry and Secret Manager: pennies.
-Overall: a **$10-15/month shape**, covered in full by GCP's standard
-free-trial credit through submission and grading.
+**Superseded 2026-07-26 by ADR-0018.** The Cloud SQL estimate below
+(~$9-12/month) was the real, verified cost that triggered the Neon
+migration — kept here as history, not the current design.
+
+With Neon replacing Cloud SQL: **effectively $0/month** across the
+whole deployment at this project's traffic level. Cloud Run, Artifact
+Registry, and Secret Manager all sit within their free tiers; Neon's
+free tier has no credit card requirement and throttles rather than
+bills an overage. This matches the cost shape of Sam's other low-cost
+GCP project, which was the explicit goal of the ADR-0018 redesign.
+
+<details>
+<summary>Prior estimate (Cloud SQL, superseded)</summary>
+
+Real total: ~$9-12/month, driven almost entirely by Cloud SQL
+(`db-f1-micro` instance ~$7.67/month + ~10GB SSD storage ~$1.70/month).
+Real cost gotcha that applied only to Cloud SQL: an idle public IPv4
+address costs ~$7.30/month extra — moot now that Cloud SQL isn't used.
+
+</details>

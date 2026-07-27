@@ -80,6 +80,20 @@ observable condition, not just a feeling that something isn't working.
 
 ## Status
 
+**Eighteen ADRs exist as of 2026-07-26 (later still, a real-cost
+correction).** `0018-neon-serverless-postgres-replaces-cloud-sql.md`
+amends ADR-0016: real GCP pricing showed Cloud SQL costing ~$9-11/month
+always-on, which Sam rejected for a zero-revenue project (both the
+cost and the unbounded-bill risk of forgetting to stop it). A follow-up
+Fable consult (an explicit named checkpoint under the Tier 3
+call-limiting rule, not a lapse of it) picked Neon (serverless
+Postgres) over BigQuery and Firestore, specifically because it's the
+only option serving both of this schema's real access patterns
+(append-only inserts, plus a later per-row UPDATE for feedback) while
+letting all 5 existing Grafana SQL queries port verbatim. Cost drops to
+effectively $0/month. `db.py`'s actual insert/update logic doesn't
+change at all — only connection handling does.
+
 **Seventeen ADRs exist as of 2026-07-26 (later, Tier 3 design).**
 `0016-gcp-cloud-deployment-architecture.md` and
 `0017-query-rewriting-design.md` — the first real design pass for

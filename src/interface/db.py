@@ -15,6 +15,7 @@ Usage (as a library, not a script):
 """
 
 import os
+import time
 from contextlib import contextmanager
 
 import psycopg
@@ -100,9 +101,21 @@ def est_cost_usd(model: str, prompt_tokens: int, completion_tokens: int) -> floa
     return (prompt_tokens / 1000) * rates["prompt"] + (completion_tokens / 1000) * rates["completion"]
 
 
+# ADR-0018 (Neon replaces Cloud SQL): the entire code change this
+# migration needs. Neon's free tier autosuspends after ~5 minutes idle,
+# and the very first connection after a wake can occasionally drop
+# mid-wake -- one retry, not a redesign, and not a general resilience
+# feature added anywhere else in this file.
+CONNECT_RETRY_DELAY_SECONDS = 1.0
+
+
 @contextmanager
 def get_conn():
-    conn = psycopg.connect(DATABASE_URL)
+    try:
+        conn = psycopg.connect(DATABASE_URL)
+    except psycopg.Error:
+        time.sleep(CONNECT_RETRY_DELAY_SECONDS)
+        conn = psycopg.connect(DATABASE_URL)
     try:
         yield conn
     finally:

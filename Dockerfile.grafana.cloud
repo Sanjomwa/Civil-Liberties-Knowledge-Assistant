@@ -14,8 +14,9 @@
 # baked here, so it stays consistent with how docker-compose.yml already
 # sets them).
 #
-# Datasource provisioning is NOT a straight copy of the local one: Cloud
-# SQL needs a Unix-socket path, not the `postgres:5432` docker-compose
+# Datasource provisioning is NOT a straight copy of the local one: Neon
+# (ADR-0018, replacing Cloud SQL) needs a standard host:port TCP
+# connection with sslmode=require, not the `postgres:5432` docker-compose
 # hostname -- see grafana/provisioning-cloud/datasources/postgres.yml for
 # the real reasoning (explicitly flagged there as unverified until the
 # first real deploy). Dashboard provisioning + the dashboard JSON itself
