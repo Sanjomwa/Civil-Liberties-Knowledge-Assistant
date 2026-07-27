@@ -542,36 +542,74 @@ across them:
   future requirement, not built — nothing to build yet since the generation
   layer itself doesn't exist. Don't lose track of it once that layer starts.
 
-**Added 2026-07-27, post-Tier-3-deploy:**
+**Added 2026-07-27, post-Tier-3-deploy — superseded by the 2026-07-29
+re-audit below where noted:**
 
-- **No CI/CD.** No GitHub Actions or equivalent — every check (syntax,
-  smoke tests, evaluation runs) has been manual/on-demand throughout
-  this project. Confirmed 0/2 on the rubric's Containerization-adjacent
-  automation criterion when this was last checked (ADR-0012).
-- **No automated tests.** No `tests/` directory, no `pytest` anywhere in
-  the repo (confirmed directly when `docs/readme-plan.md` was written,
-  ADR-0012) — correctness has been established via manual smoke tests
-  and real evaluation runs (0.946 citation precision, retrieval Hit
-  Rate/MRR), not unit/integration tests.
-- **Query rewriting (ADR-0017) unverified against the live cloud
-  deployment specifically.** It ships inside the deployed app image and
-  was smoke-tested + evaluated locally before deploy, but the live
-  Cloud Run instance hasn't had this path specifically exercised and
-  checked. Not a known problem — just an unverified gap, same category
-  as the other "explicitly unconfirmed until a real deploy" items
-  `docs/deployment-runbook.md` already listed going in.
-- **README still needs the deployment update** — it predates the live
-  Tier 2/Tier 3 URLs and Neon migration; needs the real App/Grafana
-  URLs, setup instructions reflecting the current (Neon, not Cloud SQL)
-  architecture, and the deployment section `docs/readme-plan.md`
-  originally scoped.
-- **A full technical-debt re-audit is still owed, not yet done.** These
-  four items were caught opportunistically, not from a systematic pass.
-  Sam's explicit call (2026-07-27): do a real audit later — inspect the
-  repo directly plus re-read the course's own project description/rubric
-  again, rather than relying on memory of what's already been checked —
-  likely surfaces more than these four. Not scheduled yet; next
-  session's call.
+- **README still needs the deployment update** — **DONE, 2026-07-28.**
+  Rewritten against the real fetched Alexey Grigorev README article,
+  both live URLs `curl`-verified before being written in. See
+  `decisionlog.md`, 2026-07-28.
+- Query rewriting (ADR-0017) unverified against the live cloud
+  deployment specifically — still open, not re-checked in the 2026-07-29
+  pass; carried forward below.
+
+**2026-07-29 — full re-audit done (real rubric fetched verbatim, repo
+re-inspected directly), replacing the four opportunistic items above.**
+Full narrative: `decisionlog.md`, 2026-07-29. Per Sam's explicit
+instruction the same day, this list is **not** scoped to rubric points
+only — real engineering/documentation rigor stays tracked here even
+where the course rubric doesn't score it.
+
+*Rubric-scored, verified clean (re-read the verbatim `project.md`
+Evaluation Criteria, not a summary):* Problem description, Retrieval
+flow, Retrieval evaluation, Interface, Ingestion pipeline, Monitoring,
+Containerization, Reproducibility, Best practices (hybrid + re-rank +
+query rewriting, all evaluated), and LLM evaluation (the ADR-0012 gap
+is closed — `src/evaluation/compare_prompts.py`'s real Prompt A/B run
+is in the README) all read as full-credit as of this snapshot. Bonus
+cloud-deployment points are claimed (live). No further action needed
+here unless something regresses.
+
+*Real, open items — engineering/documentation rigor, not rubric risk:*
+
+- **No CI/CD.** No GitHub Actions or equivalent — every check has been
+  manual/on-demand throughout. **Recalibrated 2026-07-29: confirmed via
+  the verbatim rubric that this costs zero graded points** (no CI/CD
+  scoring line exists in `project.md` at all) — kept on this list
+  anyway, per Sam's explicit instruction, as genuine engineering
+  hygiene debt rather than a scoring risk.
+- **No unit/integration test suite (`tests/`, `pytest`).**
+  **Recalibrated 2026-07-29, same basis as above** — not rubric-scored,
+  still real debt. Correctness so far rests on manual smoke tests and
+  real evaluation runs (0.946 citation precision, retrieval Hit
+  Rate/MRR), not unit tests.
+- **New finding, 2026-07-29 — the "no automated tests" framing itself
+  was stale, independent of the CI/CD point above.**
+  `docs/behavioral-test-suite.md` + `src/evaluation/
+  run_behavioral_tests.py` (ADR-0015, 25 scripted pass/fail questions
+  against `answer()` directly) are real, already-built automated
+  tests — but nothing in `data/eval/` shows they've ever actually been
+  run, and `README.md`'s Testing section still says none exist. Cheap
+  fix (run it, log a results file, update the README sentence); real
+  documentation-accuracy gap regardless of rubric impact.
+- **Human calibration review still pending** (`data/eval/
+  human_calibration_v2_verdicts.csv`, 65-row sample) — blocks the
+  ADR-0011 κ-or-fallback verdict on judge validity. Not rubric-scored
+  either, but the one substantive open thread in the evaluation
+  methodology's own integrity, disclosed as an open limitation in the
+  README already.
+- Unpinned `grafana/grafana:latest` (`docker-compose.yml` and
+  `Dockerfile.grafana.cloud`) — unchanged, still open.
+- Missing `check_drift.py` (ADR-0003) — correctly deferred, no corpus
+  version change yet to detect drift against.
+- ADR-0015's two-unprotected-phrasings residual gap — unchanged, still
+  open, deliberately not expanded unprompted.
+- Query rewriting (ADR-0017) unverified against the live cloud
+  deployment specifically — carried forward from 2026-07-27, still
+  open.
+- **Unclaimed opportunity, not debt:** the rubric's discretionary "up
+  to 3 extra bonus points... write in feedback for what" line is still
+  open — worth a deliberate decision before submission, not urgent.
 
 ## 6a. First implementation milestone (walking skeleton)
 
@@ -759,7 +797,38 @@ auto-vs-manual question; scaling further is future work, see Section 7),
 
 ## 7. Open action items (don't lose track of these)
 
-**NEWEST OF ALL, 2026-07-28 (even later) — ADR-0019 fully closed end
+**NEWEST OF ALL, 2026-07-28 (later still) — README.md now accurately
+describes the live deployment, per Alexey Grigorev's README article's
+two explicit rules.** Article fetched and read in full this session
+(<https://alexeyondata.substack.com/p/how-to-write-a-good-readme>,
+logged in `docs/readme-plan.md`) rather than relied on from an older
+summary. Both real live URLs verified via `curl` three separate times,
+including immediately before finalizing, before being written into the
+file. Fixed: a "Live demo" line now sits near the top (Rule 1: live URL
+"immediately after the title and description"); the Demo section's
+stale "No live interface yet" opening is gone; the Deployment section
+is fully rewritten to cover everything Rule 2 requires (where hosted,
+which services, how they connect, secrets required, manual-not-CI/CD,
+how someone else deploys their own copy) — including the one real,
+load-bearing nuance stated explicitly rather than left implicit: the
+**live app already serves 100% of the corpus** (private
+`Dockerfile.cloud` bakes it at build time), while a **fresh local
+`docker compose up` starts at 54% and rehydrates to 100%** on first
+run — two different mechanisms reaching the same end state, for a real
+reason (Cloud Run's scale-to-zero model can't tolerate a 15-minute
+cold-start rehydration). The stale "No public deployment yet"
+Limitations bullet was replaced with a real, still-true one (manual
+deployment, manual image rebuild needed when Freedom House/Access Now
+publish something new) instead of just deleted. Query rewriting
+(ADR-0017) was checked and correctly left out of the README rather than
+added as a misleading one-liner — the real result is a near-null,
+not-statistically-significant finding that needs the same nuance this
+README already gives its other honest findings. `docs/readme-plan.md`'s
+own status line updated to match. Confirmed via `git diff` that nothing
+outside the 4 intended regions changed. Full detail: `reports.md`,
+2026-07-28.
+
+**PRIOR, 2026-07-28 (even later) — ADR-0019 fully closed end
 to end, `app-cloud` redeployed, live site now matches the repo.**
 Rebuilt the public baseline image (real rebuild, cache invalidated by
 the dashboard-file deletion), rebuilt the private `app-cloud` image
