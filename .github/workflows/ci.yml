@@ -1,0 +1,26 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  syntax-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Compile-check every src/ file (catches real syntax errors, no imports/side effects)
+        run: python -m py_compile $(find src -name "*.py")
+
+  docker-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build the public app image (no secrets needed — OPENAI_API_KEY/
+          DATABASE_URL are runtime env vars, not build args)
+        run: docker compose build app

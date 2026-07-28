@@ -442,11 +442,12 @@ first run.** Both reach the same place, by different mechanisms, for
 different reasons — Cloud Run's cold-start economics versus a laptop's
 tolerance for a one-time wait.
 
-**Manual, not CI/CD.** There's no GitHub Actions workflow triggering any
-of this. `deploy/gcp-deploy.sh` is a real, working, standalone script I
-run by hand whenever a redeploy is needed — including whenever Freedom
-House or Access Now publish something new, since the private image only
-picks that up on a manual rebuild + repush, not automatically.
+**Manual, not CI/CD.** The [CI workflow](#cicd) validates builds on push/PR;
+it doesn't deploy anything. `deploy/gcp-deploy.sh` is a real, working,
+standalone script I run by hand whenever a redeploy is needed — including
+whenever Freedom House or Access Now publish something new, since the
+private image only picks that up on a manual rebuild + repush, not
+automatically.
 
 **To deploy your own copy:** see `docs/deployment-runbook.md` for the
 full checklist — a GCP project with billing enabled, `gcloud auth
@@ -603,8 +604,27 @@ slightly more complex one.
 
 ## CI/CD
 
-**None yet.** I haven't set up a GitHub Actions workflow in this repo.
-Stating this here rather than leaving it to be discovered as an absence.
+**Build-validation only, not behavioral testing.** `.github/workflows/ci.yml`
+runs on every push and pull request to `main`, as two jobs:
+
+- **`syntax-check`** — compiles every file under `src/` with
+  `python -m py_compile` (no imports, no side effects) to catch real syntax
+  errors fast.
+- **`docker-build`** — runs `docker compose build app`, confirming the public
+  app image still builds. This needs no GitHub Secrets: `OPENAI_API_KEY` and
+  `DATABASE_URL` are runtime environment variables the container reads at
+  start (`docker-compose.yml`), not build args or `Dockerfile` `ENV`/`ARG`
+  values.
+
+The two jobs are deliberately separate so a slow Docker layer build never
+blocks the fast syntax check from reporting first.
+
+**What this doesn't do.** It doesn't run the retrieval evaluation (Hit
+Rate/MRR), the citation-precision judge, or the ADR-0015 behavioral suite —
+those all cost real OpenAI API calls, and this project isn't spending that
+on every push. Those checks remain manual, run by hand when the pipeline
+actually changes. Don't read a green CI badge here as "the RAG pipeline is
+correct" — it only means the code compiles and the image builds.
 
 ## Limitations
 
@@ -668,8 +688,11 @@ Stating this here rather than leaving it to be discovered as an absence.
   [Monitoring](#monitoring). A handful of live thumbs-down votes isn't
   evidence against the 0.946 claim-level precision number, and vice
   versa.
-- **No automated tests, no CI/CD** — see [Testing](#testing) and
-  [CI/CD](#cicd).
+- **No automated behavioral/correctness tests** — CI (see
+  [CI/CD](#cicd)) validates that the code compiles and the Docker image
+  builds, not that the RAG pipeline behaves correctly. The real correctness
+  checks — retrieval Hit Rate/MRR, the citation-precision judge, the
+  ADR-0015 behavioral suite — remain manual; see [Testing](#testing).
 - **Deployment is manual, not CI/CD-automated, and the private cloud
   image needs a manual rebuild + repush whenever Freedom House or
   Access Now publish something new** — a real, already-accepted cost

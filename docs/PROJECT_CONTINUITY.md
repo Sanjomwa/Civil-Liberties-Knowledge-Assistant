@@ -583,15 +583,25 @@ here unless something regresses.
   still real debt. Correctness so far rests on manual smoke tests and
   real evaluation runs (0.946 citation precision, retrieval Hit
   Rate/MRR), not unit tests.
-- **New finding, 2026-07-29 — the "no automated tests" framing itself
-  was stale, independent of the CI/CD point above.**
-  `docs/behavioral-test-suite.md` + `src/evaluation/
-  run_behavioral_tests.py` (ADR-0015, 25 scripted pass/fail questions
-  against `answer()` directly) are real, already-built automated
-  tests — but nothing in `data/eval/` shows they've ever actually been
-  run, and `README.md`'s Testing section still says none exist. Cheap
-  fix (run it, log a results file, update the README sentence); real
-  documentation-accuracy gap regardless of rubric impact.
+- **Correction, 2026-07-29 (same day, close-out task) — the "never run"
+  claim above was wrong; the real gap is different and more specific.**
+  Claude Code checked `data/eval/` directly: `docs/
+  behavioral-test-suite.md` + `src/evaluation/run_behavioral_tests.py`
+  (ADR-0015) **has** been run — twice, 2026-07-26 — and a real results
+  file exists, `data/eval/behavioral-test-results-2026-07-26.md`. Round
+  1 (full 25 questions): 23/25 real passes. Round 2 (narrow 14-question
+  re-test after a rule-2 prompt fix): 12/14 real passes. **The actual
+  open item: two genuine failures were still unresolved when the file's
+  own text says it stopped — Q19 (persisting) and Q16 (regressing) —
+  and nothing since 2026-07-26 shows either was picked back up.** That's
+  the real debt here, not "never run." `README.md`'s Testing section
+  ("No automated tests exist yet") is independently accurate on its own
+  literal terms (no `pytest`/`tests/` suite) — it isn't describing the
+  behavioral suite, which is a different kind of check — so no README
+  fix is needed on that specific sentence. Whether the README should
+  additionally mention the behavioral suite and its 2 known open
+  failures, for documentation completeness rather than accuracy, is a
+  real call worth making next session, not decided here.
 - **Human calibration review still pending** (`data/eval/
   human_calibration_v2_verdicts.csv`, 65-row sample) — blocks the
   ADR-0011 κ-or-fallback verdict on judge validity. Not rubric-scored
