@@ -572,17 +572,56 @@ here unless something regresses.
 
 *Real, open items — engineering/documentation rigor, not rubric risk:*
 
-- **No CI/CD.** No GitHub Actions or equivalent — every check has been
-  manual/on-demand throughout. **Recalibrated 2026-07-29: confirmed via
-  the verbatim rubric that this costs zero graded points** (no CI/CD
-  scoring line exists in `project.md` at all) — kept on this list
-  anyway, per Sam's explicit instruction, as genuine engineering
-  hygiene debt rather than a scoring risk.
-- **No unit/integration test suite (`tests/`, `pytest`).**
-  **Recalibrated 2026-07-29, same basis as above** — not rubric-scored,
-  still real debt. Correctness so far rests on manual smoke tests and
-  real evaluation runs (0.946 citation precision, retrieval Hit
-  Rate/MRR), not unit tests.
+- **No CI/CD — DONE, 2026-07-30.** `.github/workflows/ci.yml` added: a
+  `syntax-check` job (`py_compile` across all of `src/`) and a
+  `docker-build` job (`docker compose build app`), triggered on
+  push/PR to `main`. Confirmed locally before pushing — both jobs pass,
+  and the docker build was explicitly re-run with `OPENAI_API_KEY`/
+  `DATABASE_URL` unset in the shell to prove no secrets are needed
+  (`Dockerfile`'s only `ARG`s are the public corpus-release URL/
+  checksum; both real secrets are runtime-only env vars in
+  `docker-compose.yml`). Deliberately scoped as build-validation only —
+  it does not run retrieval evaluation, the citation-precision judge,
+  or the ADR-0015 behavioral suite, which stay manual since they cost
+  real OpenAI API spend. `README.md`'s CI/CD, Limitations, and
+  Deployment sections all updated to match. This was never a
+  rubric-scored item (confirmed 2026-07-29, no CI/CD line in the
+  verbatim rubric) — closed anyway per Sam's explicit call to track
+  real engineering rigor beyond course requirements.
+- **Unit/integration test suite — Priority 0 + Tier 1 BUILT, 2026-08-02,
+  46/46 passing, CI wired.** Design: `docs/testing-design.md` + `docs/
+  adr/0020-unit-test-suite-scope-and-priority.md` (2026-08-01, revised
+  2026-08-02 after an Opus 5 review found three real implementation
+  blockers, one real mis-tier, and one missing Priority 0 test — see
+  that entry below and `decisionlog.md` for full detail). Implementation
+  followed the revised design exactly: the Priority 0 citation-
+  numbering contract test, `citations.py` (9 tests, plus a small
+  additive `metadata_loader` injectable-parameter source change),
+  `ground_truth.py`'s `classify_category()` (5), `chunk.py`'s
+  `make_windows()` (6), `search.py`'s RRF/re-rank (9), `db.py`'s
+  `est_cost_usd()` (5), `generate.py`'s two pulled-forward pure
+  functions (11) — 46 total, all passing. For three regression-
+  motivated tests, the real bug was temporarily reintroduced and
+  confirmed to fail the new test before reverting, not just trusted by
+  construction. A third `unit-tests` CI job added, only after the local
+  suite ran clean. `README.md`'s Testing section updated to match. Full
+  detail: `decisionlog.md`, 2026-08-02.
+
+  **Two real findings from this pass, not yet resolved — Sam's call:**
+  (1) a genuine `IndexError` in `citations.py`'s `sourcing_footer()`
+  when every cited document's metadata fails to resolve (`dates` empty,
+  `dates[0]` still evaluated) — found while writing a test for it, left
+  unfixed since fixing behavior was outside that task's authorized
+  scope; (2) `sync.sh`'s push-exclude list has no entry for
+  `.pytest_cache/`, so running pytest leaks a new top-level directory
+  into the Cowork mirror on every push — manually cleaned up this time,
+  gap itself not fixed.
+
+  **Tier 2/3 remain deliberately deferred** — `chunk_document()`,
+  `metadata.py`/`validate.py` (Tier 2), and `generate.py`'s `answer()`
+  chain / `judge.py` (Tier 3, needs real OpenAI mocking design). Not
+  scheduled; next real pickup whenever build time resumes, same status
+  as Tier 1 was before this pass.
 - **Correction, 2026-07-29 (same day, close-out task) — the "never run"
   claim above was wrong; the real gap is different and more specific.**
   Claude Code checked `data/eval/` directly: `docs/

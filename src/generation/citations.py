@@ -19,6 +19,7 @@ import json
 import re
 from functools import lru_cache
 from pathlib import Path
+from typing import Callable
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 METADATA_DIR = PROJECT_ROOT / "data" / "metadata"
@@ -96,15 +97,24 @@ def parse_citations(answer_text: str, chunks: list[dict]) -> dict:
     }
 
 
-def render_sources(citations: list[dict]) -> str:
+def render_sources(
+    citations: list[dict],
+    metadata_loader: Callable[[str], dict | None] = _load_doc_metadata,
+) -> str:
     """Renders a markdown Sources list from parse_citations()'s
     `citations` list, one line per citation in marker order, e.g.
     '[3] CIPESA, "State of Internet Freedom in Africa 2025"
     (2025-09-01), pp. 7-8. <url>'. A missing metadata lookup renders a
-    degraded but honest line instead of crashing."""
+    degraded but honest line instead of crashing.
+
+    `metadata_loader` defaults to the real file-reading, `lru_cache`d
+    `_load_doc_metadata` -- every existing caller's behavior is
+    unchanged. Tests can inject a fake loader instead, so this is
+    properly unit-testable without real file I/O or cross-test cache
+    leakage."""
     lines = []
     for c in citations:
-        meta = _load_doc_metadata(c["doc_id"])
+        meta = metadata_loader(c["doc_id"])
         if meta is None:
             lines.append(
                 f"[{c['marker']}] {c['doc_id']} (metadata unavailable), "
@@ -122,11 +132,17 @@ def render_sources(citations: list[dict]) -> str:
     return "\n".join(lines)
 
 
-def sourcing_footer(citations: list[dict]) -> dict:
+def sourcing_footer(
+    citations: list[dict],
+    metadata_loader: Callable[[str], dict | None] = _load_doc_metadata,
+) -> dict:
     """Computes distinct orgs/docs/date-range over the CITED subset
     only -- never the retrieved-but-unused chunks (see ADR-0009 for why
     that distinction is the whole design). Returns the raw counts plus
-    a rendered, factual (not binary-verdict) footer string."""
+    a rendered, factual (not binary-verdict) footer string.
+
+    `metadata_loader` defaults to the real file-reading, `lru_cache`d
+    `_load_doc_metadata` -- see render_sources()'s docstring for why."""
     if not citations:
         return {
             "distinct_orgs": 0,
@@ -136,13 +152,18 @@ def sourcing_footer(citations: list[dict]) -> dict:
 
     docs_meta: dict[str, dict | None] = {}
     for c in citations:
-        docs_meta.setdefault(c["doc_id"], _load_doc_metadata(c["doc_id"]))
+        docs_meta.setdefault(c["doc_id"], metadata_loader(c["doc_id"]))
 
     orgs = {m["organization"] for m in docs_meta.values() if m}
     dates = sorted({m["publication_date"][:4] for m in docs_meta.values() if m})
     distinct_docs = len(docs_meta)
     distinct_orgs = len(orgs)
-    year_range = dates[0] if len(dates) <= 1 else f"{dates[0]}-{dates[-1]}"
+    if not dates:
+        year_range = "date unknown"
+    elif len(dates) == 1:
+        year_range = dates[0]
+    else:
+        year_range = f"{dates[0]}-{dates[-1]}"
 
     if distinct_docs == 1:
         only_org = next(iter(orgs), "an unknown organization")

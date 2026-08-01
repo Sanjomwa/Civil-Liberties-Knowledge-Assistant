@@ -178,6 +178,12 @@ case "$MODE" in
     # (a WSL-local build output, not source). Same reasoning as .venv/
     # __pycache__ -- a regenerable local artifact, never worth syncing.
     #
+    # --exclude='.pytest_cache' added 2026-08-02, same class of gap as
+    # dist/ above: already in .gitignore, but never added here, so it
+    # landed in the Cowork mirror as a new top-level dir on the first
+    # push after pytest was actually run locally. Same reasoning as
+    # .venv/__pycache__ -- regenerable, never worth syncing.
+    #
     # Everything else -- src/, corpus/sources/*.yaml, corpus/
     # acquisition-log.md, corpus/manifest.csv, corpus/checksums.sha256,
     # corpus/validation-report.md, docs/, reports.md -- flows back. This
@@ -192,7 +198,7 @@ case "$MODE" in
     # never remove something Cowork itself added since the last push.
     stats_file="$(mktemp)"
     rsync -av --stats \
-      --exclude='.venv' --exclude='__pycache__' --exclude='data/' \
+      --exclude='.venv' --exclude='__pycache__' --exclude='.pytest_cache' --exclude='data/' \
       --exclude='CLAUDE.md' --exclude='.git/' --exclude='claude-code-wsl-CLAUDE.md' \
       --exclude='.claude/' --exclude='.env' --exclude='dist/' \
       "$WSL_REPO/" \

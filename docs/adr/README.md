@@ -80,7 +80,19 @@ observable condition, not just a feeling that something isn't working.
 
 ## Status
 
-**Nineteen ADRs exist as of 2026-07-27.**
+**Twenty ADRs exist as of 2026-08-01.**
+`0020-unit-test-suite-scope-and-priority.md` — design-only (no
+`tests/` directory built yet): scopes a future `pytest` suite into
+three priority tiers by mocking cost, starting with pure-logic modules
+that have each broken silently once already
+(`chunk.py`'s stamp-ordering bug, `ground_truth.py`'s OONI
+case-sensitivity bug). Explicitly does not replace the retrieval
+evaluation, the LLM-evaluation judge, or the ADR-0015 behavioral
+suite — targets deterministic function-level logic underneath them.
+Full detail: `docs/testing-design.md`. No advisor consult — a scoping
+decision over already-read source files, not a design trade-off.
+
+**Nineteen ADRs existed as of 2026-07-27.**
 `0019-remove-streamlit-native-dashboard.md` — with Grafana now live and
 verified against real production data (the actual Tier 3 deploy,
 2026-07-27), the Streamlit-native dashboard `docs/interface-design.md`

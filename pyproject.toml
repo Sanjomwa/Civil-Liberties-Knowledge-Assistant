@@ -27,3 +27,8 @@ dev = [
     "jupyter>=1.1.1",
     "pytest>=8.0.0",
 ]
+
+[tool.pytest.ini_options]
+pythonpath = ["src", "src/generation", "src/retrieval", "src/ingestion", "src/interface"]
+testpaths = ["tests"]
+addopts = "--import-mode=importlib"

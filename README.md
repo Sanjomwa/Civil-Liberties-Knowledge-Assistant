@@ -269,9 +269,33 @@ the spot-check: `data/eval/prompt-comparison-report.md` and `reports.md`
 
 ## Testing
 
-**No automated tests exist yet.** I list `pytest` as a dev dependency in
-`pyproject.toml`, but I haven't written any test files yet. Stating this
-plainly rather than implying otherwise.
+**Real unit tests exist for this project's deterministic logic** (`tests/`,
+`uv run pytest tests/`, wired into CI as the `unit-tests` job) — scoped and
+prioritized per `docs/testing-design.md`/ADR-0020, Priority 0 + Tier 1 only
+so far: 46 tests, pure functions with no network/DB/filesystem I/O, an
+autouse `conftest.py` fixture that blocks any real socket connection for
+the whole session. Covered: the `prompts.py`/`citations.py` citation-
+numbering contract (the literal mechanism ADR-0009's citation-integrity
+claim depends on), `citations.py`'s marker parsing/validation and
+three-branch sourcing footer, `ground_truth.py`'s `classify_category()`
+(a direct regression test for the real 2026-07-22 OONI case-sensitivity
+bug), `chunk.py`'s `make_windows()` boundary math, `search.py`'s RRF
+fusion and country-boost re-rank, `db.py`'s `est_cost_usd()` (including
+its deliberate raise on an unrecognized model), and `generate.py`'s
+`_detect_out_of_scope_countries()`/`_out_of_scope_disclosure()`
+(a direct regression test for the real Niger/Nigeria and Mali/Somalia
+substring bug, ADR-0015 round 3).
+
+**What this is not.** These are unit tests of deterministic Python
+functions, not tests of RAG *behavior* — no automated test of retrieval
+quality, generation quality, or end-to-end correctness exists. That stays
+the retrieval evaluation (Hit Rate/MRR), the LLM-evaluation judge
+(claim-level citation precision), and the ADR-0015 behavioral suite —
+all real, expensive (real API spend), and manual by design; see
+[Evaluation](#evaluation). `chunk_document()` (real filesystem writes),
+`metadata.py`/`validate.py` (Tier 2), and `generate.py`'s `answer()`
+call chain / `judge.py` (Tier 3, real OpenAI mocking) are explicitly
+deferred — not claimed as covered here.
 
 ## Monitoring
 
