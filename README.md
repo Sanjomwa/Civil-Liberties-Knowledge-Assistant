@@ -22,6 +22,7 @@ Built for DataTalksClub's LLM Zoomcamp 2026 capstone project.
 **Live demo:** 
 
 [app](https://app-cloud-wphwnmh6wq-uc.a.run.app)
+
 [monitoring dashboard](https://grafana-cloud-wphwnmh6wq-uc.a.run.app)
 
 ***both on Google Cloud Run, `min-instances=0` — a quiet period means the
