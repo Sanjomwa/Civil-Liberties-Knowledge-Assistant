@@ -15,14 +15,6 @@ Built for DataTalksClub's LLM Zoomcamp 2026 capstone project.
 (both on Google Cloud Run, `min-instances=0` — a quiet period means the
 next request has a few seconds' cold start, not that the link is dead).
 
-> **Status, 2026-07-28:** I've built and verified ingestion, retrieval,
-> generation, LLM evaluation, interface, monitoring, containerization,
-> and cloud deployment (see [Quickstart](#quickstart),
-> [Monitoring](#monitoring), [Deployment](#deployment)). I've stated
-> plainly, section by section, what exists today versus what I still
-> have in progress, per
-> [`docs/adr/0012-rubric-driven-completion-plan.md`](docs/adr/0012-rubric-driven-completion-plan.md).
-
 ## Contents
 
 - [Problem](#problem)
@@ -70,63 +62,16 @@ intent.
 **Live demo:** [https://app-cloud-wphwnmh6wq-uc.a.run.app](https://app-cloud-wphwnmh6wq-uc.a.run.app)
 — ask a real question directly, no setup required.
 
-I'm keeping the static example below too, since a hosted demo can go
-down or need credentials later while a verified static example doesn't
-(the [article](https://alexeyondata.substack.com/p/how-to-write-a-good-readme)
-this README follows makes the same point). This is one real, verified
-question/answer pair I pulled directly from
-`data/eval/generation_results.jsonl` (question `general-0094`), not a
-constructed example. I spot-checked every `[n]` marker below by hand
-against the actual cited chunk text before including it here; all eight
-resolve to real supporting passages.
+I'm also including the recording below, since a hosted demo can go down
+or need credentials later while a recording of a real run doesn't (the
+[article](https://alexeyondata.substack.com/p/how-to-write-a-good-readme)
+this README follows makes a similar point). It's an unedited screen
+recording of a real query run against the live app, not a staged mockup.
 
-**Question:** What surveillance tools is the Rwandan government known to use?
+Screen recording of the live app answering: "Has Uganda blocked social media
+platforms during an election?" (2026-07-27).
 
-**Answer:**
-
-> The excerpts say the Rwandan government is known to use commercial
-> spyware tools, especially Pegasus, the surveillance software made by
-> NSO Group, against opposition figures, journalists, and human rights
-> defenders.[1][2][3][5][6][8][10]
->
-> They also say the government closely monitors social media discussions,
-> with progovernment commenters frequently appearing on major
-> platforms.[1][2][3][8]
->
-> One excerpt says Rwanda has taken steps to restrict anonymity by
-> implementing SIM card registration requirements.[9]
->
-> Another excerpt says that in 2021, the Rwandan government reportedly
-> targeted the mobile devices of prominent journalists in Uganda with
-> malware.[9]
->
-> The excerpts do not provide a full list of surveillance tools, and one
-> explicitly says the full extent of the authorities' surveillance
-> capabilities is unknown.[1][2][3][8]
-
-**Sources:**
-
-```
-[1] Freedom House, "Rwanda: Freedom on the Net 2022 Country Report" (2022-10-01). https://freedomhouse.org/country/rwanda/freedom-net/2022
-[2] Freedom House, "Rwanda: Freedom on the Net 2024 Country Report" (2024-10-01). https://freedomhouse.org/country/rwanda/freedom-net/2024
-[3] Freedom House, "Rwanda: Freedom on the Net 2023 Country Report" (2023-10-01). https://freedomhouse.org/country/rwanda/freedom-net/2023
-[5] Freedom House, "Rwanda: Freedom on the Net 2024 Country Report" (2024-10-01). https://freedomhouse.org/country/rwanda/freedom-net/2024
-[6] Freedom House, "Rwanda: Freedom on the Net 2023 Country Report" (2023-10-01). https://freedomhouse.org/country/rwanda/freedom-net/2023
-[8] Freedom House, "Rwanda: Freedom on the Net 2022 Country Report" (2022-10-01). https://freedomhouse.org/country/rwanda/freedom-net/2022
-[9] CIPESA, "State of Internet Freedom in Africa 2024: Technology and Elections" (2024-10-01), p. 22. https://cipesa.org/wp-content/files/reports/State_of_Internet_Freedom_in_Africa_Report_2024.pdf
-[10] Freedom House, "Rwanda: Freedom on the Net 2022 Country Report" (2022-10-01). https://freedomhouse.org/country/rwanda/freedom-net/2022
-```
-
-*Sourcing: this answer cites 4 documents from 2 organizations (2022-2024).*
-
-One nuance this answer doesn't surface, which I found while spot-checking:
-one cited excerpt (marker [5], the 2024 Freedom House report) also notes
-NSO Group stated Rwanda has not been a client since 2021, corroborated by
-Citizen Lab — the answer's own citations remain accurate (it only claims
-historical, not current, Pegasus use), but this is exactly the kind of
-finer distinction the claim-level judge's 0.946 (not 1.0) precision score
-reflects (see [Evaluation](#evaluation)) — I'm stating it here rather than
-smoothing it over.
+<video src="assets/streamlit-demo.webm" controls width="700"></video>
 
 ## Evaluation
 

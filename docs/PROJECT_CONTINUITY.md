@@ -607,15 +607,19 @@ here unless something regresses.
   suite ran clean. `README.md`'s Testing section updated to match. Full
   detail: `decisionlog.md`, 2026-08-02.
 
-  **Two real findings from this pass, not yet resolved — Sam's call:**
-  (1) a genuine `IndexError` in `citations.py`'s `sourcing_footer()`
-  when every cited document's metadata fails to resolve (`dates` empty,
-  `dates[0]` still evaluated) — found while writing a test for it, left
-  unfixed since fixing behavior was outside that task's authorized
-  scope; (2) `sync.sh`'s push-exclude list has no entry for
-  `.pytest_cache/`, so running pytest leaks a new top-level directory
-  into the Cowork mirror on every push — manually cleaned up this time,
-  gap itself not fixed.
+  **Both real findings from this pass — FIXED, same day, 2026-08-02.**
+  (1) The `sourcing_footer()` `IndexError` was fixed test-driven — the
+  edge-case test was confirmed to reproduce the exact crash before any
+  source change, then a three-way branch replaced the single ternary
+  (empty case now renders `"date unknown"` instead of indexing into an
+  empty list; the two previously-working cases unchanged). Suite now
+  **47/47 passing**. (2) `sync.sh`'s push-exclude list now has
+  `--exclude='.pytest_cache'` alongside the existing `__pycache__`
+  entry, verified with a real push (confirmed the directory existed
+  locally, confirmed it was absent from the mirror before the push, ran
+  the push for real, confirmed it still didn't reach the mirror — not
+  just a pattern-syntax check). Full detail: `decisionlog.md`,
+  2026-08-02.
 
   **Tier 2/3 remain deliberately deferred** — `chunk_document()`,
   `metadata.py`/`validate.py` (Tier 2), and `generate.py`'s `answer()`
@@ -1332,6 +1336,15 @@ section.
   Monitoring, Deployment, the final Quickstart run command,
   Self-evaluation, and Future work (the last two deliberately held for
   submission time).
+  **Superseded, 2026-08-05: the static Q&A example above was removed
+  from the Demo section entirely**, replaced with a real screen
+  recording of the live app (`assets/streamlit-demo.webm`, embedded via
+  `<video>` tag). The justification paragraph above the embed was
+  rewritten in place (by Cowork, not another Claude Code task) to argue
+  for keeping the recording instead of the deleted text example, since
+  the original wording referred to "the static example below" and
+  spot-checked `[n]` markers that no longer exist post-edit — full
+  detail in `decisionlog.md`, 2026-08-05.
 - **DONE, 2026-07-25: LLM evaluation's rubric gap actually closed —
   Prompt A/B comparison run for real (ADR-0012 Decision 2).** See the
   Evaluation entry in Section 1 above for the full real-run detail
