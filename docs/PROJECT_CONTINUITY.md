@@ -1345,6 +1345,13 @@ section.
   the original wording referred to "the static example below" and
   spot-checked `[n]` markers that no longer exist post-edit — full
   detail in `decisionlog.md`, 2026-08-05.
+  **DONE, 2026-08-05: caption filled in with the real question** —
+  "Screen recording of the live app answering: 'Has Uganda blocked
+  social media platforms during an election?' (2026-07-27)." No
+  matching question found in `data/eval/generation_results.jsonl` (122
+  rows checked), so the surrounding paragraph was correctly left as-is
+  rather than forcing a connection. Full detail: `decisionlog.md`,
+  2026-08-05.
 - **DONE, 2026-07-25: LLM evaluation's rubric gap actually closed —
   Prompt A/B comparison run for real (ADR-0012 Decision 2).** See the
   Evaluation entry in Section 1 above for the full real-run detail

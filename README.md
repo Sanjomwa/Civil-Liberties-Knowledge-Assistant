@@ -68,10 +68,11 @@ or need credentials later while a recording of a real run doesn't (the
 this README follows makes a similar point). It's an unedited screen
 recording of a real query run against the live app, not a staged mockup.
 
-Screen recording of the live app answering: "Has Uganda blocked social media
-platforms during an election?" (2026-07-27).
-
-<video src="assets/streamlit-demo.webm" controls width="700"></video>
+**[Watch the screen recording](assets/streamlit-demo.webm)** — the live app
+answering: "Has Uganda blocked social media platforms during an election?"
+(2026-07-27). (GitHub doesn't inline-embed self-hosted repo video via
+`<video>` tags, so this is a direct link — click through to play it on
+GitHub's file-preview page.)
 
 ## Evaluation
 
