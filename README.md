@@ -57,22 +57,24 @@ it's drawn from, and evidence that's thin (one source) or contradictory
 how I actually enforced that principle in code, not just stated it as
 intent.
 
+[![Python](https://img.shields.io/badge/Python-3.10--3.12-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
+[![OpenAI](https://img.shields.io/badge/OpenAI-GPT-412991?style=for-the-badge&logo=openai&logoColor=white)](https://platform.openai.com/)
+[![Streamlit](https://img.shields.io/badge/Streamlit-Interface-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)](https://streamlit.io/)
+[![Postgres](https://img.shields.io/badge/Postgres-Neon-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)](https://neon.tech/)
+[![Grafana](https://img.shields.io/badge/Grafana-Monitoring-F46800?style=for-the-badge&logo=grafana&logoColor=white)](https://grafana.com/)
+[![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
+[![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-CI-2088FF?style=for-the-badge&logo=githubactions&logoColor=white)](https://github.com/features/actions)
+[![Google Cloud Run](https://img.shields.io/badge/Cloud%20Run-Deployment-4285F4?style=for-the-badge&logo=googlecloud&logoColor=white)](https://cloud.google.com/run)
+
 ## Demo
 
-**Live demo:** [https://app-cloud-wphwnmh6wq-uc.a.run.app](https://app-cloud-wphwnmh6wq-uc.a.run.app)
-— ask a real question directly, no setup required.
+Ask a real question directly against the live app — no setup required
+(live link at the top of this README).
 
-I'm also including the recording below, since a hosted demo can go down
-or need credentials later while a recording of a real run doesn't (the
-[article](https://alexeyondata.substack.com/p/how-to-write-a-good-readme)
-this README follows makes a similar point). It's an unedited screen
-recording of a real query run against the live app, not a staged mockup.
+Screen recording of the live app answering: "Has Uganda blocked social
+media platforms during an election?" (2026-07-27).
 
-**[Watch the screen recording](assets/streamlit-demo.mp4)** — the live app
-answering: "Has Uganda blocked social media platforms during an election?"
-(2026-07-27). (GitHub doesn't inline-embed self-hosted repo video via
-`<video>` tags, so this is a direct link — click through to play it on
-GitHub's file-preview page.)
+<video src="https://github.com/user-attachments/assets/a7d39742-6f01-429c-b50e-be27b0eb4a37" controls width="700"></video>
 
 ## Evaluation
 
