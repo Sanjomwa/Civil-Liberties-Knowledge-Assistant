@@ -1352,6 +1352,16 @@ section.
   rows checked), so the surrounding paragraph was correctly left as-is
   rather than forcing a connection. Full detail: `decisionlog.md`,
   2026-08-05.
+  **DONE, 2026-08-05, same day — video switched from `<video>` embed to
+  a direct link.** GitHub strips self-hosted `<video>` tags from
+  rendered READMEs (confirmed empirically via GitHub's own render API,
+  not guessed); no git/API-based way exists to get a true inline embed
+  for a repo-committed video, only GitHub's interactive browser upload
+  does. Per Sam's choice, the Demo section now links to
+  `assets/streamlit-demo.webm` instead (GitHub's blob page plays
+  `.webm` inline on click-through), with a short parenthetical
+  explaining why. Not yet committed/pushed to `origin/main` — stays
+  with Sam. Full detail: `decisionlog.md`, 2026-08-05.
 - **DONE, 2026-07-25: LLM evaluation's rubric gap actually closed —
   Prompt A/B comparison run for real (ADR-0012 Decision 2).** See the
   Evaluation entry in Section 1 above for the full real-run detail
